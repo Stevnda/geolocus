@@ -18,6 +18,7 @@ module.exports = {
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
     'import/default': 0,
     'import/no-named-as-default-member': 0,
+    'no-use-before-define': 0,
   },
   settings: {
     'import/resolver': {

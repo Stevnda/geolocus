@@ -1,0 +1,1 @@
+export const GEO_MAX_VALUE = 281474956479743
