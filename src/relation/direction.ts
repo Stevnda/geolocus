@@ -70,6 +70,13 @@ export class Direction {
       ['west', this.west],
     ])
 
+    const tag = new Map([
+      ['north', false],
+      ['south', false],
+      ['east', false],
+      ['west', false],
+    ])
+
     const source = [...geometry.getBBox().getVertex()] as [Position2, Position2]
     const target: [Position2, Position2] = [
       [-GEO_MAX_VALUE, -GEO_MAX_VALUE],
@@ -78,36 +85,52 @@ export class Direction {
     const lower = direction.toLowerCase()
     map.forEach((value, key) => {
       if (lower.includes(key)) {
-        value(source, target)
+        value(source, target, tag)
       }
     })
+
+    return target
   }
 
   private static north = (
     source: [Position2, Position2],
     target: [Position2, Position2],
+    tag: Map<string, boolean>,
   ) => {
     target[0][1] = source[1][1]
+    tag.set('north', true)
   }
 
   private static south = (
     source: [Position2, Position2],
     target: [Position2, Position2],
+    tag: Map<string, boolean>,
   ) => {
+    if (tag.get('north')) {
+      throw new Error(`North and south can't exist together at the same time.`)
+    }
     target[1][1] = source[0][1]
+    tag.set('south', true)
   }
 
   private static east = (
     source: [Position2, Position2],
     target: [Position2, Position2],
+    tag: Map<string, boolean>,
   ) => {
     target[0][0] = source[1][0]
+    tag.set('east', true)
   }
 
   private static west = (
     source: [Position2, Position2],
     target: [Position2, Position2],
+    tag: Map<string, boolean>,
   ) => {
+    if (tag.get('east')) {
+      throw new Error(`East and west can't exist together at the same time.`)
+    }
     target[1][0] = source[0][0]
+    tag.set('west', true)
   }
 }

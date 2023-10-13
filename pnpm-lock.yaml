@@ -5,6 +5,9 @@ settings:
   excludeLinksFromLockfile: false
 
 dependencies:
+  '@turf/boolean-touches':
+    specifier: ^6.5.0
+    version: 6.5.0
   '@turf/turf':
     specifier: ^6.5.0
     version: 6.5.0
@@ -1336,6 +1339,15 @@ packages:
   /@turf/boolean-point-on-line@6.5.0:
     resolution: {integrity: sha512-A1BbuQ0LceLHvq7F/P7w3QvfpmZqbmViIUPHdNLvZimFNLo4e6IQunmzbe+8aSStH9QRZm3VOflyvNeXvvpZEQ==}
     dependencies:
+      '@turf/helpers': 6.5.0
+      '@turf/invariant': 6.5.0
+    dev: false
+
+  /@turf/boolean-touches@6.5.0:
+    resolution: {integrity: sha512-L7psPYa2MvvtcRUGsc/SLrsbA5mjYoAuofCti/YXJnYQhGERSBI8uEMC5fCMrjKdGHaZACb5v+gy27hkbp09iA==}
+    dependencies:
+      '@turf/boolean-point-in-polygon': 6.5.0
+      '@turf/boolean-point-on-line': 6.5.0
       '@turf/helpers': 6.5.0
       '@turf/invariant': 6.5.0
     dev: false

@@ -38,20 +38,21 @@ export const MathUtil = {
   clamp: (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value))
   },
-  rangeOverlap: (
-    r0: [number, number],
-    r1: [number, number],
-  ): null | [number, number] => {
-    if (r0[0] > r0[1] || r1[0] > r1[1]) {
-      return null
-    }
-    if (r0[0] > r1[1] || r1[0] > r0[1]) {
-      return null
-    }
 
-    const start = Math.max(r0[0], r1[0])
-    const end = Math.min(r0[1], r1[1])
+  // rangeOverlap: (
+  //   r0: [number, number],
+  //   r1: [number, number],
+  // ): null | [number, number] => {
+  //   if (r0[0] > r0[1] || r1[0] > r1[1]) {
+  //     return null
+  //   }
+  //   if (r0[0] > r1[1] || r1[0] > r0[1]) {
+  //     return null
+  //   }
 
-    return [start, end]
-  },
+  //   const start = Math.max(r0[0], r1[0])
+  //   const end = Math.min(r0[1], r1[1])
+
+  //   return [start, end]
+  // },
 }

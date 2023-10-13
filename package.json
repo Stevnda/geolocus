@@ -21,6 +21,7 @@
     ]
   },
   "dependencies": {
+    "@turf/boolean-touches": "^6.5.0",
     "@turf/turf": "^6.5.0"
   },
   "devDependencies": {
