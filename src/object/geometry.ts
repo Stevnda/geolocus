@@ -25,12 +25,13 @@ export class Geometry {
   }
 
   static bboxPolygon = (position: GeolocusBBox): GeolocusPolygonGeometry => {
-    const leftDown = [position[0], position[2]]
-    const rightDown = [position[1], position[2]]
-    const rightUp = [position[1], position[3]]
+    const leftDown = [position[0], position[1]]
+    const rightDown = [position[2], position[1]]
+    const rightUp = [position[2], position[3]]
     const leftUp = [position[0], position[3]]
 
-    return turf.polygon([[leftDown, rightDown, rightUp, leftUp]]).geometry
+    return turf.polygon([[leftDown, rightDown, rightUp, leftUp, leftDown]])
+      .geometry
   }
 
   static bbox = (geometry: GeolocusGeometry): GeolocusBBox => {
