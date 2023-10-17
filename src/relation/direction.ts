@@ -1,6 +1,6 @@
-import { GeolocusGeometry } from '../geometry'
 import { GEO_MAX_VALUE } from '../math'
-import { Position2 } from '../type'
+import { GeolocusBBox } from '../object'
+import { GeolocusObject } from '../object/object'
 
 // enum AbsoluteDirection {
 //   'TopNorthWest',
@@ -62,7 +62,7 @@ import { Position2 } from '../type'
 //     'DownRightBackward',
 // }
 export class Direction {
-  static computeRegion = (geometry: GeolocusGeometry, direction: string) => {
+  static computeRegion = (object: GeolocusObject, direction: string) => {
     const map = new Map([
       ['north', this.north],
       ['south', this.south],
@@ -77,10 +77,12 @@ export class Direction {
       ['west', false],
     ])
 
-    const source = [...geometry.getBBox().getVertex()] as [Position2, Position2]
-    const target: [Position2, Position2] = [
-      [-GEO_MAX_VALUE, -GEO_MAX_VALUE],
-      [GEO_MAX_VALUE, GEO_MAX_VALUE],
+    const source = object.getBBox()
+    const target: GeolocusBBox = [
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
     ]
     const lower = direction.toLowerCase()
     map.forEach((value, key) => {
@@ -93,44 +95,44 @@ export class Direction {
   }
 
   private static north = (
-    source: [Position2, Position2],
-    target: [Position2, Position2],
+    source: GeolocusBBox,
+    target: GeolocusBBox,
     tag: Map<string, boolean>,
   ) => {
-    target[0][1] = source[1][1]
+    target[1] = source[3]
     tag.set('north', true)
   }
 
   private static south = (
-    source: [Position2, Position2],
-    target: [Position2, Position2],
+    source: GeolocusBBox,
+    target: GeolocusBBox,
     tag: Map<string, boolean>,
   ) => {
     if (tag.get('north')) {
       throw new Error(`North and south can't exist together at the same time.`)
     }
-    target[1][1] = source[0][1]
+    target[3] = source[1]
     tag.set('south', true)
   }
 
   private static east = (
-    source: [Position2, Position2],
-    target: [Position2, Position2],
+    source: GeolocusBBox,
+    target: GeolocusBBox,
     tag: Map<string, boolean>,
   ) => {
-    target[0][0] = source[1][0]
+    target[0] = source[2]
     tag.set('east', true)
   }
 
   private static west = (
-    source: [Position2, Position2],
-    target: [Position2, Position2],
+    source: GeolocusBBox,
+    target: GeolocusBBox,
     tag: Map<string, boolean>,
   ) => {
     if (tag.get('east')) {
       throw new Error(`East and west can't exist together at the same time.`)
     }
-    target[1][0] = source[0][0]
+    target[2] = source[0]
     tag.set('west', true)
   }
 }
