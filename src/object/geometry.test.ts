@@ -19,10 +19,12 @@ describe('Test the Geometry class', () => {
 
   test('Return the GeolocusPolygonGeometry', () => {
     const polygon = Geometry.polygon([
-      [1, 1],
-      [1, 2],
-      [3, 3],
-      [1, 1],
+      [
+        [1, 1],
+        [1, 2],
+        [3, 3],
+        [1, 1],
+      ],
     ])
     expect(polygon.coordinates).toEqual([
       [
@@ -49,10 +51,12 @@ describe('Test the Geometry class', () => {
 
   test('Return the bbox of GeolocusGeometry', () => {
     const polygon = Geometry.polygon([
-      [1, 1],
-      [1, 2],
-      [3, 3],
-      [1, 1],
+      [
+        [1, 1],
+        [1, 2],
+        [3, 3],
+        [1, 1],
+      ],
     ])
     expect(Geometry.bbox(polygon)).toEqual([1, 1, 3, 3])
   })

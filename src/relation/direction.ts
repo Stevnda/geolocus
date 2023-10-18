@@ -1,6 +1,5 @@
 import { GEO_MAX_VALUE } from '../math'
 import { GeolocusBBox } from '../object'
-import { GeolocusObject } from '../object/object'
 
 // enum AbsoluteDirection {
 //   'TopNorthWest',
@@ -62,7 +61,7 @@ import { GeolocusObject } from '../object/object'
 //     'DownRightBackward',
 // }
 export class Direction {
-  static computeRegion = (object: GeolocusObject, direction: string) => {
+  static computeRegion = (bbox: GeolocusBBox, direction: string) => {
     const map = new Map([
       ['north', this.north],
       ['south', this.south],
@@ -77,7 +76,7 @@ export class Direction {
       ['west', false],
     ])
 
-    const source = object.getBBox()
+    const source = bbox
     const target: GeolocusBBox = [
       -GEO_MAX_VALUE,
       -GEO_MAX_VALUE,

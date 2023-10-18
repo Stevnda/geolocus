@@ -12,7 +12,7 @@ import {
 interface IGeolocusObject {
   getUUID(): string
   getType(): 'Point' | 'LineString' | 'Polygon'
-  getVertex(): Position2[] | Position2
+  getVertex(): Position2 | Position2[] | Position2[][]
   getBBox(): GeolocusBBox
   getGeometry(): GeolocusGeometry
 }
@@ -108,10 +108,10 @@ export class GeolocusPolygonObject implements IGeolocusObject {
   // private _route: Route
   // private _group: Group
   private _geometry: GeolocusPolygonGeometry
-  private _vertex: Position2[]
+  private _vertex: Position2[][]
   private _bbox: GeolocusBBox
 
-  constructor(position: Position2[]) {
+  constructor(position: Position2[][]) {
     this._type = 'Polygon'
     this._uuid = crypto.randomUUID()
     // this._route = new Route()
@@ -129,7 +129,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     return this._type
   }
 
-  getVertex(): Position2[] {
+  getVertex(): Position2[][] {
     return this._vertex
   }
 

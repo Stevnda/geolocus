@@ -20,8 +20,8 @@ export class Geometry {
     return turf.lineString(position).geometry
   }
 
-  static polygon = (position: Position2[]): GeolocusPolygonGeometry => {
-    return turf.polygon([position]).geometry
+  static polygon = (position: Position2[][]): GeolocusPolygonGeometry => {
+    return turf.polygon(position).geometry
   }
 
   static bboxPolygon = (position: GeolocusBBox): GeolocusPolygonGeometry => {
