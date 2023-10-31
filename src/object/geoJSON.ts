@@ -2,28 +2,25 @@ import * as turf from '@turf/turf'
 import { GeolocusBBox, Position2 } from '../type'
 import { Point, LineString, Polygon, Feature } from 'geojson'
 
-export type GeolocusPointGeoJSON = Feature<Point>
-export type GeolocusLineStringGeoJSON = Feature<LineString>
-export type GeolocusPolygonGeoJSON = Feature<Polygon>
-export type GeolocusGeoJSON =
-  | GeolocusPointGeoJSON
-  | GeolocusLineStringGeoJSON
-  | GeolocusPolygonGeoJSON
+export type GeoJSONPoint = Feature<Point>
+export type GeoJSONLineString = Feature<LineString>
+export type GeoJSONPolygon = Feature<Polygon>
+export type GeolocusGeoJSON = GeoJSONPoint | GeoJSONLineString | GeoJSONPolygon
 
 export class GeoJSON {
-  static point = (position: Position2): GeolocusPointGeoJSON => {
+  static point = (position: Position2): GeoJSONPoint => {
     return turf.point(position)
   }
 
-  static lineString = (position: Position2[]): GeolocusLineStringGeoJSON => {
+  static lineString = (position: Position2[]): GeoJSONLineString => {
     return turf.lineString(position)
   }
 
-  static polygon = (position: Position2[][]): GeolocusPolygonGeoJSON => {
+  static polygon = (position: Position2[][]): GeoJSONPolygon => {
     return turf.polygon(position)
   }
 
-  static bboxPolygon = (position: GeolocusBBox): GeolocusPolygonGeoJSON => {
+  static bboxPolygon = (position: GeolocusBBox): GeoJSONPolygon => {
     const leftDown = [position[0], position[1]]
     const rightDown = [position[2], position[1]]
     const rightUp = [position[2], position[3]]

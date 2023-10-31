@@ -3,6 +3,7 @@
 log/
 .vscode/
 doc/
+demo.ts
 
 # dependencies
 node_modules/

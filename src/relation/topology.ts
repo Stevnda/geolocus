@@ -1,79 +1,83 @@
-import booleanTouches from '@turf/boolean-touches'
 import * as turf from '@turf/turf'
-import { GeolocusGeometry } from '../object'
-import { GeolocusPolygonGeometry } from '../object/geometry'
+import { Feature, Polygon } from 'geojson'
+import { GeolocusObject, GeolocusPolygonObject } from '../object'
 
 export class Topology {
-  static isEqual = (
-    geometry0: GeolocusGeometry,
-    geometry1: GeolocusGeometry,
-  ) => {
-    return turf.booleanEqual(geometry0, geometry1)
+  static isEqual = (geoObject0: GeolocusObject, geoObject1: GeolocusObject) => {
+    return turf.booleanEqual(geoObject0.getGeoJSON(), geoObject1.getGeoJSON())
   }
 
   static isIntersect = (
-    geometry0: GeolocusGeometry,
-    geometry1: GeolocusGeometry,
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
   ) => {
-    return turf.booleanIntersects(geometry0, geometry1)
+    return turf.booleanIntersects(
+      geoObject0.getGeoJSON(),
+      geoObject1.getGeoJSON(),
+    )
   }
 
   static isDisjoint = (
-    geometry0: GeolocusGeometry,
-    geometry1: GeolocusGeometry,
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
   ) => {
-    return turf.booleanDisjoint(geometry0, geometry1)
+    return turf.booleanDisjoint(
+      geoObject0.getGeoJSON(),
+      geoObject1.getGeoJSON(),
+    )
   }
 
   static isWithin = (
-    geometry0: GeolocusGeometry,
-    geometry1: GeolocusGeometry,
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
   ) => {
-    return turf.booleanWithin(geometry0, geometry1)
+    return turf.booleanWithin(geoObject0.getGeoJSON(), geoObject1.getGeoJSON())
   }
 
   static isContains = (
-    geometry0: GeolocusGeometry,
-    geometry1: GeolocusGeometry,
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
   ) => {
-    return turf.booleanContains(geometry0, geometry1)
+    return turf.booleanContains(
+      geoObject0.getGeoJSON(),
+      geoObject1.getGeoJSON(),
+    )
   }
 
-  static isTouch = (
-    geometry0: GeolocusGeometry,
-    geometry1: GeolocusGeometry,
-  ) => {
-    return booleanTouches(geometry0, geometry1)
+  static isTouch = (geoObject0: GeolocusObject, geoObject1: GeolocusObject) => {
+    return turf.booleanTouches(geoObject0.getGeoJSON(), geoObject1.getGeoJSON())
   }
 
   static intersection = (
-    polygon0: GeolocusPolygonGeometry,
-    polygon1: GeolocusPolygonGeometry,
-  ): null | GeolocusPolygonGeometry => {
-    const intersection = turf.intersect(polygon0, polygon1)
+    polygon0: GeolocusPolygonObject,
+    polygon1: GeolocusPolygonObject,
+  ) => {
+    const intersection = turf.intersect(
+      turf.featureCollection([polygon0.getGeoJSON(), polygon1.getGeoJSON()]),
+    )
 
     if (!intersection) {
       return null
     }
 
-    return intersection.geometry as GeolocusPolygonGeometry
+    return intersection
   }
 
-  private static buffer = (geometry: GeolocusGeometry, distance: number) => {
-    const converted = turf.toWgs84(geometry)
+  private static buffer = (object: GeolocusObject, distance: number) => {
+    const converted = turf.toWgs84(object.getGeoJSON())
     return turf.toMercator(
       turf.buffer(converted, distance, {
         units: 'meters',
-      }) as turf.Feature<turf.Polygon>,
+      }) as Feature<Polygon>,
     )
   }
 
-  static bufferOfDistance = (geometry: GeolocusGeometry, distance: number) => {
+  static bufferOfDistance = (geometry: GeolocusObject, distance: number) => {
     return this.buffer(geometry, distance).geometry
   }
 
   static bufferOfRange = (
-    geometry: GeolocusGeometry,
+    geometry: GeolocusObject,
     range: [number, number],
   ) => {
     const buffer0 = this.buffer(geometry, range[0])

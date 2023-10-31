@@ -60,6 +60,8 @@ import { GeolocusBBox } from '../object'
 //     'DownBackward',
 //     'DownRightBackward',
 // }
+export type DirectionAzimuth = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW'
+
 export class Direction {
   static computeRegion = (bbox: GeolocusBBox, direction: string) => {
     const map = new Map([

@@ -2,9 +2,9 @@ import crypto from 'crypto'
 import { GeolocusBBox, Position2 } from '../type'
 import {
   GeolocusGeoJSON,
-  GeolocusLineStringGeoJSON,
-  GeolocusPointGeoJSON,
-  GeolocusPolygonGeoJSON,
+  GeoJSONLineString,
+  GeoJSONPoint,
+  GeoJSONPolygon,
   GeoJSON,
 } from './geoJSON'
 
@@ -26,7 +26,7 @@ export class GeolocusPointObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geoJSON: GeolocusPointGeoJSON
+  private _geoJSON: GeoJSONPoint
   private _vertex: Position2
   private _bbox: GeolocusBBox
 
@@ -56,7 +56,7 @@ export class GeolocusPointObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeoJSON(): GeolocusPointGeoJSON {
+  getGeoJSON(): GeoJSONPoint {
     return this._geoJSON
   }
 }
@@ -66,7 +66,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geoJSON: GeolocusLineStringGeoJSON
+  private _geoJSON: GeoJSONLineString
   private _vertex: Position2[]
   private _bbox: GeolocusBBox
 
@@ -96,7 +96,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeoJSON(): GeolocusLineStringGeoJSON {
+  getGeoJSON(): GeoJSONLineString {
     return this._geoJSON
   }
 }
@@ -106,7 +106,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geoJSON: GeolocusPolygonGeoJSON
+  private _geoJSON: GeoJSONPolygon
   private _vertex: Position2[][]
   private _bbox: GeolocusBBox
 
@@ -136,7 +136,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeoJSON(): GeolocusPolygonGeoJSON {
+  getGeoJSON(): GeoJSONPolygon {
     return this._geoJSON
   }
 
