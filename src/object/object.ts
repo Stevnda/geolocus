@@ -1,19 +1,14 @@
 import crypto from 'crypto'
 import { GeolocusBBox, Position2 } from '../type'
-import {
-  GeolocusGeoJSON,
-  GeoJSONLineString,
-  GeoJSONPoint,
-  GeoJSONPolygon,
-  GeoJSON,
-} from './geoJSON'
+import { Feature, LineString, Point, Polygon } from 'geojson'
+import { GeoJSON } from './geoJSON'
 
 interface IGeolocusObject {
   getUUID(): string
   getType(): 'Point' | 'LineString' | 'Polygon'
   getVertex(): Position2 | Position2[] | Position2[][]
   getBBox(): GeolocusBBox
-  getGeoJSON(): GeolocusGeoJSON
+  getGeoJSON(): Feature
 }
 
 export type GeolocusObject =
@@ -26,7 +21,7 @@ export class GeolocusPointObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geoJSON: GeoJSONPoint
+  private _geoJSON: Feature<Point>
   private _vertex: Position2
   private _bbox: GeolocusBBox
 
@@ -56,7 +51,7 @@ export class GeolocusPointObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeoJSON(): GeoJSONPoint {
+  getGeoJSON(): Feature<Point> {
     return this._geoJSON
   }
 }
@@ -66,7 +61,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geoJSON: GeoJSONLineString
+  private _geoJSON: Feature<LineString>
   private _vertex: Position2[]
   private _bbox: GeolocusBBox
 
@@ -96,7 +91,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeoJSON(): GeoJSONLineString {
+  getGeoJSON(): Feature<LineString> {
     return this._geoJSON
   }
 }
@@ -106,7 +101,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geoJSON: GeoJSONPolygon
+  private _geoJSON: Feature<Polygon>
   private _vertex: Position2[][]
   private _bbox: GeolocusBBox
 
@@ -136,7 +131,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeoJSON(): GeoJSONPolygon {
+  getGeoJSON(): Feature<Polygon> {
     return this._geoJSON
   }
 

@@ -17,7 +17,7 @@ describe('Test the GeoJSON class', () => {
     ])
   })
 
-  test('Return the GeoJSONPolygon', () => {
+  test('Return the Feature<Polygon>', () => {
     const polygon = GeoJSON.polygon([
       [
         [1, 1],
@@ -36,7 +36,7 @@ describe('Test the GeoJSON class', () => {
     ])
   })
 
-  test('Return the GeoJSONPolygon by bbox', () => {
+  test('Return the Feature<Polygon> by bbox', () => {
     const polygon = GeoJSON.bboxPolygon([1, 1, 3, 3])
     expect(polygon.geometry.coordinates).toEqual([
       [

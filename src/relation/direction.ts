@@ -1,5 +1,5 @@
 import { GEO_MAX_VALUE } from '../math'
-import { GeolocusBBox } from '../object'
+import { GeolocusBBox } from '../type'
 
 // enum AbsoluteDirection {
 //   'TopNorthWest',

@@ -152,7 +152,7 @@ describe('Test the Topology class', () => {
     expect(Topology.isTouch(g0, g2)).toBeFalsy()
   })
 
-  test('Return the intersection between two geometries', () => {
+  test('Return the intersection between two simple geometries', () => {
     const g0 = new GeolocusPolygonObject([
       [
         [1, 1],
@@ -183,15 +183,28 @@ describe('Test the Topology class', () => {
 
     expect(Topology.intersection(g0, g1)?.geometry.coordinates).toEqual([
       [
-        [1, 1],
-        [2, 1],
-        [2, 2],
-        [1, 2],
-        [1, 1],
+        [
+          [1, 1],
+          [2, 1],
+          [2, 2],
+          [1, 2],
+          [1, 1],
+        ],
       ],
     ])
 
     expect(Topology.intersection(g0, g2)).toBeNull()
+  })
+
+  test('Return the intersection between two geometries with holes', () => {
+    const point1 = new GeolocusPointObject([0, 0])
+    const point2 = new GeolocusPointObject([0, 20])
+    const buffer1 = Topology.bufferOfRange(point1.getGeoJSON(), [5, 10])
+    const buffer2 = Topology.bufferOfRange(point1.getGeoJSON(), [8, 15])
+    const buffer3 = Topology.bufferOfRange(point2.getGeoJSON(), [1, 2])
+
+    expect(Topology.intersection(buffer1, buffer2)).toBeTruthy()
+    expect(Topology.intersection(buffer1, buffer3)).toBeNull()
   })
 
   test('Return the buffer area of specified distance', () => {
