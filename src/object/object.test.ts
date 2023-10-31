@@ -1,3 +1,4 @@
+import { GeolocusBBox } from '../type'
 import { GeoJSON } from './geoJSON'
 import {
   GeolocusLineStringObject,
@@ -163,5 +164,12 @@ describe('Test the GeolocusPolygonObject class', () => {
         ],
       ]),
     )
+  })
+
+  test('Get the GeolocusPolygonObject from bbox', () => {
+    const bbox: GeolocusBBox = [1, 2, 3, 4]
+    const polygon = GeolocusPolygonObject.fromBBox(bbox)
+
+    expect(polygon).toBeInstanceOf(GeolocusPolygonObject)
   })
 })
