@@ -1,4 +1,4 @@
-import { Geometry } from './geometry'
+import { GeoJSON } from './geoJSON'
 import {
   GeolocusLineStringObject,
   GeolocusPointObject,
@@ -30,7 +30,7 @@ describe('Test the GeolocusPointObject class', () => {
 
   test('Return the geometry', () => {
     const point = new GeolocusPointObject([1, 1])
-    expect(point.getGeometry()).toEqual(Geometry.point([1, 1]))
+    expect(point.getGeoJSON()).toEqual(GeoJSON.point([1, 1]))
   })
 })
 
@@ -77,8 +77,8 @@ describe('Test the GeolocusLineStringObject class', () => {
       [1, 1],
       [1, 2],
     ])
-    expect(object.getGeometry()).toEqual(
-      Geometry.lineString([
+    expect(object.getGeoJSON()).toEqual(
+      GeoJSON.lineString([
         [1, 1],
         [1, 2],
       ]),
@@ -153,8 +153,8 @@ describe('Test the GeolocusPolygonObject class', () => {
         [1, 1],
       ],
     ])
-    expect(object.getGeometry()).toEqual(
-      Geometry.polygon([
+    expect(object.getGeoJSON()).toEqual(
+      GeoJSON.polygon([
         [
           [1, 1],
           [1, 2],

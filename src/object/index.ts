@@ -1,4 +1,3 @@
-export { GeolocusBBox, GeolocusGeometry } from './geometry'
 export {
   GeolocusLineStringObject,
   GeolocusObject,

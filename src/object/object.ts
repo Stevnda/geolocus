@@ -1,20 +1,19 @@
 import crypto from 'crypto'
-import { Position2 } from '../type'
+import { GeolocusBBox, Position2 } from '../type'
 import {
-  GeolocusBBox,
-  GeolocusGeometry,
-  GeolocusLineStringGeometry,
-  GeolocusPointGeometry,
-  GeolocusPolygonGeometry,
-  Geometry,
-} from './geometry'
+  GeolocusGeoJSON,
+  GeolocusLineStringGeoJSON,
+  GeolocusPointGeoJSON,
+  GeolocusPolygonGeoJSON,
+  GeoJSON,
+} from './geoJSON'
 
 interface IGeolocusObject {
   getUUID(): string
   getType(): 'Point' | 'LineString' | 'Polygon'
   getVertex(): Position2 | Position2[] | Position2[][]
   getBBox(): GeolocusBBox
-  getGeometry(): GeolocusGeometry
+  getGeoJSON(): GeolocusGeoJSON
 }
 
 export type GeolocusObject =
@@ -27,7 +26,7 @@ export class GeolocusPointObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geometry: GeolocusPointGeometry
+  private _geoJSON: GeolocusPointGeoJSON
   private _vertex: Position2
   private _bbox: GeolocusBBox
 
@@ -36,9 +35,9 @@ export class GeolocusPointObject implements IGeolocusObject {
     this._uuid = crypto.randomUUID()
     // this._route = new Route()
     // this._group = new Group()
-    this._geometry = Geometry.point(position)
+    this._geoJSON = GeoJSON.point(position)
     this._vertex = position
-    this._bbox = Geometry.bbox(this._geometry)
+    this._bbox = GeoJSON.bbox(this._geoJSON)
   }
 
   getUUID(): string {
@@ -57,8 +56,8 @@ export class GeolocusPointObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeometry(): GeolocusPointGeometry {
-    return this._geometry
+  getGeoJSON(): GeolocusPointGeoJSON {
+    return this._geoJSON
   }
 }
 
@@ -67,7 +66,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geometry: GeolocusLineStringGeometry
+  private _geoJSON: GeolocusLineStringGeoJSON
   private _vertex: Position2[]
   private _bbox: GeolocusBBox
 
@@ -76,9 +75,9 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     this._uuid = crypto.randomUUID()
     // this._route = new Route()
     // this._group = new Group()
-    this._geometry = Geometry.lineString(position)
+    this._geoJSON = GeoJSON.lineString(position)
     this._vertex = position
-    this._bbox = Geometry.bbox(this._geometry)
+    this._bbox = GeoJSON.bbox(this._geoJSON)
   }
 
   getUUID(): string {
@@ -97,8 +96,8 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeometry(): GeolocusLineStringGeometry {
-    return this._geometry
+  getGeoJSON(): GeolocusLineStringGeoJSON {
+    return this._geoJSON
   }
 }
 
@@ -107,7 +106,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
   private _uuid: string
   // private _route: Route
   // private _group: Group
-  private _geometry: GeolocusPolygonGeometry
+  private _geoJSON: GeolocusPolygonGeoJSON
   private _vertex: Position2[][]
   private _bbox: GeolocusBBox
 
@@ -116,9 +115,9 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     this._uuid = crypto.randomUUID()
     // this._route = new Route()
     // this._group = new Group()
-    this._geometry = Geometry.polygon(position)
+    this._geoJSON = GeoJSON.polygon(position)
     this._vertex = position
-    this._bbox = Geometry.bbox(this._geometry)
+    this._bbox = GeoJSON.bbox(this._geoJSON)
   }
 
   getUUID(): string {
@@ -137,7 +136,18 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     return this._bbox
   }
 
-  getGeometry(): GeolocusPolygonGeometry {
-    return this._geometry
+  getGeoJSON(): GeolocusPolygonGeoJSON {
+    return this._geoJSON
+  }
+
+  static fromBBox(position: GeolocusBBox): GeolocusPolygonObject {
+    const leftDown: Position2 = [position[0], position[1]]
+    const rightDown: Position2 = [position[2], position[1]]
+    const rightUp: Position2 = [position[2], position[3]]
+    const leftUp: Position2 = [position[0], position[3]]
+
+    return new GeolocusPolygonObject([
+      [leftDown, rightDown, rightUp, leftUp, leftDown],
+    ])
   }
 }
