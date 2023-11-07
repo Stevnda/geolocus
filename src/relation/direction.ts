@@ -1,6 +1,5 @@
 import { GEO_MAX_VALUE } from '../math'
-import { GeolocusObject, GeolocusPolygonObject } from '../object'
-import { GeolocusBBox } from '../type'
+import { GeolocusBBox, GeolocusObject, GeolocusPolygonObject } from '../object'
 
 export type AbsoluteDirection =
   | 'N'

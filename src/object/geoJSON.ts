@@ -1,6 +1,7 @@
 import * as turf from '@turf/turf'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
-import { GeolocusBBox, Position2 } from '../type'
+import { GeolocusBBox } from '.'
+import { Position2 } from '../type'
 
 export class GeoJSON {
   static point = (position: Position2): Feature<Point> => {

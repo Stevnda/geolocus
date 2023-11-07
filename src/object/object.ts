@@ -1,6 +1,7 @@
 import crypto from 'crypto'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
-import { GeolocusBBox, Position2 } from '../type'
+import { GeolocusBBox } from '.'
+import { Position2 } from '../type'
 import { GeoJSON } from './geoJSON'
 
 interface IGeolocusObject {

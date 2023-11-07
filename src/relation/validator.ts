@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { IGeoRelation } from './type'
+import { IGeoRelation } from '.'
 const topologyHandler = (relation: IGeoRelation) => {
   //
 }

@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BBox } from 'geojson'
-import { Vector2 } from '../math'
 import {
   GeolocusObject,
   GeolocusPolygonObject,
@@ -8,8 +7,12 @@ import {
 } from '../object'
 import { GeolocusMultiPolygonObject } from '../object/object'
 import { IGeoRelation } from '../relation'
-import { Topology, TopologyRelation } from '../relation/topology'
 import { Position2 } from '../type'
+import {
+  regionHandlerOfDirection,
+  regionHandlerOfDistance,
+  regionHandlerOfTopology,
+} from './handler'
 
 export interface IGeoTriple {
   origin: GeolocusObject
@@ -17,124 +20,18 @@ export interface IGeoTriple {
   target: GeolocusObject
 }
 
+export interface IRegionPDF {
+  type: 0 | 1 | 2 | 3
+  origin: Position2
+  distance: number | null
+  distanceDelta: number | null
+  azimuth: number | null
+  azimuthDelta: number | null
+}
+
 export interface IRegionResult {
   region: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
-  PDF: {
-    type: 0 | 1 | 2 | 3
-    origin: Position2
-    distance: number | null
-    distanceDelta: number | null
-    azimuth: number | null
-    azimuthDelta: number | null
-  }[]
-}
-
-export interface IRegionHandler {
-  (
-    origin: GeolocusObject,
-    relation: IGeoRelation,
-    target: GeolocusObject,
-    result: IRegionResult,
-    index: number,
-  ): void
-}
-
-const DISTANCE_DELTA = 0.2
-
-const topologyHandler: IRegionHandler = (
-  origin: GeolocusObject,
-  relation: IGeoRelation,
-  target: GeolocusObject,
-  result: IRegionResult,
-  index: number,
-) => {
-  const region = result.region
-  if (!region) {
-    throw new Error("Can't compute the fuzzy region.")
-  }
-
-  const topology = relation.topology as TopologyRelation
-  const map: {
-    [props in TopologyRelation]: () => void
-  } = {
-    equal: () => {
-      const fuzzyRegion = Topology.bufferOfDistance(origin, 1)
-      result.region = Topology.intersection(fuzzyRegion, region)
-
-      result.PDF[index] = {
-        type: 0,
-        origin: origin.getCenter(),
-        distance: null,
-        distanceDelta: null,
-        azimuth: null,
-        azimuthDelta: null,
-      }
-    },
-    contain: () => {
-      const originBBox = origin.getBBox()
-      const length = Vector2.distanceTo(
-        [originBBox[0], originBBox[1]],
-        [originBBox[2], originBBox[3]],
-      )
-
-      const fuzzyRegion = Topology.bufferOfDistance(
-        origin,
-        length * DISTANCE_DELTA,
-      )
-      result.region = Topology.intersection(fuzzyRegion, region)
-      result.PDF[index] = {
-        type: 1,
-        origin: origin.getCenter(),
-        distance: 0,
-        distanceDelta: length / 2,
-        azimuth: null,
-        azimuthDelta: null,
-      }
-    },
-    intersect: () => {
-      const targetBBox = target.getBBox()
-      const distance = Vector2.distanceTo(
-        [targetBBox[0], targetBBox[1]],
-        [targetBBox[2], targetBBox[3]],
-      )
-
-      const fuzzyRegion = Topology.bufferOfDistance(
-        origin,
-        distance * DISTANCE_DELTA,
-      )
-      result.region = Topology.intersection(fuzzyRegion, region)
-      result.PDF[index] = {
-        type: 1,
-        origin: origin.getCenter(),
-        distance: 0,
-        distanceDelta: distance / 2,
-        azimuth: null,
-        azimuthDelta: null,
-      }
-    },
-    disjoint: () => {
-      const targetBBox = target.getBBox()
-      const distance = Vector2.distanceTo(
-        [targetBBox[0], targetBBox[1]],
-        [targetBBox[2], targetBBox[3]],
-      )
-
-      const buffer = Topology.bufferOfDistance(
-        origin,
-        distance * DISTANCE_DELTA,
-      )
-      const fuzzyRegion = Topology.mask(MaxBBoxPolygon, buffer)
-      result.region = Topology.intersection(fuzzyRegion, region)
-      result.PDF[index] = {
-        type: 0,
-        origin: origin.getCenter(),
-        distance: null,
-        distanceDelta: null,
-        azimuth: null,
-        azimuthDelta: null,
-      }
-    },
-  }
+  PDF: IRegionPDF[]
 }
 
 export class Region {
@@ -166,13 +63,17 @@ export class Region {
         0: () => {
           throw new Error('The geoRelation is null.')
         },
-        1: topologyHandler,
-        // 3: directionHandler,
-        // 7: distanceHandler,
+        1: regionHandlerOfTopology,
+        3: regionHandlerOfDirection,
+        7: regionHandlerOfDistance,
         // 4: topologyDirectionHandler,
         // 8: topologyDistanceHandler,
         // 10: directionDistanceHandler,
         // 11: allRelationHandler,
+      }
+
+      if (!this._result.region) {
+        throw new Error("Can't compute the fuzzy region.")
       }
     }
   }
