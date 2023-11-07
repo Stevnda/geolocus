@@ -4,3 +4,5 @@ export {
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from './object'
+
+export { MaxBBoxPolygon } from './constant'

@@ -1,6 +1,6 @@
 import * as turf from '@turf/turf'
+import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
 import { GeolocusBBox, Position2 } from '../type'
-import { Point, LineString, Polygon, Feature } from 'geojson'
 
 export class GeoJSON {
   static point = (position: Position2): Feature<Point> => {
@@ -15,6 +15,10 @@ export class GeoJSON {
     return turf.polygon(position)
   }
 
+  static multiPolygon = (position: Position2[][][]): Feature<MultiPolygon> => {
+    return turf.multiPolygon(position)
+  }
+
   static bboxPolygon = (position: GeolocusBBox): Feature<Polygon> => {
     const leftDown = [position[0], position[1]]
     const rightDown = [position[2], position[1]]
@@ -26,5 +30,9 @@ export class GeoJSON {
 
   static bbox = (object: Feature): GeolocusBBox => {
     return turf.bbox(object) as GeolocusBBox
+  }
+
+  static centerOfMass = (object: Feature): Position2 => {
+    return turf.centerOfMass(object).geometry.coordinates as Position2
   }
 }

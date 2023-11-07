@@ -1,84 +1,44 @@
 import { GEO_MAX_VALUE } from '../math'
+import { GeolocusObject, GeolocusPolygonObject } from '../object'
 import { GeolocusBBox } from '../type'
 
-// enum AbsoluteDirection {
-//   'TopNorthWest',
-//   'TopNorth',
-//   'TopNorthEast',
-//   'TopWest',
-//   'Top',
-//   'TopEast',
-//   'TopSouthWest',
-//   'TopSouth',
-//   'TopSouthEast',
-//   'NorthWest',
-//   'North',
-//   'NorthEast',
-//   'West',
-//   'SamePosition',
-//   'East',
-//   'SouthWest',
-//   'South',
-//   'SouthEast',
-//   'BottomNorthWest',
-//   'BottomNorth',
-//   'BottomNorthEast',
-//   'BottomWest',
-//   'Bottom',
-//   'BottomEast',
-//   'BottomSouthWest',
-//   'BottomSouth',
-//   'BottomSouthEast',
-// }
+export type AbsoluteDirection =
+  | 'N'
+  | 'NE'
+  | 'E'
+  | 'SE'
+  | 'S'
+  | 'SW'
+  | 'W'
+  | 'NW'
 
-// enum RelativeDirection {
-//     'UpLeftForward',
-//     'UpForward',
-//     'UpRightForward',
-//     'UpLeft',
-//     'UpSamePosition',
-//     'UpRight',
-//     'UpLeftBackward',
-//     'UpBackward',
-//     'UpRightBackward',
-//     'LeftForward',
-//     'Forward',
-//     'RightForward',
-//     'Left',
-//     'SamePosition',
-//     'Right',
-//     'LeftBackward',
-//     'Backward',
-//     'RightBackward',
-//     'DownLeftForward',
-//     'DownForward',
-//     'DownRightForward',
-//     'DownLeft',
-//     'DownSamePosition',
-//     'DownRight',
-//     'DownLeftBackward',
-//     'DownBackward',
-//     'DownRightBackward',
-// }
-export type DirectionAzimuth = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW'
+export type RelativeDirection =
+  | 'F'
+  | 'FR'
+  | 'R'
+  | 'BR'
+  | 'B'
+  | 'BL'
+  | 'L'
+  | 'FL'
 
 export class Direction {
-  static computeRegion = (bbox: GeolocusBBox, direction: string) => {
+  static computeRegion = (object: GeolocusObject, direction: string) => {
     const map = new Map([
-      ['north', this.north],
-      ['south', this.south],
-      ['east', this.east],
-      ['west', this.west],
+      ['n', this.north],
+      ['s', this.south],
+      ['e', this.east],
+      ['w', this.west],
     ])
 
     const tag = new Map([
-      ['north', false],
-      ['south', false],
-      ['east', false],
-      ['west', false],
+      ['n', false],
+      ['s', false],
+      ['e', false],
+      ['w', false],
     ])
 
-    const source = bbox
+    const source = object.getBBox()
     const target: GeolocusBBox = [
       -GEO_MAX_VALUE,
       -GEO_MAX_VALUE,
@@ -92,7 +52,7 @@ export class Direction {
       }
     })
 
-    return target
+    return GeolocusPolygonObject.fromBBox(target)
   }
 
   private static north = (
@@ -101,7 +61,7 @@ export class Direction {
     tag: Map<string, boolean>,
   ) => {
     target[1] = source[3]
-    tag.set('north', true)
+    tag.set('n', true)
   }
 
   private static south = (
@@ -109,11 +69,11 @@ export class Direction {
     target: GeolocusBBox,
     tag: Map<string, boolean>,
   ) => {
-    if (tag.get('north')) {
+    if (tag.get('n')) {
       throw new Error(`North and south can't exist together at the same time.`)
     }
     target[3] = source[1]
-    tag.set('south', true)
+    tag.set('s', true)
   }
 
   private static east = (
@@ -122,7 +82,7 @@ export class Direction {
     tag: Map<string, boolean>,
   ) => {
     target[0] = source[2]
-    tag.set('east', true)
+    tag.set('e', true)
   }
 
   private static west = (
@@ -130,10 +90,10 @@ export class Direction {
     target: GeolocusBBox,
     tag: Map<string, boolean>,
   ) => {
-    if (tag.get('east')) {
+    if (tag.get('e')) {
       throw new Error(`East and west can't exist together at the same time.`)
     }
     target[2] = source[0]
-    tag.set('west', true)
+    tag.set('w', true)
   }
 }

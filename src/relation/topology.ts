@@ -1,51 +1,91 @@
 import * as turf from '@turf/turf'
+import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
 import * as martinez from 'martinez-polygon-clipping'
-import { Feature, Polygon } from 'geojson'
+import { GeolocusObject, GeolocusPolygonObject } from '../object'
+import {
+  GeolocusLineStringObject,
+  GeolocusMultiPolygonObject,
+  GeolocusPointObject,
+} from '../object/object'
 import { Position2 } from '../type'
 
+export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
+// | 'within'
+// | 'touch'
+
 export class Topology {
-  static isEqual = (geoObject0: Feature, geoObject1: Feature) => {
-    return turf.booleanEqual(geoObject0, geoObject1)
+  static isEqual = (geoObject0: GeolocusObject, geoObject1: GeolocusObject) => {
+    return turf.booleanEqual(geoObject0.getGeoJSON(), geoObject1.getGeoJSON())
   }
 
-  static isIntersect = (geoObject0: Feature, geoObject1: Feature) => {
-    return turf.booleanIntersects(geoObject0, geoObject1)
+  static isIntersect = (
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
+  ) => {
+    return turf.booleanIntersects(
+      geoObject0.getGeoJSON(),
+      geoObject1.getGeoJSON(),
+    )
   }
 
-  static isDisjoint = (geoObject0: Feature, geoObject1: Feature) => {
-    return turf.booleanDisjoint(geoObject0, geoObject1)
+  static isDisjoint = (
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
+  ) => {
+    return turf.booleanDisjoint(
+      geoObject0.getGeoJSON(),
+      geoObject1.getGeoJSON(),
+    )
   }
 
-  static isWithin = (geoObject0: Feature, geoObject1: Feature) => {
-    return turf.booleanWithin(geoObject0, geoObject1)
+  static isWithin = (
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
+  ) => {
+    return turf.booleanWithin(geoObject0.getGeoJSON(), geoObject1.getGeoJSON())
   }
 
-  static isContains = (geoObject0: Feature, geoObject1: Feature) => {
-    return turf.booleanContains(geoObject0, geoObject1)
+  static isContains = (
+    geoObject0: GeolocusObject,
+    geoObject1: GeolocusObject,
+  ) => {
+    return turf.booleanContains(
+      geoObject0.getGeoJSON(),
+      geoObject1.getGeoJSON(),
+    )
   }
 
-  static isTouch = (geoObject0: Feature, geoObject1: Feature) => {
-    return turf.booleanTouches(geoObject0, geoObject1)
+  static isTouch = (geoObject0: GeolocusObject, geoObject1: GeolocusObject) => {
+    return turf.booleanTouches(geoObject0.getGeoJSON(), geoObject1.getGeoJSON())
+  }
+
+  static mask = (
+    object: GeolocusPolygonObject,
+    mask: GeolocusPolygonObject,
+  ) => {
+    return GeolocusPolygonObject.fromGeoJSON(
+      turf.mask(object.getGeoJSON(), mask.getGeoJSON()),
+    )
   }
 
   static intersection = (
-    polygon0: Feature<Polygon>,
-    polygon1: Feature<Polygon>,
+    polygon0: GeolocusPolygonObject | GeolocusMultiPolygonObject,
+    polygon1: GeolocusPolygonObject | GeolocusMultiPolygonObject,
   ) => {
     const intersection = martinez.intersection(
-      polygon0.geometry.coordinates,
-      polygon1.geometry.coordinates,
+      polygon0.getGeoJSON().geometry.coordinates,
+      polygon1.getGeoJSON().geometry.coordinates,
     )
 
     if (!intersection || intersection.length === 0) {
       return null
     }
 
-    return turf.multiPolygon(intersection as Position2[][][])
+    return new GeolocusMultiPolygonObject(intersection as Position2[][][])
   }
 
-  private static buffer = (object: Feature, distance: number) => {
-    const converted = turf.toWgs84(object)
+  private static buffer = (object: GeolocusObject, distance: number) => {
+    const converted = turf.toWgs84(object.getGeoJSON())
     return turf.toMercator(
       turf.buffer(converted, distance, {
         units: 'meters',
@@ -53,14 +93,48 @@ export class Topology {
     )
   }
 
-  static bufferOfDistance = (geometry: Feature, distance: number) => {
-    return this.buffer(geometry, distance)
+  static bufferOfDistance = (geometry: GeolocusObject, distance: number) => {
+    return new GeolocusPolygonObject(
+      this.buffer(geometry, distance).geometry.coordinates as Position2[][],
+    )
   }
 
-  static bufferOfRange = (geometry: Feature, range: [number, number]) => {
+  static bufferOfRange = (
+    geometry: GeolocusObject,
+    range: [number, number],
+  ) => {
     const buffer0 = this.buffer(geometry, range[0])
     const buffer1 = this.buffer(geometry, range[1])
 
-    return turf.mask(buffer1, buffer0)
+    const mask = turf.mask(buffer1, buffer0)
+    return new GeolocusPolygonObject(mask.geometry.coordinates as Position2[][])
+  }
+
+  static transformTranslate(
+    object: GeolocusObject,
+    distance: number,
+    direction: number,
+  ): GeolocusObject {
+    const type = object.getType()
+    const converted = turf.toWgs84(object.getGeoJSON())
+    const feature = turf.toMercator(
+      turf.transformTranslate(converted, distance, direction, {
+        units: 'meters',
+      }),
+    )
+    if (type === 'Point')
+      return GeolocusPointObject.fromGeoJSON(feature as Feature<Point>)
+    if (type === 'LineString')
+      return GeolocusLineStringObject.fromGeoJSON(
+        feature as Feature<LineString>,
+      )
+    if (type === 'Polygon')
+      return GeolocusPolygonObject.fromGeoJSON(feature as Feature<Polygon>)
+    if (type === 'MultiPolygon')
+      return GeolocusMultiPolygonObject.fromGeoJSON(
+        feature as Feature<MultiPolygon>,
+      )
+
+    throw new Error('Unknown type!')
   }
 }

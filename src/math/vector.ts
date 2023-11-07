@@ -70,6 +70,18 @@ export class Vector2 {
   }
 
   /**
+   * Computes the azimuth of vector
+   * @param {Position2} vector vector
+   * @returns {number} the angle in radians in [0, 2pi]
+   */
+  static azimuth(vector: Position2): number {
+    const angle =
+      (Math.PI / 2 - Math.atan2(vector[1], vector[0]) + 2 * Math.PI) %
+      (2 * Math.PI)
+    return angle
+  }
+
+  /**
    * Return the square of the length of the vector
    * @param {Position2} vector vector
    * @returns {number} the length
