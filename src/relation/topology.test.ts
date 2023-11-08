@@ -1,9 +1,9 @@
-import { createWriteStream } from 'fs'
 import {
   GeolocusLineStringObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from '../object'
+import { GeolocusMultiPolygonObject } from '../object/object'
 import { Topology } from './topology'
 
 describe('Test the Topology class', () => {
@@ -153,6 +153,15 @@ describe('Test the Topology class', () => {
     expect(Topology.isTouch(g0, g2)).toBeFalsy()
   })
 
+  test('Mask the polygon by the mask feature.', () => {
+    const point1 = new GeolocusPointObject([0, 0])
+    const buffer1 = Topology.bufferOfDistance(point1, 10)
+    const buffer2 = Topology.bufferOfDistance(point1, 5)
+    const mask = Topology.mask(buffer1, buffer2)
+
+    expect(Topology.isIntersect(buffer1, mask)).toBeTruthy()
+  })
+
   test('Return the intersection between two simple geometries', () => {
     const g0 = new GeolocusPolygonObject([
       [
@@ -206,9 +215,6 @@ describe('Test the Topology class', () => {
     const buffer2 = Topology.bufferOfRange(point1, [8, 15])
     const buffer3 = Topology.bufferOfRange(point2, [1, 2])
 
-    createWriteStream('./test.json', 'utf-8').write(
-      JSON.stringify(Topology.intersection(buffer1, buffer2)),
-    )
     expect(Topology.intersection(buffer1, buffer2)).toBeTruthy()
     expect(Topology.intersection(buffer1, buffer3)).toBeNull()
   })
@@ -226,5 +232,49 @@ describe('Test the Topology class', () => {
       Topology.bufferOfRange(point, [100, 200]).getGeoJSON().geometry
         .coordinates,
     ).toBeTruthy()
+  })
+
+  test('Translate the feature by distance and radian.', () => {
+    const point = new GeolocusPointObject([0, 0])
+    const pointTranslated = Topology.transformTranslate(point, 10, 0)
+
+    const line = new GeolocusLineStringObject([
+      [1, 1],
+      [2, 2],
+    ])
+    const lineTranslated = Topology.transformTranslate(line, 10, 0)
+
+    const polygon = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 3],
+        [3, 3],
+        [3, 1],
+        [1, 1],
+      ],
+    ])
+    const polygonTranslated = Topology.transformTranslate(polygon, 10, 0)
+
+    const multiPolygon = new GeolocusMultiPolygonObject([
+      [
+        [
+          [1, 1],
+          [1, 3],
+          [3, 3],
+          [3, 1],
+          [1, 1],
+        ],
+      ],
+    ])
+    const multiPolygonTranslated = Topology.transformTranslate(
+      multiPolygon,
+      10,
+      0,
+    )
+
+    expect(pointTranslated.getVertex().length).toBe(2)
+    expect(lineTranslated.getVertex().length).toBe(2)
+    expect(polygonTranslated.getVertex().length).toBe(1)
+    expect(multiPolygonTranslated.getVertex().length).toBe(1)
   })
 })

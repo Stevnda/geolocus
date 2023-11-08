@@ -31,9 +31,41 @@ describe('Test the GeolocusPointObject class', () => {
     expect(point.getBBox()).toEqual([1, 1, 1, 1])
   })
 
+  test('Return the center of object', () => {
+    const object = new GeolocusPointObject([1, 1])
+    const center = object.getCenter()
+
+    expect(center).toEqual([1, 1])
+  })
+
   test('Return the geometry', () => {
     const point = new GeolocusPointObject([1, 1])
     expect(point.getGeoJSON()).toEqual(GeoJSON.point([1, 1]))
+  })
+
+  test('Clone itself', () => {
+    const object = new GeolocusPointObject([1, 1])
+    const clone = object.clone()
+    expect(clone.getVertex()).toEqual(object.getVertex())
+  })
+
+  test('Get the GeolocusPolygonObject from geojson', () => {
+    const point = new GeolocusPointObject([1, 1])
+    const polygon = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+
+    expect(GeolocusPointObject.fromGeoJSON(point.getGeoJSON()).getType()).toBe(
+      'Point',
+    )
+    expect(() =>
+      GeolocusPointObject.fromGeoJSON(polygon.getGeoJSON() as any),
+    ).toThrow()
   })
 })
 
@@ -66,13 +98,22 @@ describe('Test the GeolocusLineStringObject class', () => {
       [1, 2],
     ])
   })
-
   test('Return the bbox', () => {
     const object = new GeolocusLineStringObject([
       [1, 1],
       [1, 2],
     ])
     expect(object.getBBox()).toEqual([1, 1, 1, 2])
+  })
+
+  test('Return the center of object', () => {
+    const object = new GeolocusLineStringObject([
+      [1, 1],
+      [1, 3],
+    ])
+    const center = object.getCenter()
+
+    expect(center).toEqual([1, 2])
   })
 
   test('Return the geometry', () => {
@@ -86,6 +127,37 @@ describe('Test the GeolocusLineStringObject class', () => {
         [1, 2],
       ]),
     )
+  })
+
+  test('Clone itself', () => {
+    const object = new GeolocusLineStringObject([
+      [1, 1],
+      [1, 2],
+    ])
+    const clone = object.clone()
+    expect(clone.getVertex()).toEqual(object.getVertex())
+  })
+
+  test('Get the GeolocusPolygonObject from geojson', () => {
+    const line = new GeolocusLineStringObject([
+      [1, 1],
+      [1, 2],
+    ])
+    const polygon = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+
+    expect(
+      GeolocusLineStringObject.fromGeoJSON(line.getGeoJSON()).getType(),
+    ).toBe('LineString')
+    expect(() =>
+      GeolocusLineStringObject.fromGeoJSON(polygon.getGeoJSON() as any),
+    ).toThrow()
   })
 })
 
@@ -135,6 +207,19 @@ describe('Test the GeolocusPolygonObject class', () => {
     ])
   })
 
+  test('Clone itself', () => {
+    const object = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+    const clone = object.clone()
+    expect(clone.getVertex()).toEqual(object.getVertex())
+  })
+
   test('Return the bbox', () => {
     const object = new GeolocusPolygonObject([
       [
@@ -145,6 +230,20 @@ describe('Test the GeolocusPolygonObject class', () => {
       ],
     ])
     expect(object.getBBox()).toEqual([1, 1, 1, 3])
+  })
+
+  test('Return the center of object', () => {
+    const object = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+    const center = object.getCenter()
+
+    expect(center).toEqual([1, 2])
   })
 
   test('Return the geometry', () => {
@@ -266,6 +365,22 @@ describe('Test the GeolocusMultiPolygonObject class', () => {
     expect(object.getBBox()).toEqual([1, 1, 1, 3])
   })
 
+  test('Return the center of object', () => {
+    const object = new GeolocusMultiPolygonObject([
+      [
+        [
+          [1, 1],
+          [1, 2],
+          [1, 3],
+          [1, 1],
+        ],
+      ],
+    ])
+    const center = object.getCenter()
+
+    expect(center).toEqual([1, 2])
+  })
+
   test('Return the geometry', () => {
     const object = new GeolocusMultiPolygonObject([
       [
@@ -289,6 +404,21 @@ describe('Test the GeolocusMultiPolygonObject class', () => {
         ],
       ]),
     )
+  })
+
+  test('Clone itself', () => {
+    const object = new GeolocusMultiPolygonObject([
+      [
+        [
+          [1, 1],
+          [1, 2],
+          [1, 3],
+          [1, 1],
+        ],
+      ],
+    ])
+    const clone = object.clone()
+    expect(clone.getVertex()).toEqual(object.getVertex())
   })
 
   test('Get the GeolocusMultiPolygonObject from bbox', () => {

@@ -41,8 +41,8 @@ export interface IRelationHandler {
     target: GeolocusObject,
     result: IRegionResult,
   ): {
-    region: IRegionResult['region']
-    pdf: IRegionPDF
+    topologyRegion: IRegionResult['region']
+    topologyPDF: IRegionPDF
   }
 }
 
@@ -52,8 +52,8 @@ const equalHandler: IRelationHandler = (
   result: IRegionResult,
 ) => {
   const fuzzyRegion = Topology.bufferOfDistance(origin, 1)
-  const region = Topology.intersection(fuzzyRegion, result.region!)
-  const pdf: IRegionPDF = {
+  const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
+  const topologyPDF: IRegionPDF = {
     type: 0,
     origin: origin.getCenter(),
     distance: null,
@@ -62,7 +62,7 @@ const equalHandler: IRelationHandler = (
     azimuthDelta: null,
   }
 
-  return { region, pdf }
+  return { topologyRegion, topologyPDF }
 }
 
 const containHandler: IRelationHandler = (
@@ -77,8 +77,8 @@ const containHandler: IRelationHandler = (
   )
 
   const fuzzyRegion = Topology.bufferOfDistance(origin, length * DISTANCE_DELTA)
-  const region = Topology.intersection(fuzzyRegion, result.region!)
-  const pdf: IRegionPDF = {
+  const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
+  const topologyPDF: IRegionPDF = {
     type: 1,
     origin: origin.getCenter(),
     distance: 0,
@@ -87,7 +87,7 @@ const containHandler: IRelationHandler = (
     azimuthDelta: null,
   }
 
-  return { region, pdf }
+  return { topologyRegion, topologyPDF }
 }
 
 const intersectHandler: IRelationHandler = (
@@ -105,8 +105,8 @@ const intersectHandler: IRelationHandler = (
     origin,
     distance * DISTANCE_DELTA,
   )
-  const region = Topology.intersection(fuzzyRegion, result.region!)
-  const pdf: IRegionPDF = {
+  const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
+  const topologyPDF: IRegionPDF = {
     type: 1,
     origin: origin.getCenter(),
     distance: 0,
@@ -115,7 +115,7 @@ const intersectHandler: IRelationHandler = (
     azimuthDelta: null,
   }
 
-  return { region, pdf }
+  return { topologyRegion, topologyPDF }
 }
 
 const disjointHandler: IRelationHandler = (
@@ -131,8 +131,8 @@ const disjointHandler: IRelationHandler = (
 
   const buffer = Topology.bufferOfDistance(origin, distance * DISTANCE_DELTA)
   const fuzzyRegion = Topology.mask(MaxBBoxPolygon, buffer)
-  const region = Topology.intersection(fuzzyRegion, result.region!)
-  const pdf: IRegionPDF = {
+  const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
+  const topologyPDF: IRegionPDF = {
     type: 0,
     origin: origin.getCenter(),
     distance: null,
@@ -141,7 +141,7 @@ const disjointHandler: IRelationHandler = (
     azimuthDelta: null,
   }
 
-  return { region, pdf }
+  return { topologyRegion, topologyPDF }
 }
 
 export const regionHandlerOfTopology: IRegionHandler = (
@@ -159,9 +159,9 @@ export const regionHandlerOfTopology: IRegionHandler = (
     disjoint: disjointHandler,
   }
 
-  const { region, pdf } = map[topology](origin, target, result)
-  result.region = region
-  result.PDF[index] = pdf
+  const { topologyRegion, topologyPDF } = map[topology](origin, target, result)
+  result.region = topologyRegion
+  result.PDF[index] = topologyPDF
 }
 
 export const regionHandlerOfDirection: IRegionHandler = (
@@ -222,5 +222,14 @@ export const regionHandlerOfDistance: IRegionHandler = (
 //   result: IRegionResult,
 //   index: number,
 // ) => {
-//   //
+//   const topology = relation.topology as TopologyRelation
+//   const direction = relation.direction as AbsoluteDirection
+//   const map = {
+//     equal: equalHandler,
+//     contain: containHandler,
+//     intersect: intersectHandler,
+//     disjoint: disjointHandler,
+//   }
+//   const { topologyRegion, topologyPDF } = map[topology](origin, target, result)
+//   const fuzzyRegion = Direction.computeRegion(origin, direction)
 // }

@@ -122,19 +122,19 @@ export class Topology {
         units: 'meters',
       }),
     )
-    if (type === 'Point')
+
+    if (type === 'Point') {
       return GeolocusPointObject.fromGeoJSON(feature as Feature<Point>)
-    if (type === 'LineString')
+    } else if (type === 'LineString') {
       return GeolocusLineStringObject.fromGeoJSON(
         feature as Feature<LineString>,
       )
-    if (type === 'Polygon')
+    } else if (type === 'Polygon') {
       return GeolocusPolygonObject.fromGeoJSON(feature as Feature<Polygon>)
-    if (type === 'MultiPolygon')
+    } else {
       return GeolocusMultiPolygonObject.fromGeoJSON(
         feature as Feature<MultiPolygon>,
       )
-
-    throw new Error('Unknown type!')
+    }
   }
 }
