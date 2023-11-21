@@ -4,6 +4,7 @@ log/
 .vscode/
 doc/
 demo.ts
+example/
 
 # dependencies
 node_modules/

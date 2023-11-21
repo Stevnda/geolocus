@@ -12,7 +12,8 @@ import {
 import { Direction } from '../relation/direction'
 import { IRegionPDF, IRegionResult } from './region'
 
-export const DISTANCE_DELTA = 0.2
+export const DISTANCE_DELTA = 0.3
+export const DISTANCE_BUFFER = 1.5
 export const DIRECTION_PARAM: {
   [props in AbsoluteDirection]: [number, number]
 } = {
@@ -160,6 +161,27 @@ export const regionHandlerOfTopology: IRegionHandler = (
   result.PDF[index] = topologyPDF
 }
 
+export const regionHandlerOfDistance: IRegionHandler = (
+  origin: GeolocusObject,
+  relation: IGeoRelation,
+  target: GeolocusObject,
+  result: IRegionResult,
+  index: number,
+) => {
+  const distance = relation.distance as EuclideanDistance
+  const buffer = Topology.bufferOfDistance(origin, DISTANCE_BUFFER * distance)
+  result.region = Topology.intersection(result.region!, buffer)
+
+  result.PDF[index] = {
+    type: 1,
+    origin: origin.getCenter(),
+    distance,
+    distanceDelta: DISTANCE_DELTA * distance,
+    azimuth: null,
+    azimuthDelta: null,
+  }
+}
+
 export const regionHandlerOfDirection: IRegionHandler = (
   origin: GeolocusObject,
   relation: IGeoRelation,
@@ -178,27 +200,6 @@ export const regionHandlerOfDirection: IRegionHandler = (
     distanceDelta: null,
     azimuth: DIRECTION_PARAM[direction][0],
     azimuthDelta: DIRECTION_PARAM[direction][1],
-  }
-}
-
-export const regionHandlerOfDistance: IRegionHandler = (
-  origin: GeolocusObject,
-  relation: IGeoRelation,
-  target: GeolocusObject,
-  result: IRegionResult,
-  index: number,
-) => {
-  const distance = relation.distance as EuclideanDistance
-  const buffer = Topology.bufferOfDistance(origin, 1.5 * distance)
-  result.region = Topology.intersection(result.region!, buffer)
-
-  result.PDF[index] = {
-    type: 1,
-    origin: origin.getCenter(),
-    distance,
-    distanceDelta: DISTANCE_DELTA * distance,
-    azimuth: null,
-    azimuthDelta: null,
   }
 }
 
@@ -299,7 +300,14 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         region = Topology.intersection(directionRegion, topologyRegion)
       }
 
-      const pdf: IRegionPDF = topologyPDF
+      const pdf: IRegionPDF = {
+        type: 2,
+        origin: topologyPDF.origin,
+        distance: topologyPDF.distance,
+        distanceDelta: topologyPDF.distanceDelta,
+        azimuth: DIRECTION_PARAM[direction][0],
+        azimuthDelta: DIRECTION_PARAM[direction][1],
+      }
 
       return { region, pdf }
     },
@@ -331,7 +339,7 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   const fuzzyRegion = Direction.computeRegion(origin, direction)
 
   const distance = relation.distance as EuclideanDistance
-  const buffer = Topology.bufferOfDistance(origin, 1.5 * distance)
+  const buffer = Topology.bufferOfDistance(origin, DISTANCE_BUFFER * distance)
 
   const intersection = Topology.intersection(fuzzyRegion, buffer)
   result.region = Topology.intersection(intersection!, result.region!)
