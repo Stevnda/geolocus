@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Vector2 } from '../math'
+import { GeolocusContext } from '../meta/context'
 import { GeolocusObject, GeolocusPointObject, MaxBBoxPolygon } from '../object'
 import { GeolocusMultiPolygonObject } from '../object/object'
 import {
@@ -11,21 +12,6 @@ import {
 } from '../relation'
 import { Direction } from '../relation/direction'
 import { IRegionPDF, IRegionResult } from './region'
-
-export const DISTANCE_DELTA = 0.3
-export const DISTANCE_BUFFER = 1.5
-export const DIRECTION_PARAM: {
-  [props in AbsoluteDirection]: [number, number]
-} = {
-  N: [0, Math.PI / 2],
-  NE: [Math.PI / 4, Math.PI / 4],
-  E: [Math.PI / 2, Math.PI / 2],
-  SE: [(Math.PI / 4) * 3, Math.PI / 4],
-  S: [Math.PI, Math.PI / 2],
-  SW: [(Math.PI / 4) * 5, Math.PI / 4],
-  W: [(Math.PI / 2) * 3, Math.PI / 2],
-  NW: [(Math.PI / 4) * 7, Math.PI / 4],
-}
 
 export interface IRegionHandler {
   (
@@ -169,14 +155,17 @@ export const regionHandlerOfDistance: IRegionHandler = (
   index: number,
 ) => {
   const distance = relation.distance as EuclideanDistance
-  const buffer = Topology.bufferOfDistance(origin, DISTANCE_BUFFER * distance)
+  const buffer = Topology.bufferOfDistance(
+    origin,
+    (1 + GeolocusContext.DISTANCE_DELTA * 1.5) * distance,
+  )
   result.region = Topology.intersection(result.region!, buffer)
 
   result.PDF[index] = {
     type: 1,
     origin: origin.getCenter(),
     distance,
-    distanceDelta: DISTANCE_DELTA * distance,
+    distanceDelta: GeolocusContext.DISTANCE_DELTA * distance,
     azimuth: null,
     azimuthDelta: null,
   }
@@ -198,8 +187,8 @@ export const regionHandlerOfDirection: IRegionHandler = (
     origin: origin.getCenter(),
     distance: null,
     distanceDelta: null,
-    azimuth: DIRECTION_PARAM[direction][0],
-    azimuthDelta: DIRECTION_PARAM[direction][1],
+    azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
+    azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
   }
 }
 
@@ -236,7 +225,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
       const topologyDistanceDelta = topologyPDF.distanceDelta as number
       const distanceDelta =
-        DIRECTION_PARAM[direction][0] === 1
+        GeolocusContext.DIRECTION_PARAM[direction][0] === 1
           ? topologyDistanceDelta / Math.SQRT2
           : topologyDistanceDelta
       const pdf: IRegionPDF = {
@@ -244,8 +233,8 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         origin: topologyPDF.origin,
         distance: distanceDelta / 2,
         distanceDelta,
-        azimuth: DIRECTION_PARAM[direction][0],
-        azimuthDelta: DIRECTION_PARAM[direction][1],
+        azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
+        azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
       }
 
       return { region, pdf }
@@ -269,7 +258,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
       const topologyDistanceDelta = topologyPDF.distanceDelta as number
       const distanceDelta =
-        DIRECTION_PARAM[direction][0] === 1
+        GeolocusContext.DIRECTION_PARAM[direction][0] === 1
           ? topologyDistanceDelta / Math.SQRT2
           : topologyDistanceDelta
       const pdf: IRegionPDF = {
@@ -277,8 +266,8 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         origin: topologyPDF.origin,
         distance: distanceDelta / 2,
         distanceDelta,
-        azimuth: DIRECTION_PARAM[direction][0],
-        azimuthDelta: DIRECTION_PARAM[direction][1],
+        azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
+        azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
       }
 
       return { region, pdf }
@@ -305,8 +294,8 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         origin: topologyPDF.origin,
         distance: topologyPDF.distance,
         distanceDelta: topologyPDF.distanceDelta,
-        azimuth: DIRECTION_PARAM[direction][0],
-        azimuthDelta: DIRECTION_PARAM[direction][1],
+        azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
+        azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
       }
 
       return { region, pdf }
@@ -339,7 +328,10 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   const fuzzyRegion = Direction.computeRegion(origin, direction)
 
   const distance = relation.distance as EuclideanDistance
-  const buffer = Topology.bufferOfDistance(origin, DISTANCE_BUFFER * distance)
+  const buffer = Topology.bufferOfDistance(
+    origin,
+    (1 + GeolocusContext.DISTANCE_DELTA * 1.5) * distance,
+  )
 
   const intersection = Topology.intersection(fuzzyRegion, buffer)
   result.region = Topology.intersection(intersection!, result.region!)
@@ -348,9 +340,9 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
     type: 3,
     origin: origin.getCenter(),
     distance,
-    distanceDelta: DISTANCE_DELTA * distance,
-    azimuth: DIRECTION_PARAM[direction][0],
-    azimuthDelta: DIRECTION_PARAM[direction][1],
+    distanceDelta: GeolocusContext.DISTANCE_DELTA * distance,
+    azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
+    azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
   }
 }
 

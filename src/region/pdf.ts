@@ -80,7 +80,7 @@ export class RegionPDF {
     ]
     const radians = Vector2.angleTo(v1, v2)
 
-    return this.calculateNormalDistributionValue(radians, 0, delta / 3)
+    return this.calculateNormalDistributionValue(radians, 0, delta / 2)
   }
 
   static distanceAndAngle(
@@ -104,10 +104,10 @@ export class RegionPDF {
     return this.calculateBivariateNormalDistributionValue(
       x,
       distance,
-      deltaDistance / 3,
+      deltaDistance / 2,
       radians,
       0,
-      deltaAzimuth / 3,
+      deltaAzimuth / 2,
     )
   }
 

@@ -168,7 +168,7 @@ export class Region {
     const points: Position2[] = []
     for (let col = 0; col < gird.length; col++) {
       for (let row = 0; row < gird[0].length; row++) {
-        if (Compare.GT(gird[col][row], value)) {
+        if (Compare.GE(gird[col][row], value)) {
           points.push([col, row])
         }
       }
