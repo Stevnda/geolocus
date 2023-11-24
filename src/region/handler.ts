@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Vector2 } from '../math'
+import { Compare, Vector2 } from '../math'
 import { GeolocusContext } from '../meta/context'
 import { GeolocusObject, GeolocusPointObject, MaxBBoxPolygon } from '../object'
 import { GeolocusMultiPolygonObject } from '../object/object'
 import {
   AbsoluteDirection,
+  Direction,
   EuclideanDistance,
   IGeoRelation,
   Topology,
   TopologyRelation,
 } from '../relation'
-import { Direction } from '../relation/direction'
 import { IRegionPDF, IRegionResult } from './region'
 
 export interface IRegionHandler {
@@ -39,7 +39,7 @@ const equalHandler: IRelationHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
-  const fuzzyRegion = Topology.bufferOfDistance(origin, 1)
+  const fuzzyRegion = Topology.bufferOfDistance(origin, 0.1)
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
 
   const topologyPDF: IRegionPDF = {
@@ -59,7 +59,7 @@ const containHandler: IRelationHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
-  const fuzzyRegion = Topology.bufferOfDistance(origin, 1)
+  const fuzzyRegion = Topology.bufferOfDistance(origin, 0.1)
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
 
   const bbox = fuzzyRegion.getBBox()
@@ -68,7 +68,7 @@ const containHandler: IRelationHandler = (
     type: 1,
     origin: origin.getCenter(),
     distance: 0,
-    distanceDelta: length * 0.5,
+    distanceDelta: (length / 3) * 2,
     azimuth: null,
     azimuthDelta: null,
   }
@@ -82,10 +82,11 @@ const intersectHandler: IRelationHandler = (
   result: IRegionResult,
 ) => {
   const targetBBox = target.getBBox()
-  const targetLength = Vector2.distanceTo(
+  let targetLength = Vector2.distanceTo(
     [targetBBox[0], targetBBox[1]],
     [targetBBox[2], targetBBox[3]],
   )
+  if (Compare.LE(targetLength, 0.1)) targetLength = 0.1
   const fuzzyRegion = Topology.bufferOfDistance(origin, targetLength)
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
 
@@ -98,7 +99,7 @@ const intersectHandler: IRelationHandler = (
     type: 1,
     origin: origin.getCenter(),
     distance: 0,
-    distanceDelta: fuzzyLength * 0.5,
+    distanceDelta: (fuzzyLength / 3) * 2,
     azimuth: null,
     azimuthDelta: null,
   }
@@ -111,7 +112,7 @@ const disjointHandler: IRelationHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
-  const buffer = Topology.bufferOfDistance(origin, 1)
+  const buffer = Topology.bufferOfDistance(origin, 0.1)
   const fuzzyRegion = Topology.mask(MaxBBoxPolygon, buffer)
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
 
@@ -222,17 +223,23 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
       )
 
       const region = topologyRegion
+      const originCenter = origin.getCenter()
+      const directionRegion = Direction.computeRegion(
+        new GeolocusPointObject(originCenter),
+        direction,
+      )
+      const intersection = Topology.intersection(
+        Topology.bufferOfDistance(origin, 0.1),
+        directionRegion,
+      ) as GeolocusMultiPolygonObject
+      const targetCenter = intersection.getCenter()
 
       const topologyDistanceDelta = topologyPDF.distanceDelta as number
-      const distanceDelta =
-        GeolocusContext.DIRECTION_PARAM[direction][0] === 1
-          ? topologyDistanceDelta / Math.SQRT2
-          : topologyDistanceDelta
       const pdf: IRegionPDF = {
         type: 3,
-        origin: topologyPDF.origin,
-        distance: distanceDelta / 2,
-        distanceDelta,
+        origin: targetCenter,
+        distance: 0,
+        distanceDelta: topologyDistanceDelta,
         azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
         azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
       }
@@ -255,17 +262,18 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
       if (topologyRegion) {
         region = Topology.intersection(directionRegion, topologyRegion)
       }
+      const intersection = Topology.intersection(
+        Topology.bufferOfDistance(origin, 0.1),
+        directionRegion,
+      ) as GeolocusMultiPolygonObject
+      const targetCenter = intersection.getCenter()
 
       const topologyDistanceDelta = topologyPDF.distanceDelta as number
-      const distanceDelta =
-        GeolocusContext.DIRECTION_PARAM[direction][0] === 1
-          ? topologyDistanceDelta / Math.SQRT2
-          : topologyDistanceDelta
       const pdf: IRegionPDF = {
         type: 3,
-        origin: topologyPDF.origin,
-        distance: distanceDelta / 2,
-        distanceDelta,
+        origin: targetCenter,
+        distance: 0,
+        distanceDelta: topologyDistanceDelta,
         azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
         azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
       }

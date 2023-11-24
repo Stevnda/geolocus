@@ -47,7 +47,7 @@ export class Region {
   constructor(triples: IGeoTriple[]) {
     this._tuple = triples
     this._result = {
-      region: MaxBBoxPolygon.clone(),
+      region: null,
       PDF: [],
     }
   }
@@ -64,6 +64,11 @@ export class Region {
       8: regionHandlerOfTopologyAndDistance,
       10: regionHandlerOfDirectionAndDistance,
       11: regionHandlerOfAll,
+    }
+
+    this._result = {
+      region: MaxBBoxPolygon.clone(),
+      PDF: [],
     }
 
     const length = this._tuple.length
@@ -85,7 +90,7 @@ export class Region {
     }
   }
 
-  private getMembershipOfPoint(coord: Position2) {
+  getMembershipOfPoint(coord: Position2) {
     const pdf = this._result.PDF
     let value = 0
     const length = pdf.length
@@ -96,7 +101,7 @@ export class Region {
     return value
   }
 
-  private getMembershipGridOfBBox(bbox: BBox) {
+  getMembershipGridOfBBox(bbox: BBox) {
     const xStart = bbox[0]
     const xEnd = bbox[2]
     const dx = xEnd - xStart

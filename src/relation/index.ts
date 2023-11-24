@@ -1,4 +1,4 @@
-export { AbsoluteDirection, RelativeDirection } from './direction'
+export { AbsoluteDirection, Direction, RelativeDirection } from './direction'
 export {
   Distance,
   EuclideanDistance,

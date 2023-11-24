@@ -83,7 +83,7 @@ export class RegionPDF {
     return this.calculateNormalDistributionValue(radians, 0, delta / 2)
   }
 
-  static distanceAndAngle(
+  private static distanceAndAngle(
     origin: Position2,
     target: Position2,
     distance: number,

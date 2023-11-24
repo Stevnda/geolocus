@@ -93,18 +93,15 @@ export class Topology {
     )
   }
 
-  static bufferOfDistance = (geometry: GeolocusObject, distance: number) => {
+  static bufferOfDistance = (object: GeolocusObject, distance: number) => {
     return new GeolocusPolygonObject(
-      this.buffer(geometry, distance).geometry.coordinates as Position2[][],
+      this.buffer(object, distance).geometry.coordinates as Position2[][],
     )
   }
 
-  static bufferOfRange = (
-    geometry: GeolocusObject,
-    range: [number, number],
-  ) => {
-    const buffer0 = this.buffer(geometry, range[0])
-    const buffer1 = this.buffer(geometry, range[1])
+  static bufferOfRange = (object: GeolocusObject, range: [number, number]) => {
+    const buffer0 = this.buffer(object, range[0])
+    const buffer1 = this.buffer(object, range[1])
 
     const mask = turf.mask(buffer1, buffer0)
     return new GeolocusPolygonObject(mask.geometry.coordinates as Position2[][])
