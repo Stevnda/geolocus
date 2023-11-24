@@ -1,7 +1,3 @@
-import { AbsoluteDirection } from './direction'
-import { Distance } from './distance'
-import { TopologyRelation } from './topology'
-
 export { AbsoluteDirection, RelativeDirection } from './direction'
 export {
   Distance,
@@ -9,9 +5,5 @@ export {
   EuclideanDistanceRange,
   SemanticDistance,
 } from './distance'
+export { IGeoRelation } from './relation'
 export { Topology, TopologyRelation } from './topology'
-export interface IGeoRelation {
-  topology: TopologyRelation | null
-  direction: AbsoluteDirection | null
-  distance: Distance | null
-}
