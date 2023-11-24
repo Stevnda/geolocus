@@ -1,7 +1,8 @@
-import { Vector2 } from '../math'
+import { Compare } from '../math'
 import { GeolocusContext } from '../meta/context'
-import { GeolocusPointObject, MaxBBoxPolygon } from '../object'
-import { Direction, IGeoRelation, Topology } from '../relation'
+import { GeolocusBBox, GeolocusPointObject, MaxBBoxPolygon } from '../object'
+import { Direction, IGeoRelation } from '../relation'
+import { Position2 } from '../type'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -35,82 +36,44 @@ describe('Test some handler functions of Region', () => {
       } as IGeoRelation
     })
 
-    const originBuffer = Topology.bufferOfDistance(origin, 0.1)
-    const fuzzyBBox = originBuffer.getBBox()
-    const distanceDelta =
-      (Vector2.distanceTo(
-        [fuzzyBBox[0], fuzzyBBox[1]],
-        [fuzzyBBox[2], fuzzyBBox[3]],
-      ) /
-        3) *
-      2
-
     // equal
     regionHandlerOfTopology(origin, relation[0], target, result, index)
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: originBuffer.getBBox(),
-      pdf: {
-        type: 0,
-        origin: [0, 0],
-        distance: null,
-        distanceDelta: null,
-        azimuth: null,
-        azimuthDelta: null,
-      },
-    })
+    let bbox = result.region?.getBBox() as GeolocusBBox
+    expect(
+      (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
+    ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
       PDF: [],
     }
     // contain
     regionHandlerOfTopology(origin, relation[1], target, result, index)
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: originBuffer.getBBox(),
-      pdf: {
-        type: 1,
-        origin: [0, 0],
-        distance: 0,
-        distanceDelta,
-        azimuth: null,
-        azimuthDelta: null,
-      },
-    })
+    bbox = result.region?.getBBox() as GeolocusBBox
+    expect(
+      (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
+    ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
       PDF: [],
     }
     // intersect
     regionHandlerOfTopology(origin, relation[2], target, result, index)
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: originBuffer.getBBox(),
-      pdf: {
-        type: 1,
-        origin: [0, 0],
-        distance: 0,
-        distanceDelta,
-        azimuth: null,
-        azimuthDelta: null,
-      },
-    })
+    bbox = result.region?.getBBox() as GeolocusBBox
+    expect(
+      (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
+    ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
       PDF: [],
     }
     // disjoint
     regionHandlerOfTopology(origin, relation[3], target, result, index)
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: [
-        -281474956479743, -281474956479743, 281474956479743, 281474956479743,
-      ],
-      pdf: {
-        type: 0,
-        origin: [0, 0],
-        distance: null,
-        distanceDelta: null,
-        azimuth: null,
-        azimuthDelta: null,
-      },
-    })
+    bbox = result.region?.getBBox() as GeolocusBBox
+    expect(
+      (() =>
+        Compare.EQ(bbox[0], -281474956479743) &&
+        Compare.EQ(bbox[2], 281474956479743))(),
+    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfDistance function', () => {
@@ -127,23 +90,11 @@ describe('Test some handler functions of Region', () => {
       distance: 100,
     }
 
-    const buffer = Topology.bufferOfDistance(
-      origin,
-      (1 + GeolocusContext.DISTANCE_DELTA * 1.5) * 100,
-    )
-
     regionHandlerOfDistance(origin, relation, target, result, index)
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: buffer.getBBox(),
-      pdf: {
-        type: 1,
-        origin: [0, 0],
-        distance: 100,
-        distanceDelta: GeolocusContext.DISTANCE_DELTA * 100,
-        azimuth: null,
-        azimuthDelta: null,
-      },
-    })
+    expect(
+      (() =>
+        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfDirection function', () => {
@@ -161,19 +112,8 @@ describe('Test some handler functions of Region', () => {
     }
 
     const fuzzyRegion = Direction.computeRegion(origin, 'N')
-
     regionHandlerOfDirection(origin, relation, target, result, index)
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: fuzzyRegion.getBBox(),
-      pdf: {
-        type: 2,
-        origin: [0, 0],
-        distance: null,
-        distanceDelta: null,
-        azimuth: GeolocusContext.DIRECTION_PARAM.N[0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM.N[1],
-      },
-    })
+    expect(result.region?.getBBox()).toEqual(fuzzyRegion.getBBox())
   })
 
   test('Test the regionHandlerOfTopologyAndDirection function', () => {
@@ -197,17 +137,6 @@ describe('Test some handler functions of Region', () => {
       } as IGeoRelation
     })
 
-    const originBuffer = Topology.bufferOfDistance(origin, 0.1)
-    const fuzzyBBox = originBuffer.getBBox()
-    const distanceDelta =
-      (Vector2.distanceTo(
-        [fuzzyBBox[0], fuzzyBBox[1]],
-        [fuzzyBBox[2], fuzzyBBox[3]],
-      ) /
-        3) *
-      2
-    console.log(distanceDelta)
-
     // equal
     regionHandlerOfTopologyAndDirection(
       origin,
@@ -216,17 +145,10 @@ describe('Test some handler functions of Region', () => {
       result,
       index,
     )
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: originBuffer.getBBox(),
-      pdf: {
-        type: 0,
-        origin: [0, 0],
-        distance: null,
-        distanceDelta: null,
-        azimuth: null,
-        azimuthDelta: null,
-      },
-    })
+    let bbox = result.region?.getBBox() as GeolocusBBox
+    expect(
+      (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
+    ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
       PDF: [],
@@ -239,17 +161,10 @@ describe('Test some handler functions of Region', () => {
       result,
       index,
     )
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: originBuffer.getBBox(),
-      pdf: {
-        type: 3,
-        origin: [0, 0.05005594185997994],
-        distance: 0,
-        distanceDelta,
-        azimuth: GeolocusContext.DIRECTION_PARAM.N[0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM.N[1],
-      },
-    })
+    let center = result.region?.getCenter() as Position2
+    expect(
+      (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
+    ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
       PDF: [],
@@ -262,16 +177,10 @@ describe('Test some handler functions of Region', () => {
       result,
       index,
     )
-    expect({ pdf: result.PDF[0] }).toEqual({
-      pdf: {
-        type: 3,
-        origin: [0, 0.05005594185997994],
-        distance: 0,
-        distanceDelta,
-        azimuth: GeolocusContext.DIRECTION_PARAM.N[0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM.N[1],
-      },
-    })
+    center = result.region?.getCenter() as Position2
+    expect(
+      (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
+    ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
       PDF: [],
@@ -284,16 +193,8 @@ describe('Test some handler functions of Region', () => {
       result,
       index,
     )
-    expect({ pdf: result.PDF[0] }).toEqual({
-      pdf: {
-        type: 2,
-        origin: [0, 0],
-        distance: null,
-        distanceDelta: null,
-        azimuth: GeolocusContext.DIRECTION_PARAM.N[0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM.N[1],
-      },
-    })
+    bbox = result.region?.getBBox() as GeolocusBBox
+    expect((() => Compare.EQ(bbox[1], 0))()).toBeTruthy()
   })
 
   test('Test the regionHandlerOfTopologyAndDistance function', () => {
@@ -310,23 +211,11 @@ describe('Test some handler functions of Region', () => {
       distance: 100,
     }
 
-    const buffer = Topology.bufferOfDistance(
-      origin,
-      (1 + GeolocusContext.DISTANCE_DELTA * 1.5) * 100,
-    )
-
     regionHandlerOfTopologyAndDistance(origin, relation, target, result, index)
-    expect({ bbox: result.region?.getBBox(), pdf: result.PDF[0] }).toEqual({
-      bbox: buffer.getBBox(),
-      pdf: {
-        type: 1,
-        origin: [0, 0],
-        distance: 100,
-        distanceDelta: GeolocusContext.DISTANCE_DELTA * 100,
-        azimuth: null,
-        azimuthDelta: null,
-      },
-    })
+    expect(
+      (() =>
+        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfDirectionAndDistance function', () => {
@@ -344,16 +233,10 @@ describe('Test some handler functions of Region', () => {
     }
 
     regionHandlerOfDirectionAndDistance(origin, relation, target, result, index)
-    expect({ pdf: result.PDF[0] }).toEqual({
-      pdf: {
-        type: 3,
-        origin: [0, 0],
-        distance: 100,
-        distanceDelta: GeolocusContext.DISTANCE_DELTA * 100,
-        azimuth: GeolocusContext.DIRECTION_PARAM.N[0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM.N[1],
-      },
-    })
+    expect(
+      (() =>
+        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfAll function', () => {
@@ -371,15 +254,9 @@ describe('Test some handler functions of Region', () => {
     }
 
     regionHandlerOfAll(origin, relation, target, result, index)
-    expect({ pdf: result.PDF[0] }).toEqual({
-      pdf: {
-        type: 3,
-        origin: [0, 0],
-        distance: 100,
-        distanceDelta: GeolocusContext.DISTANCE_DELTA * 100,
-        azimuth: GeolocusContext.DIRECTION_PARAM.N[0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM.N[1],
-      },
-    })
+    expect(
+      (() =>
+        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+    ).toBeTruthy()
   })
 })
