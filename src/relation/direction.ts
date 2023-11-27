@@ -1,25 +1,6 @@
 import { GEO_MAX_VALUE } from '../math'
-import { GeolocusBBox, GeolocusObject, GeolocusPolygonObject } from '../object'
-
-export type AbsoluteDirection =
-  | 'N'
-  | 'NE'
-  | 'E'
-  | 'SE'
-  | 'S'
-  | 'SW'
-  | 'W'
-  | 'NW'
-
-export type RelativeDirection =
-  | 'F'
-  | 'FR'
-  | 'R'
-  | 'BR'
-  | 'B'
-  | 'BL'
-  | 'L'
-  | 'FL'
+import { GeolocusObject, GeolocusPolygonObject } from '../object'
+import { GeolocusBBox } from '../type'
 
 export class Direction {
   static computeRegion = (object: GeolocusObject, direction: string) => {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GeolocusBBox } from '../object'
+import { GeolocusBBox } from '../type'
 import { GeoJSON } from './geoJSON'
 import {
   GeolocusLineStringObject,

@@ -1,24 +1,9 @@
 import crypto from 'crypto'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
-import { GeolocusBBox } from '.'
-import { Position2 } from '../type'
+import { GEO_MAX_VALUE } from '../math'
+import { GeolocusBBox, Position2 } from '../type'
 import { GeoJSON } from './geoJSON'
-
-interface IGeolocusObject {
-  getUUID(): string
-  getType(): 'Point' | 'LineString' | 'Polygon' | 'MultiPolygon'
-  getVertex(): Position2 | Position2[] | Position2[][] | Position2[][][]
-  getBBox(): GeolocusBBox
-  getCenter(): Position2
-  getGeoJSON(): Feature
-  clone(): GeolocusObject
-}
-
-export type GeolocusObject =
-  | GeolocusPointObject
-  | GeolocusLineStringObject
-  | GeolocusPolygonObject
-  | GeolocusMultiPolygonObject
+import { IGeolocusObject } from './object.type'
 
 export class GeolocusPointObject implements IGeolocusObject {
   private _type: 'Point'
@@ -299,3 +284,10 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
     }
   }
 }
+
+export const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+  -GEO_MAX_VALUE,
+  -GEO_MAX_VALUE,
+  GEO_MAX_VALUE,
+  GEO_MAX_VALUE,
+])

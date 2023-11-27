@@ -7,7 +7,7 @@ import {
   GeolocusMultiPolygonObject,
   GeolocusPointObject,
 } from '../object/object'
-import { Position2 } from '../type'
+import { EuclideanDistance, EuclideanDistanceRange, Position2 } from '../type'
 
 export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
 // | 'within'
@@ -84,7 +84,10 @@ export class Topology {
     return new GeolocusMultiPolygonObject(intersection as Position2[][][])
   }
 
-  private static buffer = (object: GeolocusObject, distance: number) => {
+  private static buffer = (
+    object: GeolocusObject,
+    distance: EuclideanDistance,
+  ) => {
     const converted = turf.toWgs84(object.getGeoJSON())
     return turf.toMercator(
       turf.buffer(converted, distance, {
@@ -93,13 +96,19 @@ export class Topology {
     )
   }
 
-  static bufferOfDistance = (object: GeolocusObject, distance: number) => {
+  static bufferOfDistance = (
+    object: GeolocusObject,
+    distance: EuclideanDistance,
+  ) => {
     return new GeolocusPolygonObject(
       this.buffer(object, distance).geometry.coordinates as Position2[][],
     )
   }
 
-  static bufferOfRange = (object: GeolocusObject, range: [number, number]) => {
+  static bufferOfRange = (
+    object: GeolocusObject,
+    range: EuclideanDistanceRange,
+  ) => {
     const buffer0 = this.buffer(object, range[0])
     const buffer1 = this.buffer(object, range[1])
 
@@ -109,7 +118,7 @@ export class Topology {
 
   static transformTranslate(
     object: GeolocusObject,
-    distance: number,
+    distance: EuclideanDistance,
     direction: number,
   ): GeolocusObject {
     const type = object.getType()

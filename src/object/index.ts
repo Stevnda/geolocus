@@ -1,8 +1,9 @@
-export { MaxBBoxPolygon } from './constant'
 export {
   GeolocusLineStringObject,
-  GeolocusObject,
+  GeolocusMultiPolygonObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
+  MaxBBoxPolygon,
 } from './object'
-export { GeolocusBBox } from './type'
+
+export { GeolocusObject } from './object.type'

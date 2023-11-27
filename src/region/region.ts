@@ -1,13 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { BBox } from 'geojson'
 import { Compare } from '../math'
-import {
-  GeolocusObject,
-  GeolocusPolygonObject,
-  MaxBBoxPolygon,
-} from '../object'
-import { GeolocusMultiPolygonObject } from '../object/object'
-import { IGeoRelation } from '../relation'
+import { MaxBBoxPolygon } from '../object'
 import { Position2 } from '../type'
 import {
   regionHandlerOfAll,
@@ -19,26 +13,7 @@ import {
   regionHandlerOfTopologyAndDistance,
 } from './handler'
 import { RegionPDF } from './pdf'
-
-export interface IGeoTriple {
-  origin: GeolocusObject
-  relation: IGeoRelation
-  target: GeolocusObject
-}
-
-export interface IRegionPDF {
-  type: 0 | 1 | 2 | 3
-  origin: Position2
-  distance: number | null
-  distanceDelta: number | null
-  azimuth: number | null
-  azimuthDelta: number | null
-}
-
-export interface IRegionResult {
-  region: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
-  PDF: IRegionPDF[]
-}
+import { IGeoTriple, IRegionResult } from './type'
 
 export class Region {
   private _tuple: IGeoTriple[]

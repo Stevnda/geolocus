@@ -1,9 +1,3 @@
-export { AbsoluteDirection, Direction, RelativeDirection } from './direction'
-export {
-  Distance,
-  EuclideanDistance,
-  EuclideanDistanceRange,
-  SemanticDistance,
-} from './distance'
+export { Direction } from './direction'
 export { IGeoRelation } from './relation'
 export { Topology, TopologyRelation } from './topology'

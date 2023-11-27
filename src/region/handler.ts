@@ -1,42 +1,21 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { GeolocusContext } from '../context/context'
 import { Compare, Vector2 } from '../math'
-import { GeolocusContext } from '../meta/context'
 import { GeolocusObject, GeolocusPointObject, MaxBBoxPolygon } from '../object'
+import { GeolocusMultiPolygonObject } from '../object/object'
 import {
-  GeolocusMultiPolygonObject,
-  GeolocusPolygonObject,
-} from '../object/object'
-import {
-  AbsoluteDirection,
   Direction,
-  EuclideanDistance,
   IGeoRelation,
   Topology,
   TopologyRelation,
 } from '../relation'
-import { IRegionPDF, IRegionResult } from './region'
-
-export interface IRegionHandler {
-  (
-    origin: GeolocusObject,
-    relation: IGeoRelation,
-    target: GeolocusObject,
-    result: IRegionResult,
-    index: number,
-  ): void
-}
-
-export interface IRelationHandler {
-  (
-    origin: GeolocusObject,
-    target: GeolocusObject,
-    result: IRegionResult,
-  ): {
-    topologyRegion: IRegionResult['region']
-    topologyPDF: IRegionPDF
-    fuzzyRegion: GeolocusPolygonObject
-  }
-}
+import { AbsoluteDirection, EuclideanDistance } from '../type'
+import {
+  IRegionHandler,
+  IRegionPDF,
+  IRegionResult,
+  IRelationHandler,
+} from './type'
 
 const equalHandler: IRelationHandler = (
   origin: GeolocusObject,
