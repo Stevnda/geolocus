@@ -1,59 +1,76 @@
-import { IRoute } from './type'
-
-export class Route implements IRoute {
-  private _parent: Set<string>
-  private _children: Set<string>
+export class Route {
+  private _graph: Map<string, Set<string>>
 
   constructor() {
-    this._parent = new Set()
-    this._children = new Set()
+    this._graph = new Map()
   }
 
-  setParent(value: Set<string>): void {
-    this._parent = value
+  getGraph() {
+    return this._graph
   }
 
-  getParent(): Set<string> {
-    return this._parent
+  getVertexCount() {
+    return this._graph.size
   }
 
-  addParent(geoObjectUUID: string): void {
-    this._parent.add(geoObjectUUID)
+  addVertex(parent: string) {
+    const children = this._graph.get(parent)
+    if (!children) {
+      const children = new Set([])
+      this._graph.set(parent, children)
+    }
   }
 
-  deleteParent(geoObjectUUID: string): boolean {
-    return this._parent.delete(geoObjectUUID)
+  addEdge(parent: string, child: string) {
+    const children = this._graph.get(parent)
+    if (!children) {
+      const children = new Set([child])
+      this._graph.set(parent, children)
+    } else {
+      children.add(child)
+    }
+    this.addVertex(child)
   }
 
-  clearParent(): void {
-    this._parent.clear()
-  }
+  topologicalSort() {
+    // generate inDegree of graph
+    const inDegree: Record<string, number> = {}
+    for (const key of this._graph.keys()) {
+      inDegree[key] = 0
+    }
+    for (const key of this._graph.keys()) {
+      const children = this._graph.get(key)
+      if (children) {
+        for (const child of children) {
+          inDegree[child] += 1
+        }
+      }
+    }
 
-  isParentOf(geoObjectUUID: string): boolean {
-    return this._children.has(geoObjectUUID)
-  }
+    // traversal the node that its inDegree is 0
+    const queue: string[] = []
+    for (const node in inDegree) {
+      if (inDegree[node] === 0) {
+        queue.push(node)
+      }
+    }
 
-  setChildren(value: Set<string>): void {
-    this._children = value
-  }
+    // topological sort
+    const result: string[] = []
+    while (queue.length > 0) {
+      const node = queue.shift() as string
+      result.push(node)
+      const children = this._graph.get(node)
+      if (children) {
+        for (const child of children) {
+          inDegree[child] -= 1
+          if (inDegree[child] === 0) {
+            queue.push(child)
+          }
+        }
+      }
+    }
 
-  getChildren(): Set<string> {
-    return this._children
-  }
-
-  addChildren(geoObjectUUID: string): void {
-    this._children.add(geoObjectUUID)
-  }
-
-  deleteChildren(geoObjectUUID: string): boolean {
-    return this._children.delete(geoObjectUUID)
-  }
-
-  clearChildren(): void {
-    this._children.clear()
-  }
-
-  isChildrenOf(geoObjectUUID: string): boolean {
-    return this._parent.has(geoObjectUUID)
+    return result
   }
 }

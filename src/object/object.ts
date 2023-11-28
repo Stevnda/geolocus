@@ -8,22 +8,21 @@ import { IGeolocusObject } from './object.type'
 export class GeolocusPointObject implements IGeolocusObject {
   private _type: 'Point'
   private _uuid: string
-  // private _route: Route
-  // private _group: Group
   private _geoJSON: Feature<Point>
   private _vertex: Position2
   private _bbox: GeolocusBBox
-  private _centerOfMass: Position2
+  private _center: Position2
 
   constructor(position: Position2) {
     this._type = 'Point'
     this._uuid = crypto.randomUUID()
-    // this._route = new Route()
-    // this._group = new Group()
     this._geoJSON = GeoJSON.point(position)
     this._vertex = position
     this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._centerOfMass = GeoJSON.centerOfMass(this._geoJSON)
+    this._center = [
+      (this._bbox[0] + this._bbox[2]) / 2,
+      (this._bbox[1] + this._bbox[3]) / 2,
+    ]
   }
 
   getUUID(): string {
@@ -43,8 +42,7 @@ export class GeolocusPointObject implements IGeolocusObject {
   }
 
   getCenter(): Position2 {
-    const bbox = this._bbox
-    return [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2]
+    return this._center
   }
 
   getGeoJSON(): Feature<Point> {
@@ -70,22 +68,19 @@ export class GeolocusPointObject implements IGeolocusObject {
 export class GeolocusLineStringObject implements IGeolocusObject {
   private _type: 'LineString'
   private _uuid: string
-  // private _route: Route
-  // private _group: Group
+
   private _geoJSON: Feature<LineString>
   private _vertex: Position2[]
   private _bbox: GeolocusBBox
-  private _centerOfMass: Position2
+  private _center: Position2
 
   constructor(position: Position2[]) {
     this._type = 'LineString'
     this._uuid = crypto.randomUUID()
-    // this._route = new Route()
-    // this._group = new Group()
     this._geoJSON = GeoJSON.lineString(position)
     this._vertex = position
     this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._centerOfMass = GeoJSON.centerOfMass(this._geoJSON)
+    this._center = GeoJSON.centerOfMass(this._geoJSON)
   }
 
   getUUID(): string {
@@ -105,8 +100,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
   }
 
   getCenter(): Position2 {
-    const bbox = this._bbox
-    return [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2]
+    return this._center
   }
 
   getGeoJSON(): Feature<LineString> {
@@ -134,22 +128,19 @@ export class GeolocusLineStringObject implements IGeolocusObject {
 export class GeolocusPolygonObject implements IGeolocusObject {
   private _type: 'Polygon'
   private _uuid: string
-  // private _route: Route
-  // private _group: Group
+
   private _geoJSON: Feature<Polygon>
   private _vertex: Position2[][]
   private _bbox: GeolocusBBox
-  private _centerOfMass: Position2
+  private _center: Position2
 
   constructor(position: Position2[][]) {
     this._type = 'Polygon'
     this._uuid = crypto.randomUUID()
-    // this._route = new Route()
-    // this._group = new Group()
     this._geoJSON = GeoJSON.polygon(position)
     this._vertex = position
     this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._centerOfMass = GeoJSON.centerOfMass(this._geoJSON)
+    this._center = GeoJSON.centerOfMass(this._geoJSON)
   }
 
   getUUID(): string {
@@ -169,8 +160,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
   }
 
   getCenter(): Position2 {
-    const bbox = this._bbox
-    return [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2]
+    return this._center
   }
 
   getGeoJSON(): Feature<Polygon> {
@@ -209,22 +199,18 @@ export class GeolocusPolygonObject implements IGeolocusObject {
 export class GeolocusMultiPolygonObject implements IGeolocusObject {
   private _type: 'MultiPolygon'
   private _uuid: string
-  // private _route: Route
-  // private _group: Group
   private _geoJSON: Feature<MultiPolygon>
   private _vertex: Position2[][][]
   private _bbox: GeolocusBBox
-  private _centerOfMass: Position2
+  private _center: Position2
 
   constructor(position: Position2[][][]) {
     this._type = 'MultiPolygon'
     this._uuid = crypto.randomUUID()
-    // this._route = new Route()
-    // this._group = new Group()
     this._geoJSON = GeoJSON.multiPolygon(position)
     this._vertex = position
     this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._centerOfMass = GeoJSON.centerOfMass(this._geoJSON)
+    this._center = GeoJSON.centerOfMass(this._geoJSON)
   }
 
   getUUID(): string {
@@ -244,8 +230,7 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
   }
 
   getCenter(): Position2 {
-    const bbox = this._bbox
-    return [(bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2]
+    return this._center
   }
 
   getGeoJSON(): Feature<MultiPolygon> {
