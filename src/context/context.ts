@@ -1,4 +1,5 @@
-import { AbsoluteDirection } from '../relation'
+import { GEO_MAX_VALUE } from '../math'
+import { AbsoluteDirection } from '../type'
 
 export class GeolocusContext {
   static DISTANCE_DELTA = 0.2
@@ -14,6 +15,16 @@ export class GeolocusContext {
     W: [(Math.PI / 2) * 3, Math.PI / 3],
     NW: [(Math.PI / 4) * 7, Math.PI / 6],
   }
+
+  static SCALE = 5000
+  static SEMANTIC_DISTANCE_THRESHOLD = [
+    0,
+    1 / 6,
+    0.5,
+    1,
+    2,
+    GEO_MAX_VALUE / this.SCALE,
+  ]
 
   static setDistanceDelta(value: number) {
     this.DISTANCE_DELTA = value
@@ -37,5 +48,9 @@ export class GeolocusContext {
       W: [(Math.PI / 2) * 3, cardinalDirection],
       NW: [(Math.PI / 4) * 7, ordinalDirection],
     }
+  }
+
+  static setScale(value: number): void {
+    this.SCALE = value
   }
 }

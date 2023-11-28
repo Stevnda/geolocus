@@ -1,8 +1,15 @@
 import { GEO_MAX_VALUE } from '../math'
 import { GeolocusObject, GeolocusPolygonObject } from '../object'
-import { GeolocusBBox } from '../type'
+import { GeolocusBBox, Position2 } from '../type'
 
 export class Direction {
+  static azimuth(vector: Position2): number {
+    const angle =
+      (Math.PI / 2 - Math.atan2(vector[1], vector[0]) + 2 * Math.PI) %
+      (2 * Math.PI)
+    return angle
+  }
+
   static computeRegion = (object: GeolocusObject, direction: string) => {
     const map = new Map([
       ['n', this.north],

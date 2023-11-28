@@ -1,4 +1,4 @@
-import { IRoute } from './context.type'
+import { IRoute } from './type'
 
 export class Route implements IRoute {
   private _parent: Set<string>

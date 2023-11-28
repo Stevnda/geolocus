@@ -1,8 +1,19 @@
-import { GEO_MAX_VALUE } from '../math'
+import { Compare, GEO_MAX_VALUE } from '../math'
 import { GeolocusPolygonObject } from '../object'
+import { Position2 } from '../type'
 import { Direction } from './direction'
 
 describe('Test the Direction class', () => {
+  test('Computes the azimuth of vector', () => {
+    const v1: Position2 = [1, 0]
+    const v2: Position2 = [-1, 1]
+
+    const result1 = Direction.azimuth(v1)
+    const result2 = Direction.azimuth(v2)
+    expect(() => Compare.EQ(result1, 0)).toBeTruthy()
+    expect(() => Compare.EQ(result2, (Math.PI / 4) * 7)).toBeTruthy()
+  })
+
   test('Return the region by direction', () => {
     const object = GeolocusPolygonObject.fromBBox([0, 0, 1, 1])
     const region0 = Direction.computeRegion(object, 'ne')

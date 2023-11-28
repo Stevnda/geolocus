@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { BBox } from 'geojson'
 import { Compare } from '../math'
 import { MaxBBoxPolygon } from '../object'
@@ -114,7 +113,6 @@ export class Region {
     if (!region) {
       throw new Error('The fuzzy region is null.')
     }
-
     const bbox = region.getBBox()
     const length = this._tuple.length
     for (let index = 0; index < length; index++) {
@@ -126,8 +124,10 @@ export class Region {
       if (originBBox[3] > bbox[3]) bbox[3] = originBBox[3]
     }
 
+    const gird = this.getMembershipGridOfBBox(bbox)
+
     return {
-      gird: this.getMembershipGridOfBBox(bbox),
+      gird,
       bbox,
     }
   }

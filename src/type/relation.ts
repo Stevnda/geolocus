@@ -1,6 +1,6 @@
 export type EuclideanDistance = number
 export type EuclideanDistanceRange = [number, number]
-export type SemanticDistance = 'v'
+export type SemanticDistance = 'VN' | 'N' | 'M' | 'F' | 'VF'
 export type AbsoluteDirection =
   | 'N'
   | 'NE'

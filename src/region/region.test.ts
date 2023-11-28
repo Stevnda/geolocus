@@ -1,6 +1,7 @@
 import { Compare } from '../math'
 import { GeolocusPointObject } from '../object'
-import { IGeoTriple, Region } from './region'
+import { Region } from './region'
+import { IGeoTriple } from './type'
 
 describe('Test the Region class', () => {
   test('Compute the result property of Region class', () => {
@@ -92,24 +93,24 @@ describe('Test the Region class', () => {
       origin: origin0,
       relation: {
         direction: 'NE',
-        distance: 100,
+        distance: 70,
         topology: 'disjoint',
       },
       target: target0,
     }
-    const origin1 = new GeolocusPointObject([-70, 0])
+    const origin1 = new GeolocusPointObject([100, 100])
     const target1 = new GeolocusPointObject([0, 0])
     const triple1: IGeoTriple = {
       origin: origin1,
       relation: {
-        direction: 'W',
-        distance: 100,
+        direction: 'SW',
+        distance: 70,
         topology: 'disjoint',
       },
       target: target1,
     }
 
-    const region0 = new Region([triple0])
+    const region0 = new Region([triple0, triple1])
     region0.computeResult()
     expect(region0.getMembershipGridOfRegion())
 
@@ -131,9 +132,10 @@ describe('Test the Region class', () => {
     }
 
     const region0 = new Region([triple0])
-    expect(() => region0.getCoordOfMaxMembershipValue([[]], 0.99)).toThrow()
+    expect(() => region0.getCoordOfMaxMembershipValue([[]])).toThrow()
     region0.computeResult()
     const result = region0.getMembershipGridOfRegion()
-    expect(region0.getCoordOfMaxMembershipValue(result.gird, 0.99))
+    const values = region0.getCoordOfMaxMembershipValue(result.gird, 0.99)
+    expect(values)
   })
 })

@@ -43,16 +43,6 @@ describe('Test Vector2 Class', () => {
     expect(Vector2.angleTo(v1, v3)).toBe(Math.PI / 2)
   })
 
-  test('Computes the azimuth of vector', () => {
-    const v1: Position2 = [1, 0]
-    const v2: Position2 = [-1, 1]
-
-    const result1 = Vector2.azimuth(v1)
-    const result2 = Vector2.azimuth(v2)
-    expect(() => Compare.EQ(result1, 0)).toBeTruthy()
-    expect(() => Compare.EQ(result2, (Math.PI / 4) * 7)).toBeTruthy()
-  })
-
   test('Return the square of the length of Vector2 instances', () => {
     const v1: Position2 = [2, 0]
     expect(Vector2.lengthSquare(v1)).toBe(4)
