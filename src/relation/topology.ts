@@ -9,10 +9,6 @@ import {
 } from '../object/object'
 import { EuclideanDistance, EuclideanDistanceRange, Position2 } from '../type'
 
-export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
-// | 'within'
-// | 'touch'
-
 export class Topology {
   static isEqual = (geoObject0: GeolocusObject, geoObject1: GeolocusObject) => {
     return turf.booleanEqual(geoObject0.getGeoJSON(), geoObject1.getGeoJSON())

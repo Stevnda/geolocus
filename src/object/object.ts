@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
-import { GEO_MAX_VALUE } from '../math'
+import { GeolocusContext } from '../context'
 import { GeolocusBBox, Position2 } from '../type'
 import { GeoJSON } from './geoJSON'
 import { IGeolocusObject } from './object.type'
@@ -23,6 +23,7 @@ export class GeolocusPointObject implements IGeolocusObject {
       (this._bbox[0] + this._bbox[2]) / 2,
       (this._bbox[1] + this._bbox[3]) / 2,
     ]
+    GeolocusContext.OBJECT.set(this._uuid, this)
   }
 
   getUUID(): string {
@@ -81,6 +82,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     this._vertex = position
     this._bbox = GeoJSON.bbox(this._geoJSON)
     this._center = GeoJSON.centerOfMass(this._geoJSON)
+    GeolocusContext.OBJECT.set(this._uuid, this)
   }
 
   getUUID(): string {
@@ -128,7 +130,6 @@ export class GeolocusLineStringObject implements IGeolocusObject {
 export class GeolocusPolygonObject implements IGeolocusObject {
   private _type: 'Polygon'
   private _uuid: string
-
   private _geoJSON: Feature<Polygon>
   private _vertex: Position2[][]
   private _bbox: GeolocusBBox
@@ -141,6 +142,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     this._vertex = position
     this._bbox = GeoJSON.bbox(this._geoJSON)
     this._center = GeoJSON.centerOfMass(this._geoJSON)
+    GeolocusContext.OBJECT.set(this._uuid, this)
   }
 
   getUUID(): string {
@@ -211,6 +213,7 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
     this._vertex = position
     this._bbox = GeoJSON.bbox(this._geoJSON)
     this._center = GeoJSON.centerOfMass(this._geoJSON)
+    GeolocusContext.OBJECT.set(this._uuid, this)
   }
 
   getUUID(): string {
@@ -269,10 +272,3 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
     }
   }
 }
-
-export const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
-  -GEO_MAX_VALUE,
-  -GEO_MAX_VALUE,
-  GEO_MAX_VALUE,
-  GEO_MAX_VALUE,
-])

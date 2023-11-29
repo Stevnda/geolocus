@@ -1,7 +1,8 @@
 import { BBox } from 'geojson'
-import { Compare } from '../math'
-import { MaxBBoxPolygon } from '../object'
-import { Position2 } from '../type'
+import { GeolocusContext } from '../context'
+import { Compare, GEO_MAX_VALUE } from '../math'
+import { GeolocusObject, GeolocusPolygonObject } from '../object'
+import { GeolocusBBox, IGeoTriple, Position2 } from '../type'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -12,7 +13,7 @@ import {
   regionHandlerOfTopologyAndDistance,
 } from './handler'
 import { RegionPDF } from './pdf'
-import { IGeoTriple, IRegionResult } from './type'
+import { IRegionResult } from './region.type'
 
 export class Region {
   private _tuple: IGeoTriple[]
@@ -41,7 +42,12 @@ export class Region {
     }
 
     this._result = {
-      region: MaxBBoxPolygon.clone(),
+      region: GeolocusPolygonObject.fromBBox([
+        -GEO_MAX_VALUE,
+        -GEO_MAX_VALUE,
+        GEO_MAX_VALUE,
+        GEO_MAX_VALUE,
+      ]),
       PDF: [],
     }
 
@@ -49,15 +55,14 @@ export class Region {
     for (let index = 0; index < length; index++) {
       const triple = this._tuple[index]
       const relation = triple.relation
-      const origin = triple.origin
-      const target = triple.target
+      const origin = GeolocusContext.OBJECT.get(triple.origin) as GeolocusObject
+      const target = GeolocusContext.OBJECT.get(triple.target) as GeolocusObject
       const topologyTag = relation.topology ? 1 : 0
       const directionTag = relation.direction ? 3 : 0
       const distanceTag = relation.distance ? 7 : 0
       const tag = (topologyTag + directionTag + distanceTag) as keyof typeof map
 
       map[tag](origin, relation, target, this._result, index)
-
       if (!this._result.region) {
         throw new Error("Can't compute the fuzzy region.")
       }
@@ -117,7 +122,9 @@ export class Region {
     const length = this._tuple.length
     for (let index = 0; index < length; index++) {
       const triple = this._tuple[index]
-      const originBBox = triple.origin.getBBox()
+      const originBBox = GeolocusContext.OBJECT.get(
+        triple.origin,
+      )?.getBBox() as GeolocusBBox
       if (originBBox[0] < bbox[0]) bbox[0] = originBBox[0]
       if (originBBox[1] < bbox[1]) bbox[1] = originBBox[1]
       if (originBBox[2] > bbox[2]) bbox[2] = originBBox[2]

@@ -1,8 +1,8 @@
-import { GeolocusContext } from '../context/context'
-import { Compare } from '../math'
-import { GeolocusPointObject, MaxBBoxPolygon } from '../object'
-import { Direction, IGeoRelation } from '../relation'
-import { GeolocusBBox, Position2 } from '../type'
+import { GeolocusContext } from '../context'
+import { Compare, GEO_MAX_VALUE } from '../math'
+import { GeolocusPointObject, GeolocusPolygonObject } from '../object'
+import { Direction } from '../relation'
+import { GeolocusBBox, IGeoRelation, Position2 } from '../type'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -12,10 +12,16 @@ import {
   regionHandlerOfTopologyAndDirection,
   regionHandlerOfTopologyAndDistance,
 } from './handler'
-import { IRegionResult } from './type'
+import { IRegionResult } from './region.type'
 
 describe('Test some handler functions of Region', () => {
   test('Test the regionHandlerOfTopology function', () => {
+    const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ])
     const origin = new GeolocusPointObject([0, 0])
     const target = new GeolocusPointObject([0, 0])
     let result: IRegionResult = {
@@ -77,6 +83,12 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfDistance function', () => {
+    const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ])
     const origin = new GeolocusPointObject([0, 0])
     const target = new GeolocusPointObject([0, 0])
     const result: IRegionResult = {
@@ -98,6 +110,12 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfDirection function', () => {
+    const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ])
     const origin = new GeolocusPointObject([0, 0])
     const target = new GeolocusPointObject([0, 0])
     const result: IRegionResult = {
@@ -117,6 +135,12 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfTopologyAndDirection function', () => {
+    const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ])
     const origin = new GeolocusPointObject([0, 0])
     const target = new GeolocusPointObject([0, 0])
     let result: IRegionResult = {
@@ -198,6 +222,12 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfTopologyAndDistance function', () => {
+    const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ])
     const origin = new GeolocusPointObject([0, 0])
     const target = new GeolocusPointObject([0, 0])
     const result: IRegionResult = {
@@ -219,6 +249,12 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfDirectionAndDistance function', () => {
+    const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ])
     const origin = new GeolocusPointObject([0, 0])
     const target = new GeolocusPointObject([0, 0])
     const result: IRegionResult = {
@@ -240,6 +276,12 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfAll function', () => {
+    const MaxBBoxPolygon = GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ])
     const origin = new GeolocusPointObject([0, 0])
     const target = new GeolocusPointObject([0, 0])
     const result: IRegionResult = {

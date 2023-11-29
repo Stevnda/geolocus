@@ -1,42 +1,42 @@
 import { Compare } from '../math'
 import { GeolocusPointObject } from '../object'
+import { IGeoTriple } from '../type'
 import { Region } from './region'
-import { IGeoTriple } from './type'
 
 describe('Test the Region class', () => {
   test('Compute the result property of Region class', () => {
     const origin0 = new GeolocusPointObject([0, 0])
     const target0 = new GeolocusPointObject([0, 0])
     const triple0: IGeoTriple = {
-      origin: origin0,
+      origin: origin0.getUUID(),
       relation: {
         direction: 'NE',
         distance: 100,
         topology: 'disjoint',
       },
-      target: target0,
+      target: target0.getUUID(),
     }
     const origin1 = new GeolocusPointObject([-70, 0])
     const target1 = new GeolocusPointObject([0, 0])
     const triple1: IGeoTriple = {
-      origin: origin1,
+      origin: origin1.getUUID(),
       relation: {
         direction: 'W',
         distance: 100,
         topology: 'disjoint',
       },
-      target: target1,
+      target: target1.getUUID(),
     }
     const origin2 = new GeolocusPointObject([-70, 0])
     const target2 = new GeolocusPointObject([0, 0])
     const triple2: IGeoTriple = {
-      origin: origin2,
+      origin: origin2.getUUID(),
       relation: {
         direction: null,
         distance: null,
         topology: null,
       },
-      target: target2,
+      target: target2.getUUID(),
     }
 
     const region0 = new Region([triple0])
@@ -51,13 +51,13 @@ describe('Test the Region class', () => {
     const origin0 = new GeolocusPointObject([0, 0])
     const target0 = new GeolocusPointObject([0, 0])
     const triple0: IGeoTriple = {
-      origin: origin0,
+      origin: origin0.getUUID(),
       relation: {
         direction: 'NE',
         distance: 100,
         topology: 'disjoint',
       },
-      target: target0,
+      target: target0.getUUID(),
     }
     const region0 = new Region([triple0])
     region0.computeResult()
@@ -73,13 +73,13 @@ describe('Test the Region class', () => {
     const origin0 = new GeolocusPointObject([0, 0])
     const target0 = new GeolocusPointObject([0, 0])
     const triple0: IGeoTriple = {
-      origin: origin0,
+      origin: origin0.getUUID(),
       relation: {
         direction: 'NE',
         distance: 100,
         topology: 'disjoint',
       },
-      target: target0,
+      target: target0.getUUID(),
     }
     const region0 = new Region([triple0])
     region0.computeResult()
@@ -90,24 +90,24 @@ describe('Test the Region class', () => {
     const origin0 = new GeolocusPointObject([0, 0])
     const target0 = new GeolocusPointObject([0, 0])
     const triple0: IGeoTriple = {
-      origin: origin0,
+      origin: origin0.getUUID(),
       relation: {
         direction: 'NE',
         distance: 70,
         topology: 'disjoint',
       },
-      target: target0,
+      target: target0.getUUID(),
     }
     const origin1 = new GeolocusPointObject([100, 100])
     const target1 = new GeolocusPointObject([0, 0])
     const triple1: IGeoTriple = {
-      origin: origin1,
+      origin: origin1.getUUID(),
       relation: {
         direction: 'SW',
         distance: 70,
         topology: 'disjoint',
       },
-      target: target1,
+      target: target1.getUUID(),
     }
 
     const region0 = new Region([triple0, triple1])
@@ -122,13 +122,13 @@ describe('Test the Region class', () => {
     const origin0 = new GeolocusPointObject([0, 0])
     const target0 = new GeolocusPointObject([0, 0])
     const triple0: IGeoTriple = {
-      origin: origin0,
+      origin: origin0.getUUID(),
       relation: {
         direction: 'NE',
         distance: 100,
         topology: 'disjoint',
       },
-      target: target0,
+      target: target0.getUUID(),
     }
 
     const region0 = new Region([triple0])

@@ -3,8 +3,7 @@ import {
   GeolocusObject,
   GeolocusPolygonObject,
 } from '../object'
-import { IGeoRelation } from '../relation'
-import { Position2 } from '../type'
+import { IGeoRelation, Position2 } from '../type'
 
 export interface IRegionHandler {
   (
@@ -26,12 +25,6 @@ export interface IRelationHandler {
     topologyPDF: IRegionPDF
     fuzzyRegion: GeolocusPolygonObject
   }
-}
-
-export interface IGeoTriple {
-  origin: GeolocusObject
-  relation: IGeoRelation
-  target: GeolocusObject
 }
 
 export interface IRegionPDF {

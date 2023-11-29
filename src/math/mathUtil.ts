@@ -1,14 +1,5 @@
 export class Compare {
   private static _EPSILON = 0.000001
-
-  static get EPSILON() {
-    return this._EPSILON
-  }
-
-  static set EPSILON(value: number) {
-    this._EPSILON = value
-  }
-
   static EQ(x: number, y: number) {
     return x - y <= this._EPSILON && x - y >= -this._EPSILON
   }

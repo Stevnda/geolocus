@@ -1,21 +1,25 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext } from '../context/context'
-import { Compare, Vector2 } from '../math'
-import { GeolocusObject, GeolocusPointObject, MaxBBoxPolygon } from '../object'
-import { GeolocusMultiPolygonObject } from '../object/object'
+import { GeolocusContext } from '../context'
+import { Compare, GEO_MAX_VALUE, Vector2 } from '../math'
 import {
-  Direction,
+  GeolocusMultiPolygonObject,
+  GeolocusObject,
+  GeolocusPointObject,
+  GeolocusPolygonObject,
+} from '../object'
+import { Direction, Topology } from '../relation'
+import {
+  AbsoluteDirection,
+  EuclideanDistance,
   IGeoRelation,
-  Topology,
   TopologyRelation,
-} from '../relation'
-import { AbsoluteDirection, EuclideanDistance } from '../type'
+} from '../type'
 import {
   IRegionHandler,
   IRegionPDF,
   IRegionResult,
   IRelationHandler,
-} from './type'
+} from './region.type'
 
 const equalHandler: IRelationHandler = (
   origin: GeolocusObject,
@@ -96,7 +100,15 @@ const disjointHandler: IRelationHandler = (
   result: IRegionResult,
 ) => {
   const buffer = Topology.bufferOfDistance(origin, 0.05)
-  const fuzzyRegion = Topology.mask(MaxBBoxPolygon, buffer)
+  const fuzzyRegion = Topology.mask(
+    GeolocusPolygonObject.fromBBox([
+      -GEO_MAX_VALUE,
+      -GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ]),
+    buffer,
+  )
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
 
   const topologyPDF: IRegionPDF = {

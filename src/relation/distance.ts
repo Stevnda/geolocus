@@ -1,4 +1,4 @@
-import { GeolocusContext } from '../context/context'
+import { GeolocusContext } from '../context'
 import { EuclideanDistanceRange, SemanticDistance } from '../type'
 
 export class Distance {

@@ -19,3 +19,13 @@ export type RelativeDirection =
   | 'BL'
   | 'L'
   | 'FL'
+
+export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
+// | 'within'
+// | 'touch'
+
+export interface IGeoRelation {
+  topology: TopologyRelation | null
+  direction: AbsoluteDirection | null
+  distance: EuclideanDistance | EuclideanDistanceRange | null
+}

@@ -1,3 +1,4 @@
 export { Direction } from './direction'
-export { IGeoRelation } from './relation'
-export { Topology, TopologyRelation } from './topology'
+export { Distance } from './distance'
+export { Relation } from './relation'
+export { Topology } from './topology'
