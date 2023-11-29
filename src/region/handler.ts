@@ -19,7 +19,7 @@ import {
   IRegionPDF,
   IRegionResult,
   IRelationHandler,
-} from './region.type'
+} from './type'
 
 const equalHandler: IRelationHandler = (
   origin: GeolocusObject,

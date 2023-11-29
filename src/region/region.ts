@@ -13,7 +13,7 @@ import {
   regionHandlerOfTopologyAndDistance,
 } from './handler'
 import { RegionPDF } from './pdf'
-import { IRegionResult } from './region.type'
+import { IRegionResult } from './type'
 
 export class Region {
   private _tuple: IGeoTriple[]

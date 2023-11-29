@@ -1,7 +1,7 @@
-import { Compare } from '../math'
-import { GeolocusPointObject } from '../object'
-import { IGeoTriple } from '../type'
-import { Region } from './region'
+import { Compare } from '../../math'
+import { GeolocusPointObject } from '../../object'
+import { IGeoTriple } from '../../type'
+import { Region } from '../region'
 
 describe('Test the Region class', () => {
   test('Compute the result property of Region class', () => {

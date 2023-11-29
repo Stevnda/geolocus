@@ -1,7 +1,7 @@
-import { Compare, GEO_MAX_VALUE } from '../math'
-import { GeolocusPolygonObject } from '../object'
-import { Position2 } from '../type'
-import { Direction } from './direction'
+import { Compare, GEO_MAX_VALUE } from '../../math'
+import { GeolocusPolygonObject } from '../../object'
+import { Position2 } from '../../type'
+import { Direction } from '../direction'
 
 describe('Test the Direction class', () => {
   test('Computes the azimuth of vector', () => {

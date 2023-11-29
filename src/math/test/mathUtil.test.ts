@@ -1,4 +1,4 @@
-import { Compare, MathUtil } from './mathUtil'
+import { Compare, MathUtil } from '../mathUtil'
 
 /**
  * Test the Compare class

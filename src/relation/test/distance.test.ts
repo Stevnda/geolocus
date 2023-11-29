@@ -1,5 +1,5 @@
-import { GEO_MAX_VALUE } from '../math'
-import { Distance } from './distance'
+import { GEO_MAX_VALUE } from '../../math'
+import { Distance } from '../distance'
 
 describe('Test the Distance class', () => {
   test('SemanticDistance to EuclideanDistanceRange.', () => {

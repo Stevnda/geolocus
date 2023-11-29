@@ -1,4 +1,4 @@
-import { GeoJSON } from './geoJSON'
+import { GeoJSON } from '../geoJSON'
 
 describe('Test the GeoJSON class', () => {
   test('Return the GeoJSONPoint', () => {

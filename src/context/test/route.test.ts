@@ -1,4 +1,4 @@
-import { Route } from '.'
+import { Route } from '..'
 
 describe('Test the Route class', () => {
   test('return the graph of Route', () => {

@@ -3,7 +3,7 @@ import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
 import { GeolocusContext } from '../context'
 import { GeolocusBBox, Position2 } from '../type'
 import { GeoJSON } from './geoJSON'
-import { IGeolocusObject } from './object.type'
+import { IGeolocusObject } from './type'
 
 export class GeolocusPointObject implements IGeolocusObject {
   private _type: 'Point'

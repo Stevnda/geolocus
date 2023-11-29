@@ -2,9 +2,9 @@ import {
   GeolocusLineStringObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
-} from '../object'
-import { GeolocusMultiPolygonObject } from '../object/object'
-import { Topology } from './topology'
+} from '../../object'
+import { GeolocusMultiPolygonObject } from '../../object/object'
+import { Topology } from '../topology'
 
 describe('Test the Topology class', () => {
   test('To check whether two geometries are equal', () => {

@@ -1,6 +1,6 @@
 import { Vector2 } from '../math'
 import { Position2 } from '../type'
-import { IRegionPDF } from './region.type'
+import { IRegionPDF } from './type'
 
 // interface IGetRegionPDF {
 //   0: () => 1

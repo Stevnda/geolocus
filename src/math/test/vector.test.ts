@@ -1,6 +1,6 @@
-import { Position2 } from '../type'
-import { Compare } from './mathUtil'
-import { Vector2 } from './vector'
+import { Position2 } from '../../type'
+import { Compare } from '../mathUtil'
+import { Vector2 } from '../vector'
 
 describe('Test Vector2 Class', () => {
   test('Add two Vector2 instance', () => {

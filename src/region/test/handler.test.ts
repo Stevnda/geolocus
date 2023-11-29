@@ -1,8 +1,8 @@
-import { GeolocusContext } from '../context'
-import { Compare, GEO_MAX_VALUE } from '../math'
-import { GeolocusPointObject, GeolocusPolygonObject } from '../object'
-import { Direction } from '../relation'
-import { GeolocusBBox, IGeoRelation, Position2 } from '../type'
+import { GeolocusContext } from '../../context'
+import { Compare, GEO_MAX_VALUE } from '../../math'
+import { GeolocusPointObject, GeolocusPolygonObject } from '../../object'
+import { Direction } from '../../relation'
+import { GeolocusBBox, IGeoRelation, Position2 } from '../../type'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -11,8 +11,8 @@ import {
   regionHandlerOfTopology,
   regionHandlerOfTopologyAndDirection,
   regionHandlerOfTopologyAndDistance,
-} from './handler'
-import { IRegionResult } from './region.type'
+} from '../handler'
+import { IRegionResult } from '../type'
 
 describe('Test some handler functions of Region', () => {
   test('Test the regionHandlerOfTopology function', () => {

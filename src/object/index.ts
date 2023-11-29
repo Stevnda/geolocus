@@ -5,4 +5,4 @@ export {
   GeolocusPolygonObject,
 } from './object'
 
-export { GeolocusObject } from './object.type'
+export { GeolocusObject } from './type'

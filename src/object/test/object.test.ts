@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GeolocusBBox } from '../type'
-import { GeoJSON } from './geoJSON'
+import { GeolocusBBox } from '../../type'
+import { GeoJSON } from '../geoJSON'
 import {
   GeolocusLineStringObject,
   GeolocusMultiPolygonObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
-} from './object'
+} from '../object'
 
 describe('Test the GeolocusPointObject class', () => {
   test('Return the uuid', () => {
