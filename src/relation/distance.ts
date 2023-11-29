@@ -16,8 +16,8 @@ export class Distance {
     term: SemanticDistance,
   ): EuclideanDistanceRange {
     const tag = this.SEMANTIC_MAP[term]
-    const scale = GeolocusContext.SCALE
-    const threshold = GeolocusContext.SEMANTIC_DISTANCE_THRESHOLD
+    const scale = GeolocusContext.getScale()
+    const threshold = GeolocusContext.getSemanticDistanceThreshold()
     const range: EuclideanDistanceRange = [
       Math.floor(scale * threshold[tag]),
       Math.floor(scale * threshold[tag + 1]),

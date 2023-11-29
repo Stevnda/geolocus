@@ -1,6 +1,6 @@
 import { GEO_MAX_VALUE } from '../math'
-import { GeolocusObject, GeolocusPolygonObject } from '../object'
-import { GeolocusBBox, Position2 } from '../type'
+import { GeolocusPolygonObject } from '../object'
+import { GeolocusBBox, GeolocusObject, Position2 } from '../type'
 
 export class Direction {
   static azimuth(vector: Position2): number {

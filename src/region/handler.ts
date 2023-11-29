@@ -3,7 +3,6 @@ import { GeolocusContext } from '../context'
 import { Compare, GEO_MAX_VALUE, Vector2 } from '../math'
 import {
   GeolocusMultiPolygonObject,
-  GeolocusObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from '../object'
@@ -11,6 +10,7 @@ import { Direction, Topology } from '../relation'
 import {
   AbsoluteDirection,
   EuclideanDistance,
+  GeolocusObject,
   IGeoRelation,
   TopologyRelation,
 } from '../type'
@@ -153,7 +153,7 @@ export const regionHandlerOfDistance: IRegionHandler = (
   const distance = relation.distance as EuclideanDistance
   const buffer = Topology.bufferOfDistance(
     origin,
-    (1 + GeolocusContext.DISTANCE_DELTA * 1.5) * distance,
+    (1 + GeolocusContext.getDistanceDelta() * 1.5) * distance,
   )
   result.region = Topology.intersection(result.region!, buffer)
 
@@ -161,7 +161,7 @@ export const regionHandlerOfDistance: IRegionHandler = (
     type: 1,
     origin: origin.getCenter(),
     distance,
-    distanceDelta: GeolocusContext.DISTANCE_DELTA * distance,
+    distanceDelta: GeolocusContext.getDistanceDelta() * distance,
     azimuth: null,
     azimuthDelta: null,
   }
@@ -183,8 +183,8 @@ export const regionHandlerOfDirection: IRegionHandler = (
     origin: origin.getCenter(),
     distance: null,
     distanceDelta: null,
-    azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
-    azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
+    azimuth: GeolocusContext.getDirectionDelta()[direction][0],
+    azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
   }
 }
 
@@ -238,8 +238,8 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         origin: insideCenter,
         distance: 0,
         distanceDelta: topologyDistanceDelta,
-        azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
+        azimuth: GeolocusContext.getDirectionDelta()[direction][0],
+        azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
       }
 
       return { region, pdf }
@@ -271,8 +271,8 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         origin: insideCenter,
         distance: 0,
         distanceDelta: topologyPDF.distanceDelta,
-        azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
+        azimuth: GeolocusContext.getDirectionDelta()[direction][0],
+        azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
       }
 
       return { region, pdf }
@@ -299,8 +299,8 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         origin: topologyPDF.origin,
         distance: topologyPDF.distance,
         distanceDelta: topologyPDF.distanceDelta,
-        azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
-        azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
+        azimuth: GeolocusContext.getDirectionDelta()[direction][0],
+        azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
       }
 
       return { region, pdf }
@@ -335,7 +335,7 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   const distance = relation.distance as EuclideanDistance
   const buffer = Topology.bufferOfDistance(
     origin,
-    (1 + GeolocusContext.DISTANCE_DELTA * 1.5) * distance,
+    (1 + GeolocusContext.getDistanceDelta() * 1.5) * distance,
   )
 
   const intersection = Topology.intersection(fuzzyRegion, buffer)
@@ -345,9 +345,9 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
     type: 3,
     origin: origin.getCenter(),
     distance,
-    distanceDelta: GeolocusContext.DISTANCE_DELTA * distance,
-    azimuth: GeolocusContext.DIRECTION_PARAM[direction][0],
-    azimuthDelta: GeolocusContext.DIRECTION_PARAM[direction][1],
+    distanceDelta: GeolocusContext.getDistanceDelta() * distance,
+    azimuth: GeolocusContext.getDirectionDelta()[direction][0],
+    azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
   }
 }
 

@@ -1,9 +1,5 @@
-import {
-  GeolocusMultiPolygonObject,
-  GeolocusObject,
-  GeolocusPolygonObject,
-} from '../object'
-import { IGeoRelation, Position2 } from '../type'
+import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '../object'
+import { GeolocusObject, IGeoRelation, Position2 } from '../type'
 
 export interface IRegionHandler {
   (

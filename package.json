@@ -10,13 +10,14 @@
     "build": "node esbuild.config.js",
     "run": "node ./dist/main.js",
     "prepare": "husky install",
-    "lint:check": "eslint package --max-warnings 0",
-    "lint:fix": "eslint package --fix",
+    "lint": "eslint src/**/*  --max-warnings 0",
+    "prettier": "prettier src/**/*  --write",
+    "format": "pnpm prettier && pnpm lint",
     "test:coverage": "jest --coverage"
   },
   "lint-staged": {
     "**/*.{ts}": [
-      "eslint --fix",
+      "prettier --write",
       "eslint --max-warnings 0"
     ]
   },

@@ -1,53 +1,91 @@
 import { GEO_MAX_VALUE } from '../math'
-import { GeolocusObject } from '../object'
 import { Relation } from '../relation'
-import { AbsoluteDirection } from '../type'
+import { AbsoluteDirection, GeolocusObject } from '../type'
 import { Route } from './route'
 
 class GeolocusContext {
-  private _ROUTE: Route | null = null
-  private _RELATION: Relation | null = null
-  OBJECT: Map<string, GeolocusObject> = new Map()
-  DISTANCE_DELTA = 0.2
-  DIRECTION_PARAM: {
-    [props in AbsoluteDirection]: [number, number]
-  } = {
-    N: [0, Math.PI / 3],
-    NE: [Math.PI / 4, Math.PI / 6],
-    E: [Math.PI / 2, Math.PI / 3],
-    SE: [(Math.PI / 4) * 3, Math.PI / 6],
-    S: [Math.PI, Math.PI / 3],
-    SW: [(Math.PI / 4) * 5, Math.PI / 6],
-    W: [(Math.PI / 2) * 3, Math.PI / 3],
-    NW: [(Math.PI / 4) * 7, Math.PI / 6],
-  }
-
-  SCALE = 5000
-  SEMANTIC_DISTANCE_THRESHOLD = [
-    0,
-    1 / 6,
-    0.5,
-    1,
-    2,
-    GEO_MAX_VALUE / this.SCALE,
+  private _object: Map<string, GeolocusObject>
+  private _route: Route
+  private _relation: Relation
+  private _scale: number
+  private _distanceDelta: number
+  private _semanticDistanceThreshold: [
+    number,
+    number,
+    number,
+    number,
+    number,
+    number,
   ]
 
-  getRoute() {
-    if (!this._ROUTE) {
-      this._ROUTE = new Route()
+  private _directionDelta: {
+    [props in AbsoluteDirection]: [number, number]
+  }
+
+  constructor() {
+    this._object = new Map()
+    this._route = new Route()
+    this._relation = new Relation()
+    this._scale = 5000
+    this._distanceDelta = 0.2
+    this._semanticDistanceThreshold = [
+      0,
+      1 / 6,
+      0.5,
+      1,
+      2,
+      GEO_MAX_VALUE / this._scale,
+    ]
+    this._directionDelta = {
+      N: [0, Math.PI / 3],
+      NE: [Math.PI / 4, Math.PI / 6],
+      E: [Math.PI / 2, Math.PI / 3],
+      SE: [(Math.PI / 4) * 3, Math.PI / 6],
+      S: [Math.PI, Math.PI / 3],
+      SW: [(Math.PI / 4) * 5, Math.PI / 6],
+      W: [(Math.PI / 2) * 3, Math.PI / 3],
+      NW: [(Math.PI / 4) * 7, Math.PI / 6],
     }
-    return this._ROUTE
+  }
+
+  addObject(uuid: string, object: GeolocusObject): void {
+    this._object.set(uuid, object)
+  }
+
+  getObjectByUUID(key: string): GeolocusObject | undefined {
+    return this._object.get(key)
+  }
+
+  getRoute() {
+    return this._route
   }
 
   getRelation() {
-    if (!this._RELATION) {
-      this._RELATION = new Relation()
-    }
-    return this._RELATION
+    return this._relation
   }
 
-  setDistanceDelta(value: number) {
-    this.DISTANCE_DELTA = value
+  setScale(value: number): void {
+    this._scale = value
+  }
+
+  getScale(): number {
+    return this._scale
+  }
+
+  setDistanceDelta(value: number): void {
+    this._distanceDelta = value
+  }
+
+  getDistanceDelta(): number {
+    return this._distanceDelta
+  }
+
+  setSemanticDistanceThreshold(value: [number, number, number, number]): void {
+    this._semanticDistanceThreshold = [0, ...value, GEO_MAX_VALUE / this._scale]
+  }
+
+  getSemanticDistanceThreshold() {
+    return this._semanticDistanceThreshold
   }
 
   setDirectionDelta(value: number): void
@@ -58,7 +96,7 @@ class GeolocusContext {
     if (!cardinalDirection) {
       cardinalDirection = ordinalDirection
     }
-    this.DIRECTION_PARAM = {
+    this._directionDelta = {
       N: [0, cardinalDirection],
       NE: [Math.PI / 4, ordinalDirection],
       E: [Math.PI / 2, cardinalDirection],
@@ -70,8 +108,8 @@ class GeolocusContext {
     }
   }
 
-  setScale(value: number): void {
-    this.SCALE = value
+  getDirectionDelta() {
+    return this._directionDelta
   }
 }
 

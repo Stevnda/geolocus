@@ -1,13 +1,18 @@
 import * as turf from '@turf/turf'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
 import * as martinez from 'martinez-polygon-clipping'
-import { GeolocusObject, GeolocusPolygonObject } from '../object'
+import { GeolocusPolygonObject } from '../object'
 import {
   GeolocusLineStringObject,
   GeolocusMultiPolygonObject,
   GeolocusPointObject,
 } from '../object/object'
-import { EuclideanDistance, EuclideanDistanceRange, Position2 } from '../type'
+import {
+  EuclideanDistance,
+  EuclideanDistanceRange,
+  GeolocusObject,
+  Position2,
+} from '../type'
 
 export class Topology {
   static isEqual = (geoObject0: GeolocusObject, geoObject1: GeolocusObject) => {

@@ -105,7 +105,8 @@ describe('Test some handler functions of Region', () => {
     regionHandlerOfDistance(origin, relation, target, result, index)
     expect(
       (() =>
-        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+        result.PDF[0].distanceDelta ===
+        100 * GeolocusContext.getDistanceDelta())(),
     ).toBeTruthy()
   })
 
@@ -244,7 +245,8 @@ describe('Test some handler functions of Region', () => {
     regionHandlerOfTopologyAndDistance(origin, relation, target, result, index)
     expect(
       (() =>
-        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+        result.PDF[0].distanceDelta ===
+        100 * GeolocusContext.getDistanceDelta())(),
     ).toBeTruthy()
   })
 
@@ -271,7 +273,8 @@ describe('Test some handler functions of Region', () => {
     regionHandlerOfDirectionAndDistance(origin, relation, target, result, index)
     expect(
       (() =>
-        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+        result.PDF[0].distanceDelta ===
+        100 * GeolocusContext.getDistanceDelta())(),
     ).toBeTruthy()
   })
 
@@ -298,7 +301,8 @@ describe('Test some handler functions of Region', () => {
     regionHandlerOfAll(origin, relation, target, result, index)
     expect(
       (() =>
-        result.PDF[0].distanceDelta === 100 * GeolocusContext.DISTANCE_DELTA)(),
+        result.PDF[0].distanceDelta ===
+        100 * GeolocusContext.getDistanceDelta())(),
     ).toBeTruthy()
   })
 })

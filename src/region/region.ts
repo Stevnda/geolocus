@@ -1,8 +1,8 @@
 import { BBox } from 'geojson'
 import { GeolocusContext } from '../context'
 import { Compare, GEO_MAX_VALUE } from '../math'
-import { GeolocusObject, GeolocusPolygonObject } from '../object'
-import { GeolocusBBox, IGeoTriple, Position2 } from '../type'
+import { GeolocusPolygonObject } from '../object'
+import { GeolocusBBox, GeolocusObject, IGeoTriple, Position2 } from '../type'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -55,8 +55,12 @@ export class Region {
     for (let index = 0; index < length; index++) {
       const triple = this._tuple[index]
       const relation = triple.relation
-      const origin = GeolocusContext.OBJECT.get(triple.origin) as GeolocusObject
-      const target = GeolocusContext.OBJECT.get(triple.target) as GeolocusObject
+      const origin = GeolocusContext.getObjectByUUID(
+        triple.origin,
+      ) as GeolocusObject
+      const target = GeolocusContext.getObjectByUUID(
+        triple.target,
+      ) as GeolocusObject
       const topologyTag = relation.topology ? 1 : 0
       const directionTag = relation.direction ? 3 : 0
       const distanceTag = relation.distance ? 7 : 0
@@ -122,7 +126,7 @@ export class Region {
     const length = this._tuple.length
     for (let index = 0; index < length; index++) {
       const triple = this._tuple[index]
-      const originBBox = GeolocusContext.OBJECT.get(
+      const originBBox = GeolocusContext.getObjectByUUID(
         triple.origin,
       )?.getBBox() as GeolocusBBox
       if (originBBox[0] < bbox[0]) bbox[0] = originBBox[0]
