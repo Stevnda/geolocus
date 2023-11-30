@@ -56,6 +56,10 @@ class GeolocusContext {
     return this._object.get(key)
   }
 
+  getAllObject(): Map<string, GeolocusObject> {
+    return this._object
+  }
+
   getRoute() {
     return this._route
   }

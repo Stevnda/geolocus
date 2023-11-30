@@ -1,45 +1,62 @@
+import { GeolocusContext } from '.'
+
 export class Route {
-  private _graph: Map<string, Set<string>>
+  private _children: Map<string, Set<string>>
+  private _parent: Map<string, Set<string>>
 
   constructor() {
-    this._graph = new Map()
+    this._children = new Map()
+    this._parent = new Map()
   }
 
-  getGraph() {
-    return this._graph
+  getChildrenGraph() {
+    return this._children
+  }
+
+  getParentGraph() {
+    return this._parent
   }
 
   getVertexCount() {
-    return this._graph.size
+    return this._children.size || 0
   }
 
-  addVertex(parent: string) {
-    const children = this._graph.get(parent)
+  addVertex(uuid: string) {
+    const children = this._children.get(uuid)
     if (!children) {
-      const children = new Set([])
-      this._graph.set(parent, children)
+      this._children.set(uuid, new Set())
+      this._parent.set(uuid, new Set())
     }
   }
 
   addEdge(parent: string, child: string) {
-    const children = this._graph.get(parent)
-    if (!children) {
-      const children = new Set([child])
-      this._graph.set(parent, children)
-    } else {
-      children.add(child)
-    }
+    this.addVertex(parent)
     this.addVertex(child)
+    const childrenSet = this._children.get(parent) as Set<string>
+    const parentSet = this._parent.get(child) as Set<string>
+    childrenSet.add(child)
+    parentSet.add(parent)
+  }
+
+  removeEdge(parent: string, child: string) {
+    const childrenSet = this._children.get(parent)
+    const parentSet = this._parent.get(child)
+    if (childrenSet) {
+      childrenSet.delete(child)
+    }
+    if (parentSet) {
+      parentSet.delete(parent)
+    }
   }
 
   topologicalSort() {
     // generate inDegree of graph
     const inDegree: Record<string, number> = {}
-    for (const key of this._graph.keys()) {
+    for (const key of this._children.keys()) {
       inDegree[key] = 0
     }
-    for (const key of this._graph.keys()) {
-      const children = this._graph.get(key)
+    for (const key of this._children.keys()) {
+      const children = this._children.get(key)
       if (children) {
         for (const child of children) {
           inDegree[child] += 1
@@ -60,7 +77,7 @@ export class Route {
     while (queue.length > 0) {
       const node = queue.shift() as string
       result.push(node)
-      const children = this._graph.get(node)
+      const children = this._children.get(node)
       if (children) {
         for (const child of children) {
           inDegree[child] -= 1
@@ -72,5 +89,34 @@ export class Route {
     }
 
     return result
+  }
+
+  validateFuzzy(uuid: string) {
+    const objectMap = GeolocusContext.getAllObject()
+    const fuzzyObject: Set<string> = new Set()
+    objectMap.forEach((value, key) => {
+      if (value.getFuzzy()) {
+        fuzzyObject.add(key)
+      }
+    })
+
+    const stack: string[] = [uuid]
+    const visited: Set<string> = new Set()
+    while (stack.length > 0) {
+      const currentUUID = stack.pop() as string
+      if (visited.has(currentUUID)) {
+        return false
+      }
+      if (!objectMap.has(currentUUID)) {
+        return false
+      }
+      const parent = this._parent.get(currentUUID)
+      if ((!parent || parent.size === 0) && fuzzyObject.has(currentUUID)) {
+        return false
+      }
+      parent?.size && stack.push(...parent)
+      visited.add(currentUUID)
+    }
+    return true
   }
 }
