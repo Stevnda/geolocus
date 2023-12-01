@@ -101,12 +101,10 @@ const disjointHandler: IRelationHandler = (
 ) => {
   const buffer = Topology.bufferOfDistance(origin, 0.05)
   const fuzzyRegion = Topology.mask(
-    GeolocusPolygonObject.fromBBox([
-      -GEO_MAX_VALUE,
-      -GEO_MAX_VALUE,
-      GEO_MAX_VALUE,
-      GEO_MAX_VALUE,
-    ]),
+    GeolocusPolygonObject.fromBBox(
+      [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
+      null,
+    ),
     buffer,
   )
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
@@ -148,10 +146,11 @@ export const regionHandlerOfDistance: IRegionHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
+  const context = origin.getContext() as GeolocusContext
   const distance = relation.distance as EuclideanDistance
   const buffer = Topology.bufferOfDistance(
     origin,
-    (1 + GeolocusContext.getDistanceDelta() * 1.5) * distance,
+    (1 + context.getDistanceDelta() * 1.5) * distance,
   )
   result.region = Topology.intersection(result.region!, buffer)
 
@@ -159,7 +158,7 @@ export const regionHandlerOfDistance: IRegionHandler = (
     type: 1,
     origin: origin.getCenter(),
     distance,
-    distanceDelta: GeolocusContext.getDistanceDelta() * distance,
+    distanceDelta: context.getDistanceDelta() * distance,
     azimuth: null,
     azimuthDelta: null,
   })
@@ -171,6 +170,7 @@ export const regionHandlerOfDirection: IRegionHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
+  const context = origin.getContext() as GeolocusContext
   const direction = relation.direction as AbsoluteDirection
   const fuzzyRegion = Direction.computeRegion(origin, direction)
   result.region = Topology.intersection(fuzzyRegion, result.region!)
@@ -180,8 +180,8 @@ export const regionHandlerOfDirection: IRegionHandler = (
     origin: origin.getCenter(),
     distance: null,
     distanceDelta: null,
-    azimuth: GeolocusContext.getDirectionDelta()[direction][0],
-    azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
+    azimuth: context.getDirectionDelta()[direction][0],
+    azimuthDelta: context.getDirectionDelta()[direction][1],
   })
 }
 
@@ -191,6 +191,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
+  const context = origin.getContext() as GeolocusContext
   const topology = relation.topology as TopologyRelation
   const direction = relation.direction as AbsoluteDirection
   const map = {
@@ -215,7 +216,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
       const originCenter = origin.getCenter()
       const directionRegion = Direction.computeRegion(
-        new GeolocusPointObject(originCenter),
+        new GeolocusPointObject(originCenter, null),
         direction,
       )
       let region = topologyRegion
@@ -231,11 +232,11 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
       const topologyDistanceDelta = topologyPDF.distanceDelta as number
       const pdf: IRegionPDF = {
         type: 3,
-        origin: insideCenter,
-        distance: 0,
+        origin: originCenter,
+        distance: Vector2.distanceTo(originCenter, insideCenter),
         distanceDelta: topologyDistanceDelta,
-        azimuth: GeolocusContext.getDirectionDelta()[direction][0],
-        azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
+        azimuth: context.getDirectionDelta()[direction][0],
+        azimuthDelta: context.getDirectionDelta()[direction][1],
       }
 
       return { region, pdf }
@@ -249,7 +250,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
       const originCenter = origin.getCenter()
       const directionRegion = Direction.computeRegion(
-        new GeolocusPointObject(originCenter),
+        new GeolocusPointObject(originCenter, null),
         direction,
       )
       let region = topologyRegion
@@ -264,11 +265,11 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
       const pdf: IRegionPDF = {
         type: 3,
-        origin: insideCenter,
-        distance: 0,
+        origin: originCenter,
+        distance: Vector2.distanceTo(originCenter, insideCenter),
         distanceDelta: topologyPDF.distanceDelta,
-        azimuth: GeolocusContext.getDirectionDelta()[direction][0],
-        azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
+        azimuth: context.getDirectionDelta()[direction][0],
+        azimuthDelta: context.getDirectionDelta()[direction][1],
       }
 
       return { region, pdf }
@@ -282,7 +283,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
       const originCenter = origin.getCenter()
       const directionRegion = Direction.computeRegion(
-        new GeolocusPointObject(originCenter),
+        new GeolocusPointObject(originCenter, null),
         direction,
       )
       let region = topologyRegion
@@ -295,8 +296,8 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
         origin: topologyPDF.origin,
         distance: topologyPDF.distance,
         distanceDelta: topologyPDF.distanceDelta,
-        azimuth: GeolocusContext.getDirectionDelta()[direction][0],
-        azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
+        azimuth: context.getDirectionDelta()[direction][0],
+        azimuthDelta: context.getDirectionDelta()[direction][1],
       }
 
       return { region, pdf }
@@ -323,13 +324,14 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
+  const context = origin.getContext() as GeolocusContext
   const direction = relation.direction as AbsoluteDirection
   const fuzzyRegion = Direction.computeRegion(origin, direction)
 
   const distance = relation.distance as EuclideanDistance
   const buffer = Topology.bufferOfDistance(
     origin,
-    (1 + GeolocusContext.getDistanceDelta() * 1.5) * distance,
+    (1 + context.getDistanceDelta() * 1.5) * distance,
   )
 
   const intersection = Topology.intersection(fuzzyRegion, buffer)
@@ -339,9 +341,9 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
     type: 3,
     origin: origin.getCenter(),
     distance,
-    distanceDelta: GeolocusContext.getDistanceDelta() * distance,
-    azimuth: GeolocusContext.getDirectionDelta()[direction][0],
-    azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
+    distanceDelta: context.getDistanceDelta() * distance,
+    azimuth: context.getDirectionDelta()[direction][0],
+    azimuthDelta: context.getDirectionDelta()[direction][1],
   })
 }
 

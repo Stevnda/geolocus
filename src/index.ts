@@ -1,13 +1,10 @@
-import * as turf from '@turf/turf'
+import { GeolocusContext } from './context'
 
-const g = turf.polygon([
-  [
-    [1, 1],
-    [1, 2],
-    [3, 3],
-    [6, 6],
-    [1, 1],
-  ],
-])
+class Geolocus {
+  private _context: GeolocusContext
+  constructor(name: string) {
+    this._context = new GeolocusContext(name)
+  }
+}
 
-console.log(turf.bbox(g))
+export const createContext = (name: string) => new Geolocus(name)

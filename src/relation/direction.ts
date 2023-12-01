@@ -3,6 +3,7 @@ import { GeolocusPolygonObject } from '../object'
 import { GeolocusBBox, GeolocusObject, Position2 } from '../type'
 
 export class Direction {
+  // radian
   static azimuth(vector: Position2): number {
     const angle =
       (Math.PI / 2 - Math.atan2(vector[1], vector[0]) + 2 * Math.PI) %
@@ -39,7 +40,7 @@ export class Direction {
       }
     })
 
-    return GeolocusPolygonObject.fromBBox(target)
+    return GeolocusPolygonObject.fromBBox(target, null)
   }
 
   private static north = (

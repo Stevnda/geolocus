@@ -30,9 +30,11 @@ const map = {
 
 export class Region {
   private _resultMap: Map<string, IRegionResult>
+  private _context: GeolocusContext
 
-  constructor() {
+  constructor(context: GeolocusContext) {
     this._resultMap = new Map()
+    this._context = context
   }
 
   getResultByUUID(uuid: string) {
@@ -40,7 +42,8 @@ export class Region {
   }
 
   computeResult(uuid: string) {
-    const route = GeolocusContext.getRoute()
+    const context = this._context
+    const route = context.getRoute()
     const computedOrderStack = route.validateFuzzy(uuid)
     if (!computedOrderStack) {
       throw new Error(
@@ -49,16 +52,14 @@ export class Region {
     }
     const uuidArray = computedOrderStack.slice()
 
-    const relation = GeolocusContext.getRelation()
+    const relation = context.getRelation()
     while (computedOrderStack.length > 0) {
       const currentUUID = computedOrderStack.pop() as string
       const result: IRegionResult = {
-        region: GeolocusPolygonObject.fromBBox([
-          -GEO_MAX_VALUE,
-          -GEO_MAX_VALUE,
-          GEO_MAX_VALUE,
-          GEO_MAX_VALUE,
-        ]),
+        region: GeolocusPolygonObject.fromBBox(
+          [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
+          null,
+        ),
         PDF: new Set(),
         position: null,
         gird: null,
@@ -68,12 +69,8 @@ export class Region {
       ) as Set<IGeoTriple>
       for (const triple of tripleSet) {
         const relation = triple.relation
-        const origin = GeolocusContext.getObjectByUUID(
-          triple.origin,
-        ) as GeolocusObject
-        const target = GeolocusContext.getObjectByUUID(
-          triple.target,
-        ) as GeolocusObject
+        const origin = context.getObjectByUUID(triple.origin) as GeolocusObject
+        const target = context.getObjectByUUID(triple.target) as GeolocusObject
         const topologyTag = relation.topology ? 1 : 0
         const directionTag = relation.direction ? 3 : 0
         const distanceTag = relation.distance ? 7 : 0
@@ -92,9 +89,7 @@ export class Region {
       result.position = coord[0]
       result.gird = gird
 
-      const object = GeolocusContext.getObjectByUUID(
-        currentUUID,
-      ) as GeolocusObject
+      const object = context.getObjectByUUID(currentUUID) as GeolocusObject
       const center = object.getCenter()
       object.setFuzzy(false)
       // TODO 多个 1 如何处理
@@ -159,6 +154,7 @@ export class Region {
 
   getMembershipGridOfRegion(uuid: string) {
     const result = this.getResultByUUID(uuid)
+    const context = this._context
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
@@ -167,12 +163,12 @@ export class Region {
       throw new Error('The fuzzy region is null.')
     }
     const bbox = region.getBBox()
-    const relation = GeolocusContext.getRelation()
+    const relation = context.getRelation()
     const tripleSet = relation.getGeoTripleByUUID(uuid) as Set<IGeoTriple>
     for (const triple of tripleSet) {
-      const originBBox = GeolocusContext.getObjectByUUID(
-        triple.origin,
-      )?.getBBox() as GeolocusBBox
+      const originBBox = context
+        .getObjectByUUID(triple.origin)
+        ?.getBBox() as GeolocusBBox
       if (originBBox[0] < bbox[0]) bbox[0] = originBBox[0]
       if (originBBox[1] < bbox[1]) bbox[1] = originBBox[1]
       if (originBBox[2] > bbox[2]) bbox[2] = originBBox[2]

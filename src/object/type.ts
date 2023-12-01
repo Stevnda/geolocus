@@ -15,3 +15,8 @@ export interface IGeolocusObject {
   getGeoJSON(): Feature
   clone(): GeolocusObject
 }
+
+export interface IGeolocusObjectOption {
+  name?: string
+  fuzzy?: boolean
+}

@@ -4,11 +4,14 @@ import { GeolocusPointObject } from '../../object'
 
 describe('Test the Region class', () => {
   test('Return the result by uuid', () => {
-    const origin0 = new GeolocusPointObject([0, 0])
-    const target0 = new GeolocusPointObject([0, 0], true)
+    const context = new GeolocusContext('test')
+    const origin0 = new GeolocusPointObject([0, 0], context)
+    const target0 = new GeolocusPointObject([0, 0], context, {
+      fuzzy: true,
+    })
 
-    const region = GeolocusContext.getRegion()
-    const relation = GeolocusContext.getRelation()
+    const region = context.getRegion()
+    const relation = context.getRelation()
 
     relation.define(target0, origin0, {
       direction: 'E',
@@ -20,12 +23,13 @@ describe('Test the Region class', () => {
   })
 
   test('Compute the result property of Region class', () => {
-    const origin0 = new GeolocusPointObject([0, 0])
-    const target0 = new GeolocusPointObject([0, 0], true)
-    const target1 = new GeolocusPointObject([0, 0], true)
+    const context = new GeolocusContext('test')
+    const origin0 = new GeolocusPointObject([0, 0], context)
+    const target0 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const target1 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
 
-    const region = GeolocusContext.getRegion()
-    const relation = GeolocusContext.getRelation()
+    const region = context.getRegion()
+    const relation = context.getRelation()
 
     expect(() => region.computeResult(origin0.getUUID())).toThrow()
     expect(() => region.computeResult(target0.getUUID())).toThrow()

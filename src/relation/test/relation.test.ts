@@ -3,11 +3,12 @@ import { GeolocusPointObject } from '../../object'
 
 describe('Test Relation class', () => {
   test('Define the relation', () => {
-    const origin0 = new GeolocusPointObject([0, 0])
-    const origin1 = new GeolocusPointObject([10, 0])
-    const target0 = new GeolocusPointObject([0, 0], true)
+    const context = new GeolocusContext('test')
+    const origin0 = new GeolocusPointObject([0, 0], context)
+    const origin1 = new GeolocusPointObject([10, 0], context)
+    const target0 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
 
-    const relation = GeolocusContext.getRelation()
+    const relation = context.getRelation()
     relation.define(target0, origin0, {
       direction: 'W',
       distance: 100,

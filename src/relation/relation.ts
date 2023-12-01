@@ -4,9 +4,11 @@ import { IGeoRelationWithSemantic } from './type'
 
 export class Relation {
   private _graph: Map<string, Set<IGeoTriple>>
+  private _context: GeolocusContext
 
-  constructor() {
+  constructor(context: GeolocusContext) {
     this._graph = new Map()
+    this._context = context
   }
 
   define(
@@ -14,9 +16,12 @@ export class Relation {
     origin: GeolocusObject,
     relation: Partial<IGeoRelationWithSemantic>,
   ) {
+    if (origin.getContext() !== target.getContext()) {
+      throw new Error('The context between origin and target is different.')
+    }
     const originUUID = origin.getUUID()
     const targetUUID = target.getUUID()
-    const route = GeolocusContext.getRoute()
+    const route = this._context.getRoute()
     route.addEdge(originUUID, targetUUID)
     const circle = route.topologicalSort()
     if (circle.length !== route.getVertexCount()) {

@@ -15,7 +15,7 @@ describe('Test the Direction class', () => {
   })
 
   test('Return the region by direction', () => {
-    const object = GeolocusPolygonObject.fromBBox([0, 0, 1, 1])
+    const object = GeolocusPolygonObject.fromBBox([0, 0, 1, 1], null)
     const region0 = Direction.computeRegion(object, 'ne')
     const region1 = Direction.computeRegion(object, 'sw')
 
@@ -24,7 +24,7 @@ describe('Test the Direction class', () => {
   })
 
   test('Return the error if the direction conflict', () => {
-    const object = GeolocusPolygonObject.fromBBox([0, 0, 1, 1])
+    const object = GeolocusPolygonObject.fromBBox([0, 0, 1, 1], null)
     expect(() => Direction.computeRegion(object, 'sn')).toThrow()
     expect(() => Direction.computeRegion(object, 'we')).toThrow()
   })

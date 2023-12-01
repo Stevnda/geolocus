@@ -63,8 +63,10 @@ describe('Test the GeoJSON class', () => {
   })
 
   test('Translate the geoJSON', () => {
-    const point = GeoJSON.point([1, 1])
-    GeoJSON.translate(point, 10, 0)
-    expect(Compare.EQ(GeoJSON.centerOfMass(point)[1], 11)).toBeTruthy()
+    const point = GeoJSON.point([0, 0])
+    GeoJSON.translate(point, 10, Math.PI / 4)
+    expect(
+      Compare.EQ(GeoJSON.centerOfMass(point)[1], 10 / Math.SQRT2),
+    ).toBeTruthy()
   })
 })

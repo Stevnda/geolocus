@@ -41,9 +41,14 @@ export class GeoJSON {
     distance: number,
     direction: number,
   ): T => {
-    return turf.transformTranslate(object, distance, direction, {
-      mutate: true,
-      units: 'degrees',
-    })
+    return turf.transformTranslate(
+      object,
+      distance,
+      (direction / Math.PI) * 180,
+      {
+        mutate: true,
+        units: 'degrees',
+      },
+    )
   }
 }

@@ -4,7 +4,8 @@ import { Relation } from '../relation'
 import { AbsoluteDirection, GeolocusObject } from '../type'
 import { Route } from './route'
 
-class GeolocusContext {
+export class GeolocusContext {
+  private _name: string
   private _object: Map<string, GeolocusObject>
   private _route: Route
   private _relation: Relation
@@ -24,11 +25,12 @@ class GeolocusContext {
     [props in AbsoluteDirection]: [number, number]
   }
 
-  constructor() {
+  constructor(name: string) {
+    this._name = name
     this._object = new Map()
-    this._route = new Route()
-    this._relation = new Relation()
-    this._region = new Region()
+    this._route = new Route(this)
+    this._relation = new Relation(this)
+    this._region = new Region(this)
     this._scale = 5000
     this._distanceDelta = 0.2
     this._semanticDistanceThreshold = [
@@ -49,6 +51,10 @@ class GeolocusContext {
       W: [(Math.PI / 2) * 3, Math.PI / 3],
       NW: [(Math.PI / 4) * 7, Math.PI / 6],
     }
+  }
+
+  getName() {
+    return this._name
   }
 
   addObject(uuid: string, object: GeolocusObject): void {
@@ -123,5 +129,3 @@ class GeolocusContext {
     return this._directionDelta
   }
 }
-
-export const instance = new GeolocusContext()

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GeolocusContext } from '../../context'
 import { Compare, GEO_MAX_VALUE } from '../../math'
 import { GeolocusPointObject, GeolocusPolygonObject } from '../../object'
@@ -22,11 +23,14 @@ describe('Test some handler functions of Region', () => {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ])
-    const origin = new GeolocusPointObject([0, 0])
-    const target = new GeolocusPointObject([0, 0])
+    const context = new GeolocusContext('test')
+    const origin = new GeolocusPointObject([0, 0], context)
+    const target = new GeolocusPointObject([0, 0], context)
     let result: IRegionResult = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
     const relation: IGeoRelation[] = [
       'equal',
@@ -50,6 +54,8 @@ describe('Test some handler functions of Region', () => {
     result = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
     // contain
     regionHandlerOfTopology(origin, relation[1], target, result)
@@ -60,6 +66,8 @@ describe('Test some handler functions of Region', () => {
     result = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
     // intersect
     regionHandlerOfTopology(origin, relation[2], target, result)
@@ -70,6 +78,8 @@ describe('Test some handler functions of Region', () => {
     result = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
     // disjoint
     regionHandlerOfTopology(origin, relation[3], target, result)
@@ -88,11 +98,14 @@ describe('Test some handler functions of Region', () => {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ])
-    const origin = new GeolocusPointObject([0, 0])
-    const target = new GeolocusPointObject([0, 0])
+    const context = new GeolocusContext('test')
+    const origin = new GeolocusPointObject([0, 0], context)
+    const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
 
     const relation: IGeoRelation = {
@@ -105,7 +118,8 @@ describe('Test some handler functions of Region', () => {
     result.PDF.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta === 100 * GeolocusContext.getDistanceDelta())(),
+          value.distanceDelta ===
+          100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })
   })
@@ -117,11 +131,14 @@ describe('Test some handler functions of Region', () => {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ])
-    const origin = new GeolocusPointObject([0, 0])
-    const target = new GeolocusPointObject([0, 0])
+    const context = new GeolocusContext('test')
+    const origin = new GeolocusPointObject([0, 0], context)
+    const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
 
     const relation: IGeoRelation = {
@@ -142,11 +159,14 @@ describe('Test some handler functions of Region', () => {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ])
-    const origin = new GeolocusPointObject([0, 0])
-    const target = new GeolocusPointObject([0, 0])
+    const context = new GeolocusContext('test')
+    const origin = new GeolocusPointObject([0, 0], context)
+    const target = new GeolocusPointObject([0, 0], context)
     let result: IRegionResult = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
 
     const relation: IGeoRelation[] = [
@@ -171,6 +191,8 @@ describe('Test some handler functions of Region', () => {
     result = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
     // contain
     regionHandlerOfTopologyAndDirection(origin, relation[1], target, result)
@@ -181,6 +203,8 @@ describe('Test some handler functions of Region', () => {
     result = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
     // intersect
     regionHandlerOfTopologyAndDirection(origin, relation[2], target, result)
@@ -191,6 +215,8 @@ describe('Test some handler functions of Region', () => {
     result = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
     // disjoint
     regionHandlerOfTopologyAndDirection(origin, relation[3], target, result)
@@ -205,11 +231,14 @@ describe('Test some handler functions of Region', () => {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ])
-    const origin = new GeolocusPointObject([0, 0])
-    const target = new GeolocusPointObject([0, 0])
+    const context = new GeolocusContext('test')
+    const origin = new GeolocusPointObject([0, 0], context)
+    const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
 
     const relation: IGeoRelation = {
@@ -222,7 +251,8 @@ describe('Test some handler functions of Region', () => {
     result.PDF.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta === 100 * GeolocusContext.getDistanceDelta())(),
+          value.distanceDelta ===
+          100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })
   })
@@ -234,11 +264,14 @@ describe('Test some handler functions of Region', () => {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ])
-    const origin = new GeolocusPointObject([0, 0])
-    const target = new GeolocusPointObject([0, 0])
+    const context = new GeolocusContext('test')
+    const origin = new GeolocusPointObject([0, 0], context)
+    const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
 
     const relation: IGeoRelation = {
@@ -251,7 +284,8 @@ describe('Test some handler functions of Region', () => {
     result.PDF.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta === 100 * GeolocusContext.getDistanceDelta())(),
+          value.distanceDelta ===
+          100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })
   })
@@ -263,11 +297,14 @@ describe('Test some handler functions of Region', () => {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ])
-    const origin = new GeolocusPointObject([0, 0])
-    const target = new GeolocusPointObject([0, 0])
+    const context = new GeolocusContext('test')
+    const origin = new GeolocusPointObject([0, 0], context)
+    const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
       PDF: new Set(),
+      position: null,
+      gird: null,
     }
 
     const relation: IGeoRelation = {
@@ -280,7 +317,8 @@ describe('Test some handler functions of Region', () => {
     result.PDF.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta === 100 * GeolocusContext.getDistanceDelta())(),
+          value.distanceDelta ===
+          100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })
   })
