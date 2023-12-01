@@ -128,7 +128,6 @@ export const regionHandlerOfTopology: IRegionHandler = (
   relation: IGeoRelation,
   target: GeolocusObject,
   result: IRegionResult,
-  index: number,
 ) => {
   const topology = relation.topology as TopologyRelation
   const map = {
@@ -140,7 +139,7 @@ export const regionHandlerOfTopology: IRegionHandler = (
 
   const { topologyRegion, topologyPDF } = map[topology](origin, target, result)
   result.region = topologyRegion
-  result.PDF[index] = topologyPDF
+  result.PDF.add(topologyPDF)
 }
 
 export const regionHandlerOfDistance: IRegionHandler = (
@@ -148,7 +147,6 @@ export const regionHandlerOfDistance: IRegionHandler = (
   relation: IGeoRelation,
   target: GeolocusObject,
   result: IRegionResult,
-  index: number,
 ) => {
   const distance = relation.distance as EuclideanDistance
   const buffer = Topology.bufferOfDistance(
@@ -157,14 +155,14 @@ export const regionHandlerOfDistance: IRegionHandler = (
   )
   result.region = Topology.intersection(result.region!, buffer)
 
-  result.PDF[index] = {
+  result.PDF.add({
     type: 1,
     origin: origin.getCenter(),
     distance,
     distanceDelta: GeolocusContext.getDistanceDelta() * distance,
     azimuth: null,
     azimuthDelta: null,
-  }
+  })
 }
 
 export const regionHandlerOfDirection: IRegionHandler = (
@@ -172,20 +170,19 @@ export const regionHandlerOfDirection: IRegionHandler = (
   relation: IGeoRelation,
   target: GeolocusObject,
   result: IRegionResult,
-  index: number,
 ) => {
   const direction = relation.direction as AbsoluteDirection
   const fuzzyRegion = Direction.computeRegion(origin, direction)
   result.region = Topology.intersection(fuzzyRegion, result.region!)
 
-  result.PDF[index] = {
+  result.PDF.add({
     type: 2,
     origin: origin.getCenter(),
     distance: null,
     distanceDelta: null,
     azimuth: GeolocusContext.getDirectionDelta()[direction][0],
     azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
-  }
+  })
 }
 
 export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
@@ -193,7 +190,6 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
   relation: IGeoRelation,
   target: GeolocusObject,
   result: IRegionResult,
-  index: number,
 ) => {
   const topology = relation.topology as TopologyRelation
   const direction = relation.direction as AbsoluteDirection
@@ -309,7 +305,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
   const { region, pdf } = map[topology]()
   result.region = region
-  result.PDF[index] = pdf
+  result.PDF.add(pdf)
 }
 
 export const regionHandlerOfTopologyAndDistance: IRegionHandler = (
@@ -317,9 +313,8 @@ export const regionHandlerOfTopologyAndDistance: IRegionHandler = (
   relation: IGeoRelation,
   target: GeolocusObject,
   result: IRegionResult,
-  index: number,
 ) => {
-  regionHandlerOfDistance(origin, relation, target, result, index)
+  regionHandlerOfDistance(origin, relation, target, result)
 }
 
 export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
@@ -327,7 +322,6 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   relation: IGeoRelation,
   target: GeolocusObject,
   result: IRegionResult,
-  index: number,
 ) => {
   const direction = relation.direction as AbsoluteDirection
   const fuzzyRegion = Direction.computeRegion(origin, direction)
@@ -341,14 +335,14 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   const intersection = Topology.intersection(fuzzyRegion, buffer)
   result.region = Topology.intersection(intersection!, result.region!)
 
-  result.PDF[index] = {
+  result.PDF.add({
     type: 3,
     origin: origin.getCenter(),
     distance,
     distanceDelta: GeolocusContext.getDistanceDelta() * distance,
     azimuth: GeolocusContext.getDirectionDelta()[direction][0],
     azimuthDelta: GeolocusContext.getDirectionDelta()[direction][1],
-  }
+  })
 }
 
 export const regionHandlerOfAll: IRegionHandler = (
@@ -356,7 +350,6 @@ export const regionHandlerOfAll: IRegionHandler = (
   relation: IGeoRelation,
   target: GeolocusObject,
   result: IRegionResult,
-  index: number,
 ) => {
-  regionHandlerOfDirectionAndDistance(origin, relation, target, result, index)
+  regionHandlerOfDirectionAndDistance(origin, relation, target, result)
 }

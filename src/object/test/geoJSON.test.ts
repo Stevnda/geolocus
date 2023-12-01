@@ -1,3 +1,4 @@
+import { Compare } from '../../math'
 import { GeoJSON } from '../geoJSON'
 
 describe('Test the GeoJSON class', () => {
@@ -59,5 +60,11 @@ describe('Test the GeoJSON class', () => {
       ],
     ])
     expect(GeoJSON.bbox(polygon)).toEqual([1, 1, 3, 3])
+  })
+
+  test('Translate the geoJSON', () => {
+    const point = GeoJSON.point([1, 1])
+    GeoJSON.translate(point, 10, 0)
+    expect(Compare.EQ(GeoJSON.centerOfMass(point)[1], 11)).toBeTruthy()
   })
 })

@@ -15,76 +15,109 @@ import {
 import { RegionPDF } from './pdf'
 import { IRegionResult } from './type'
 
+const map = {
+  0: () => {
+    throw new Error('The geoRelation is null.')
+  },
+  1: regionHandlerOfTopology,
+  3: regionHandlerOfDirection,
+  7: regionHandlerOfDistance,
+  4: regionHandlerOfTopologyAndDirection,
+  8: regionHandlerOfTopologyAndDistance,
+  10: regionHandlerOfDirectionAndDistance,
+  11: regionHandlerOfAll,
+}
+
 export class Region {
-  private _tuple: IGeoTriple[]
-  private _result: IRegionResult
+  private _resultMap: Map<string, IRegionResult>
 
-  constructor(triples: IGeoTriple[]) {
-    this._tuple = triples
-    this._result = {
-      region: null,
-      PDF: [],
-    }
+  constructor() {
+    this._resultMap = new Map()
   }
 
-  computeResult() {
-    const map = {
-      0: () => {
-        throw new Error('The geoRelation is null.')
-      },
-      1: regionHandlerOfTopology,
-      3: regionHandlerOfDirection,
-      7: regionHandlerOfDistance,
-      4: regionHandlerOfTopologyAndDirection,
-      8: regionHandlerOfTopologyAndDistance,
-      10: regionHandlerOfDirectionAndDistance,
-      11: regionHandlerOfAll,
+  getResultByUUID(uuid: string) {
+    return this._resultMap.get(uuid)
+  }
+
+  computeResult(uuid: string) {
+    const route = GeolocusContext.getRoute()
+    const computedOrderStack = route.validateFuzzy(uuid)
+    if (!computedOrderStack) {
+      throw new Error(
+        'Can not compute this object or it is not necessary be computed.',
+      )
     }
+    const uuidArray = computedOrderStack.slice()
 
-    this._result = {
-      region: GeolocusPolygonObject.fromBBox([
-        -GEO_MAX_VALUE,
-        -GEO_MAX_VALUE,
-        GEO_MAX_VALUE,
-        GEO_MAX_VALUE,
-      ]),
-      PDF: [],
-    }
-
-    const length = this._tuple.length
-    for (let index = 0; index < length; index++) {
-      const triple = this._tuple[index]
-      const relation = triple.relation
-      const origin = GeolocusContext.getObjectByUUID(
-        triple.origin,
-      ) as GeolocusObject
-      const target = GeolocusContext.getObjectByUUID(
-        triple.target,
-      ) as GeolocusObject
-      const topologyTag = relation.topology ? 1 : 0
-      const directionTag = relation.direction ? 3 : 0
-      const distanceTag = relation.distance ? 7 : 0
-      const tag = (topologyTag + directionTag + distanceTag) as keyof typeof map
-
-      map[tag](origin, relation, target, this._result, index)
-      if (!this._result.region) {
-        throw new Error("Can't compute the fuzzy region.")
+    const relation = GeolocusContext.getRelation()
+    while (computedOrderStack.length > 0) {
+      const currentUUID = computedOrderStack.pop() as string
+      const result: IRegionResult = {
+        region: GeolocusPolygonObject.fromBBox([
+          -GEO_MAX_VALUE,
+          -GEO_MAX_VALUE,
+          GEO_MAX_VALUE,
+          GEO_MAX_VALUE,
+        ]),
+        PDF: new Set(),
+        position: null,
+        gird: null,
       }
+      const tripleSet = relation.getGeoTripleByUUID(
+        currentUUID,
+      ) as Set<IGeoTriple>
+      for (const triple of tripleSet) {
+        const relation = triple.relation
+        const origin = GeolocusContext.getObjectByUUID(
+          triple.origin,
+        ) as GeolocusObject
+        const target = GeolocusContext.getObjectByUUID(
+          triple.target,
+        ) as GeolocusObject
+        const topologyTag = relation.topology ? 1 : 0
+        const directionTag = relation.direction ? 3 : 0
+        const distanceTag = relation.distance ? 7 : 0
+        const tag = (topologyTag +
+          directionTag +
+          distanceTag) as keyof typeof map
+
+        map[tag](origin, relation, target, result)
+        if (!result.region) {
+          throw new Error("Can't compute the fuzzy region.")
+        }
+      }
+      this._resultMap.set(currentUUID, result)
+      const { gird } = this.getMembershipGridOfRegion(currentUUID)
+      const coord = this.getCoordOfMaxMembershipValue(currentUUID, gird, 1)
+      result.position = coord[0]
+      result.gird = gird
+
+      const object = GeolocusContext.getObjectByUUID(
+        currentUUID,
+      ) as GeolocusObject
+      const center = object.getCenter()
+      object.setFuzzy(false)
+      // TODO 多个 1 如何处理
+      object.translate(center, coord[0])
     }
+
+    return uuidArray
   }
 
-  getMembershipOfPoint(coord: Position2) {
-    const pdf = this._result.PDF
-    let value = 0
-    const length = pdf.length
-    for (let index = 0; index < length; index++) {
-      const currentPDF = pdf[index]
-      value += RegionPDF.computePDF(currentPDF, coord)
+  getMembershipOfPoint(uuid: string, coord: Position2) {
+    const result = this.getResultByUUID(uuid)
+    if (!result) {
+      throw new Error('The result of this uuid is not existed.')
     }
+    const pdf = result.PDF
+    let value = 0
+    pdf.forEach((currentPDF) => {
+      value += RegionPDF.computePDF(currentPDF, coord)
+    })
     return value
   }
 
-  getMembershipGridOfBBox(bbox: BBox) {
+  getMembershipGridOfBBox(uuid: string, bbox: BBox) {
     const xStart = bbox[0]
     const xEnd = bbox[2]
     const dx = xEnd - xStart
@@ -100,32 +133,43 @@ export class Region {
     for (let col = xStart; col < xEnd; col += girdSize) {
       const temp = []
       for (let row = yStart; row < yEnd; row += girdSize) {
-        const value = this.getMembershipOfPoint([col, row])
+        const value = this.getMembershipOfPoint(uuid, [col, row])
         if (value > max) max = value
         if (value < min) min = value
-        temp.push(this.getMembershipOfPoint([col, row]))
+        temp.push(value)
       }
       gird.push(temp)
     }
-
-    for (let col = 0; col < gird.length; col++) {
-      for (let row = 0; row < gird[0].length; row++) {
-        gird[col][row] = (gird[col][row] - min) / (max - min)
+    if (max !== min) {
+      for (let col = 0; col < gird.length; col++) {
+        for (let row = 0; row < gird[0].length; row++) {
+          gird[col][row] = (gird[col][row] - min) / (max - min)
+        }
+      }
+    } else {
+      for (let col = 0; col < gird.length; col++) {
+        for (let row = 0; row < gird[0].length; row++) {
+          gird[col][row] = 1
+        }
       }
     }
 
     return gird
   }
 
-  getMembershipGridOfRegion() {
-    const region = this._result.region
+  getMembershipGridOfRegion(uuid: string) {
+    const result = this.getResultByUUID(uuid)
+    if (!result) {
+      throw new Error('The result of this uuid is not existed.')
+    }
+    const region = result.region
     if (!region) {
       throw new Error('The fuzzy region is null.')
     }
     const bbox = region.getBBox()
-    const length = this._tuple.length
-    for (let index = 0; index < length; index++) {
-      const triple = this._tuple[index]
+    const relation = GeolocusContext.getRelation()
+    const tripleSet = relation.getGeoTripleByUUID(uuid) as Set<IGeoTriple>
+    for (const triple of tripleSet) {
       const originBBox = GeolocusContext.getObjectByUUID(
         triple.origin,
       )?.getBBox() as GeolocusBBox
@@ -135,7 +179,7 @@ export class Region {
       if (originBBox[3] > bbox[3]) bbox[3] = originBBox[3]
     }
 
-    const gird = this.getMembershipGridOfBBox(bbox)
+    const gird = this.getMembershipGridOfBBox(uuid, bbox)
 
     return {
       gird,
@@ -143,8 +187,12 @@ export class Region {
     }
   }
 
-  getCoordOfMaxMembershipValue(gird: number[][], value = 0.995) {
-    const region = this._result.region
+  getCoordOfMaxMembershipValue(uuid: string, gird: number[][], value = 0.995) {
+    const result = this.getResultByUUID(uuid)
+    if (!result) {
+      throw new Error('The result of this uuid is not existed.')
+    }
+    const region = result.region
     if (!region) {
       throw new Error('The fuzzy region is null.')
     }
@@ -165,11 +213,11 @@ export class Region {
       }
     }
 
-    const result = points.map((colRow) => [
+    const coord = points.map((colRow) => [
       (colRow[0] / gird.length) * dx + xStart,
       (colRow[1] / gird[0].length) * dy + yStart,
     ])
 
-    return result as Position2[]
+    return coord as Position2[]
   }
 }

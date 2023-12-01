@@ -35,4 +35,15 @@ export class GeoJSON {
   static centerOfMass = (object: Feature): Position2 => {
     return turf.centerOfMass(object).geometry.coordinates as Position2
   }
+
+  static translate = <T extends Feature>(
+    object: T,
+    distance: number,
+    direction: number,
+  ): T => {
+    return turf.transformTranslate(object, distance, direction, {
+      mutate: true,
+      units: 'degrees',
+    })
+  }
 }

@@ -22,11 +22,6 @@ export class Relation {
     if (circle.length !== route.getVertexCount()) {
       throw new Error('Route contains a cycle.')
     }
-    const isComputed = route.validateFuzzy(targetUUID)
-    if (!isComputed) {
-      throw new Error('Can not compute the fuzzy.')
-    }
-
     const relationSet = this._graph.get(targetUUID)
     const tempTriple: IGeoTriple = {
       origin: originUUID,

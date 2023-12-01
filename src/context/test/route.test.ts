@@ -85,14 +85,18 @@ describe('Test the Route class', () => {
 
     const route = new Route()
     expect(route.validateFuzzy('kxh')).toBeFalsy()
-    expect(route.validateFuzzy(point0.getUUID())).toBeTruthy()
+    expect(route.validateFuzzy(point0.getUUID())).toBeFalsy()
     expect(route.validateFuzzy(point2.getUUID())).toBeFalsy()
     route.addEdge(point3.getUUID(), point2.getUUID())
     route.addEdge(point4.getUUID(), point3.getUUID())
     expect(route.validateFuzzy(point2.getUUID())).toBeFalsy()
     route.addEdge(point0.getUUID(), point4.getUUID())
     route.addEdge(point1.getUUID(), point3.getUUID())
-    expect(route.validateFuzzy(point2.getUUID())).toBeTruthy()
+    expect(route.validateFuzzy(point2.getUUID())).toEqual([
+      point2.getUUID(),
+      point3.getUUID(),
+      point4.getUUID(),
+    ])
     route.addEdge(point2.getUUID(), point1.getUUID())
     expect(route.validateFuzzy(point2.getUUID())).toBeFalsy()
   })

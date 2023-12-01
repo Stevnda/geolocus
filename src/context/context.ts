@@ -1,4 +1,5 @@
 import { GEO_MAX_VALUE } from '../math'
+import { Region } from '../region'
 import { Relation } from '../relation'
 import { AbsoluteDirection, GeolocusObject } from '../type'
 import { Route } from './route'
@@ -7,6 +8,7 @@ class GeolocusContext {
   private _object: Map<string, GeolocusObject>
   private _route: Route
   private _relation: Relation
+  private _region: Region
   private _scale: number
   private _distanceDelta: number
   private _semanticDistanceThreshold: [
@@ -26,6 +28,7 @@ class GeolocusContext {
     this._object = new Map()
     this._route = new Route()
     this._relation = new Relation()
+    this._region = new Region()
     this._scale = 5000
     this._distanceDelta = 0.2
     this._semanticDistanceThreshold = [
@@ -66,6 +69,10 @@ class GeolocusContext {
 
   getRelation() {
     return this._relation
+  }
+
+  getRegion() {
+    return this._region
   }
 
   setScale(value: number): void {

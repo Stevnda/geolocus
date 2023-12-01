@@ -1,6 +1,8 @@
 import crypto from 'crypto'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
 import { GeolocusContext } from '../context'
+import { Vector2 } from '../math'
+import { Direction } from '../relation'
 import { GeolocusBBox, Position2 } from '../type'
 import { GeoJSON } from './geoJSON'
 import { IGeolocusObject } from './type'
@@ -33,6 +35,10 @@ export class GeolocusPointObject implements IGeolocusObject {
 
   getFuzzy(): boolean {
     return this._fuzzy
+  }
+
+  setFuzzy(value: boolean) {
+    this._fuzzy = value
   }
 
   getName(): string {
@@ -69,6 +75,18 @@ export class GeolocusPointObject implements IGeolocusObject {
       this._fuzzy,
       this._name,
     )
+  }
+
+  translate(origin: Position2, target: Position2) {
+    const distance = Vector2.distanceTo(origin, target)
+    const direction = Direction.azimuth(Vector2.sub(target, origin))
+    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
+    this._vertex = this._geoJSON.geometry.coordinates as Position2
+    this._bbox = GeoJSON.bbox(this._geoJSON)
+    this._center = [
+      (this._bbox[0] + this._bbox[2]) / 2,
+      (this._bbox[1] + this._bbox[3]) / 2,
+    ]
   }
 
   static fromGeoJSON(geojson: Feature<Point>, fuzzy = false, name = '') {
@@ -112,6 +130,10 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     return this._fuzzy
   }
 
+  setFuzzy(value: boolean) {
+    this._fuzzy = value
+  }
+
   getName(): string {
     return this._name
   }
@@ -146,6 +168,18 @@ export class GeolocusLineStringObject implements IGeolocusObject {
       this._fuzzy,
       this._name,
     )
+  }
+
+  translate(origin: Position2, target: Position2) {
+    const distance = Vector2.distanceTo(origin, target)
+    const direction = Direction.azimuth(Vector2.sub(target, origin))
+    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
+    this._vertex = this._geoJSON.geometry.coordinates as Position2[]
+    this._bbox = GeoJSON.bbox(this._geoJSON)
+    this._center = [
+      (this._bbox[0] + this._bbox[2]) / 2,
+      (this._bbox[1] + this._bbox[3]) / 2,
+    ]
   }
 
   static fromGeoJSON(geojson: Feature<LineString>, fuzzy = false, name = '') {
@@ -188,6 +222,10 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     return this._fuzzy
   }
 
+  setFuzzy(value: boolean) {
+    this._fuzzy = value
+  }
+
   getName(): string {
     return this._name
   }
@@ -222,6 +260,18 @@ export class GeolocusPolygonObject implements IGeolocusObject {
       this._fuzzy,
       this._name,
     )
+  }
+
+  translate(origin: Position2, target: Position2) {
+    const distance = Vector2.distanceTo(origin, target)
+    const direction = Direction.azimuth(Vector2.sub(target, origin))
+    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
+    this._vertex = this._geoJSON.geometry.coordinates as Position2[][]
+    this._bbox = GeoJSON.bbox(this._geoJSON)
+    this._center = [
+      (this._bbox[0] + this._bbox[2]) / 2,
+      (this._bbox[1] + this._bbox[3]) / 2,
+    ]
   }
 
   static fromBBox(
@@ -281,6 +331,10 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
     return this._fuzzy
   }
 
+  setFuzzy(value: boolean) {
+    this._fuzzy = value
+  }
+
   getName(): string {
     return this._name
   }
@@ -315,6 +369,18 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
       this._fuzzy,
       this._name,
     )
+  }
+
+  translate(origin: Position2, target: Position2) {
+    const distance = Vector2.distanceTo(origin, target)
+    const direction = Direction.azimuth(Vector2.sub(target, origin))
+    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
+    this._vertex = this._geoJSON.geometry.coordinates as Position2[][][]
+    this._bbox = GeoJSON.bbox(this._geoJSON)
+    this._center = [
+      (this._bbox[0] + this._bbox[2]) / 2,
+      (this._bbox[1] + this._bbox[3]) / 2,
+    ]
   }
 
   static fromBBox(

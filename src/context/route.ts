@@ -92,6 +92,9 @@ export class Route {
   }
 
   validateFuzzy(uuid: string) {
+    if (!GeolocusContext.getObjectByUUID(uuid)?.getFuzzy()) {
+      return false
+    }
     const objectMap = GeolocusContext.getAllObject()
     const fuzzyObject: Set<string> = new Set()
     objectMap.forEach((value, key) => {
@@ -100,14 +103,15 @@ export class Route {
       }
     })
 
+    const computedOrderStack: string[] = [uuid]
     const stack: string[] = [uuid]
     const visited: Set<string> = new Set()
     while (stack.length > 0) {
       const currentUUID = stack.pop() as string
-      if (visited.has(currentUUID)) {
+      if (!objectMap.has(currentUUID)) {
         return false
       }
-      if (!objectMap.has(currentUUID)) {
+      if (visited.has(currentUUID)) {
         return false
       }
       const parent = this._parent.get(currentUUID)
@@ -116,7 +120,13 @@ export class Route {
       }
       parent?.size && stack.push(...parent)
       visited.add(currentUUID)
+      if (fuzzyObject.has(currentUUID)) {
+        computedOrderStack.push(currentUUID)
+      }
     }
-    return true
+    if (computedOrderStack[0] === computedOrderStack[1]) {
+      computedOrderStack.shift()
+    }
+    return computedOrderStack
   }
 }

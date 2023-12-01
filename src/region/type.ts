@@ -7,7 +7,6 @@ export interface IRegionHandler {
     relation: IGeoRelation,
     target: GeolocusObject,
     result: IRegionResult,
-    index: number,
   ): void
 }
 
@@ -34,5 +33,7 @@ export interface IRegionPDF {
 
 export interface IRegionResult {
   region: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
-  PDF: IRegionPDF[]
+  PDF: Set<IRegionPDF>
+  position: Position2 | null
+  gird: number[][] | null
 }
