@@ -1,7 +1,12 @@
 import { BBox } from 'geojson'
 import { GeolocusContext } from '../context'
 import { Compare, GEO_MAX_VALUE } from '../math'
-import { GeolocusPolygonObject } from '../object'
+import {
+  GeolocusMultiPolygonObject,
+  GeolocusPointObject,
+  GeolocusPolygonObject,
+} from '../object'
+import { Topology } from '../relation'
 import { GeolocusBBox, GeolocusObject, IGeoTriple, Position2 } from '../type'
 import {
   regionHandlerOfAll,
@@ -41,7 +46,7 @@ export class Region {
     return this._resultMap.get(uuid)
   }
 
-  computeResult(uuid: string) {
+  computeFuzzyObject(uuid: string) {
     const context = this._context
     const route = context.getRoute()
     const computedOrderStack = route.validateFuzzy(uuid)
@@ -50,9 +55,9 @@ export class Region {
         'Can not compute this object or it is not necessary be computed.',
       )
     }
-    const uuidArray = computedOrderStack.slice()
 
     const relation = context.getRelation()
+    const uuidArray = computedOrderStack.slice()
     while (computedOrderStack.length > 0) {
       const currentUUID = computedOrderStack.pop() as string
       const result: IRegionResult = {
@@ -64,6 +69,7 @@ export class Region {
         position: null,
         gird: null,
       }
+
       const tripleSet = relation.getGeoTripleByUUID(
         currentUUID,
       ) as Set<IGeoTriple>
@@ -84,35 +90,79 @@ export class Region {
         }
       }
       this._resultMap.set(currentUUID, result)
+
+      const { coord } = this.getCoordOfMaxMembershipValue(currentUUID)
       const { gird } = this.getMembershipGridOfRegion(currentUUID)
-      const coord = this.getCoordOfMaxMembershipValue(currentUUID, gird, 1)
-      result.position = coord[0]
+      result.position = coord
       result.gird = gird
 
       const object = context.getObjectByUUID(currentUUID) as GeolocusObject
       const center = object.getCenter()
       object.setFuzzy(false)
-      // TODO 多个 1 如何处理
-      object.translate(center, coord[0])
+      object.translate(center, coord)
     }
 
     return uuidArray
   }
 
-  getMembershipOfPoint(uuid: string, coord: Position2) {
+  getCoordOfMaxMembershipValue(uuid: string) {
+    const result = this.getResultByUUID(uuid)
+    if (!result) {
+      throw new Error('The result of this uuid is not existed.')
+    }
+
+    const region = result.region as
+      | GeolocusPolygonObject
+      | GeolocusMultiPolygonObject
+    const bbox = region.getBBox()
+    const xStart = bbox[0]
+    const xEnd = bbox[2]
+    const dx = xEnd - xStart
+    const yStart = bbox[1]
+    const yEnd = bbox[3]
+    const dy = yEnd - yStart
+    const ratio = dy / dx
+    const girdSize = dx / Math.sqrt(4096 / ratio)
+
+    let max = -Number.MAX_VALUE
+    let coord: Position2 = [0, 0]
+    for (let col = xStart; col < xEnd; col += girdSize) {
+      for (let row = yStart; row < yEnd; row += girdSize) {
+        const value = this.getMembershipValueOfPoint(uuid, [col, row])
+        if (Compare.GE(value, max)) {
+          const point = new GeolocusPointObject([col, row])
+          if (Topology.isIntersect(point, region)) {
+            max = value
+            coord = [col, row]
+          }
+        }
+      }
+    }
+    return { coord, max }
+  }
+
+  getMembershipValueOfPoint(uuid: string, coord: Position2) {
     const result = this.getResultByUUID(uuid)
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
     const pdf = result.PDF
-    let value = 0
+    let value = 1
     pdf.forEach((currentPDF) => {
-      value += RegionPDF.computePDF(currentPDF, coord)
+      const memberShipValue = RegionPDF.computePDF(currentPDF, coord)
+      value *= memberShipValue
     })
+
     return value
   }
 
   getMembershipGridOfBBox(uuid: string, bbox: BBox) {
+    const result = this.getResultByUUID(uuid)
+    if (!result) {
+      throw new Error('The result of this uuid is not existed.')
+    }
+    const region = result.region as GeolocusMultiPolygonObject
+
     const xStart = bbox[0]
     const xEnd = bbox[2]
     const dx = xEnd - xStart
@@ -128,40 +178,34 @@ export class Region {
     for (let col = xStart; col < xEnd; col += girdSize) {
       const temp = []
       for (let row = yStart; row < yEnd; row += girdSize) {
-        const value = this.getMembershipOfPoint(uuid, [col, row])
-        if (value > max) max = value
-        if (value < min) min = value
-        temp.push(value)
+        const tempPoint = new GeolocusPointObject([col, row])
+        if (Topology.isIntersect(tempPoint, region)) {
+          const value = this.getMembershipValueOfPoint(uuid, [col, row])
+          if (value > max) max = value
+          if (value < min) min = value
+          temp.push(value)
+        } else {
+          temp.push(0)
+        }
       }
       gird.push(temp)
     }
-    if (max !== min) {
-      for (let col = 0; col < gird.length; col++) {
-        for (let row = 0; row < gird[0].length; row++) {
-          gird[col][row] = (gird[col][row] - min) / (max - min)
-        }
-      }
-    } else {
-      for (let col = 0; col < gird.length; col++) {
-        for (let row = 0; row < gird[0].length; row++) {
-          gird[col][row] = 1
-        }
-      }
-    }
 
-    return gird
+    return {
+      gird,
+      range: [min, max],
+    }
   }
 
   getMembershipGridOfRegion(uuid: string) {
     const result = this.getResultByUUID(uuid)
-    const context = this._context
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
-    const region = result.region
-    if (!region) {
-      throw new Error('The fuzzy region is null.')
-    }
+    const region = result.region as
+      | GeolocusPolygonObject
+      | GeolocusMultiPolygonObject
+    const context = this._context
     const bbox = region.getBBox()
     const relation = context.getRelation()
     const tripleSet = relation.getGeoTripleByUUID(uuid) as Set<IGeoTriple>
@@ -175,23 +219,27 @@ export class Region {
       if (originBBox[3] > bbox[3]) bbox[3] = originBBox[3]
     }
 
-    const gird = this.getMembershipGridOfBBox(uuid, bbox)
+    const { gird, range } = this.getMembershipGridOfBBox(uuid, bbox)
 
     return {
       gird,
+      range,
       bbox,
     }
   }
 
-  getCoordOfMaxMembershipValue(uuid: string, gird: number[][], value = 0.995) {
+  getCoordOfMaxMembershipValueInBBox(
+    uuid: string,
+    gird: number[][],
+    value = 0.995,
+  ) {
     const result = this.getResultByUUID(uuid)
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
-    const region = result.region
-    if (!region) {
-      throw new Error('The fuzzy region is null.')
-    }
+    const region = result.region as
+      | GeolocusPolygonObject
+      | GeolocusMultiPolygonObject
     const bbox = region.getBBox()
     const xStart = bbox[0]
     const xEnd = bbox[2]

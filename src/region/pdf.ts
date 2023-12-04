@@ -26,9 +26,10 @@ export class RegionPDF {
     mean: number,
     std: number,
   ) {
-    const exponent = -Math.pow(x - mean, 2) / (2 * Math.pow(std, 2))
-    const coefficient = 1 / (std * Math.sqrt(2 * Math.PI))
-    const result = (coefficient * Math.exp(exponent)) / coefficient
+    const exponent = (Math.pow(x - mean, 2) / Math.pow(std, 2)) * -0.5
+    // const coefficient = 1 / (std * Math.sqrt(2 * Math.PI))
+    // const result = coefficient * Math.exp(exponent)
+    const result = Math.exp(exponent)
 
     return result
   }
@@ -45,8 +46,9 @@ export class RegionPDF {
       (Math.pow(x - meanX, 2) / Math.pow(stdX, 2) +
         Math.pow(y - meanY, 2) / Math.pow(stdY, 2)) *
       -0.5
-    const coefficient = 1 / (2 * Math.PI * stdX * stdY)
-    const result = (coefficient * Math.exp(exponent)) / coefficient
+    // const coefficient = 1 / (2 * Math.PI * stdX * stdY)
+    // const result = coefficient * Math.exp(exponent)
+    const result = Math.exp(exponent)
 
     return result
   }

@@ -148,10 +148,11 @@ export const regionHandlerOfDistance: IRegionHandler = (
 ) => {
   const context = origin.getContext() as GeolocusContext
   const distance = relation.distance as EuclideanDistance
-  const buffer = Topology.bufferOfDistance(
-    origin,
-    (1 + context.getDistanceDelta() * 1.5) * distance,
-  )
+  // martinez-polygon-clipping 的 intersect 函数的 bug, 加一个极小的随机误差
+  const buffer = Topology.bufferOfRange(origin, [
+    (1 - context.getDistanceDelta() * 1.5) * distance - Math.random() / 100,
+    (1 + context.getDistanceDelta() * 1.5) * distance + Math.random() / 100,
+  ])
   result.region = Topology.intersection(result.region!, buffer)
 
   result.PDF.add({
@@ -329,13 +330,16 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   const fuzzyRegion = Direction.computeRegion(origin, direction)
 
   const distance = relation.distance as EuclideanDistance
-  const buffer = Topology.bufferOfDistance(
-    origin,
-    (1 + context.getDistanceDelta() * 1.5) * distance,
-  )
+  // martinez-polygon-clipping 的 intersect 函数的 bug, 加一个极小的随机误差
+  const buffer = Topology.bufferOfRange(origin, [
+    (1 - context.getDistanceDelta() * 1.5) * distance - Math.random() / 100,
+    (1 + context.getDistanceDelta() * 1.5) * distance + Math.random() / 100,
+  ])
 
-  const intersection = Topology.intersection(fuzzyRegion, buffer)
-  result.region = Topology.intersection(intersection!, result.region!)
+  result.region = Topology.intersection(
+    Topology.intersection(fuzzyRegion, buffer)!,
+    result.region!,
+  )
 
   result.PDF.add({
     type: 3,

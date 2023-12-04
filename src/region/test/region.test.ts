@@ -17,7 +17,7 @@ describe('Test the Region class', () => {
       direction: 'E',
       distance: 60,
     })
-    region.computeResult(target0.getUUID())
+    region.computeFuzzyObject(target0.getUUID())
     expect(region.getResultByUUID(origin0.getUUID())).toEqual(undefined)
     expect(region.getResultByUUID(target0.getUUID())).toBeTruthy()
   })
@@ -31,20 +31,19 @@ describe('Test the Region class', () => {
     const region = context.getRegion()
     const relation = context.getRelation()
 
-    expect(() => region.computeResult(origin0.getUUID())).toThrow()
-    expect(() => region.computeResult(target0.getUUID())).toThrow()
+    expect(() => region.computeFuzzyObject(origin0.getUUID())).toThrow()
+    expect(() => region.computeFuzzyObject(target0.getUUID())).toThrow()
     relation.define(target0, target1, {
       direction: 'E',
       distance: 60,
     })
-    expect(() => region.computeResult(target0.getUUID())).toThrow()
+    expect(() => region.computeFuzzyObject(target0.getUUID())).toThrow()
     relation.define(target1, origin0, {
       topology: 'equal',
     })
-    const uuid = region.computeResult(target0.getUUID())
+    const uuid = region.computeFuzzyObject(target0.getUUID())
     expect(uuid.length).toBe(2)
     const x = region.getResultByUUID(target0.getUUID())!.position![0]
-    // TODO 最大值根据格子划分遍历的, 格子内的值都在左上角, 导致存在误差
     expect(x > 59 && x < 61).toBeTruthy()
   })
 
