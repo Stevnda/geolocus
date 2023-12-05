@@ -28,9 +28,11 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], context)
     let result: IRegionResult = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
     const relation: IGeoRelation[] = [
       'equal',
@@ -53,9 +55,11 @@ describe('Test some handler functions of Region', () => {
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
     // contain
     regionHandlerOfTopology(origin, relation[1], target, result)
@@ -65,9 +69,11 @@ describe('Test some handler functions of Region', () => {
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
     // intersect
     regionHandlerOfTopology(origin, relation[2], target, result)
@@ -77,9 +83,11 @@ describe('Test some handler functions of Region', () => {
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
     // disjoint
     regionHandlerOfTopology(origin, relation[3], target, result)
@@ -103,9 +111,11 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
 
     const relation: IGeoRelation = {
@@ -115,7 +125,7 @@ describe('Test some handler functions of Region', () => {
     }
 
     regionHandlerOfDistance(origin, relation, target, result)
-    result.PDF.forEach((value) => {
+    result.pdf.forEach((value) => {
       expect(
         (() =>
           value.distanceDelta ===
@@ -136,9 +146,11 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
 
     const relation: IGeoRelation = {
@@ -164,9 +176,11 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], context)
     let result: IRegionResult = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
 
     const relation: IGeoRelation[] = [
@@ -190,9 +204,11 @@ describe('Test some handler functions of Region', () => {
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
     // contain
     regionHandlerOfTopologyAndDirection(origin, relation[1], target, result)
@@ -202,9 +218,11 @@ describe('Test some handler functions of Region', () => {
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
     // intersect
     regionHandlerOfTopologyAndDirection(origin, relation[2], target, result)
@@ -214,9 +232,11 @@ describe('Test some handler functions of Region', () => {
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
     // disjoint
     regionHandlerOfTopologyAndDirection(origin, relation[3], target, result)
@@ -236,9 +256,11 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
 
     const relation: IGeoRelation = {
@@ -248,7 +270,7 @@ describe('Test some handler functions of Region', () => {
     }
 
     regionHandlerOfTopologyAndDistance(origin, relation, target, result)
-    result.PDF.forEach((value) => {
+    result.pdf.forEach((value) => {
       expect(
         (() =>
           value.distanceDelta ===
@@ -269,9 +291,11 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
 
     const relation: IGeoRelation = {
@@ -281,7 +305,7 @@ describe('Test some handler functions of Region', () => {
     }
 
     regionHandlerOfDirectionAndDistance(origin, relation, target, result)
-    result.PDF.forEach((value) => {
+    result.pdf.forEach((value) => {
       expect(
         (() =>
           value.distanceDelta ===
@@ -302,9 +326,11 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], context)
     const result: IRegionResult = {
       region: MaxBBoxPolygon,
-      PDF: new Set(),
-      position: null,
-      gird: null,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      mask: null,
     }
 
     const relation: IGeoRelation = {
@@ -314,7 +340,7 @@ describe('Test some handler functions of Region', () => {
     }
 
     regionHandlerOfAll(origin, relation, target, result)
-    result.PDF.forEach((value) => {
+    result.pdf.forEach((value) => {
       expect(
         (() =>
           value.distanceDelta ===

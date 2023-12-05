@@ -21,6 +21,8 @@ export class GeolocusContext {
     number,
   ]
 
+  private _girdSize = 16384
+
   private _directionDelta: {
     [props in AbsoluteDirection]: [number, number]
   }
@@ -79,6 +81,10 @@ export class GeolocusContext {
 
   getRegion() {
     return this._region
+  }
+
+  getGirdSize() {
+    return this._girdSize
   }
 
   setScale(value: number): void {

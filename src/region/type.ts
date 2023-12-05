@@ -31,9 +31,13 @@ export interface IRegionPDF {
   azimuthDelta: number | null
 }
 
+export type RegionGird = number[][]
+
 export interface IRegionResult {
   region: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
-  PDF: Set<IRegionPDF>
-  position: Position2 | null
-  gird: number[][] | null
+  pdf: IRegionPDF[]
+  coord: Position2 | null
+  pdfGird: RegionGird[]
+  resultGird: RegionGird | null
+  mask: RegionGird | null
 }

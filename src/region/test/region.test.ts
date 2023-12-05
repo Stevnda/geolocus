@@ -43,7 +43,7 @@ describe('Test the Region class', () => {
     })
     const uuid = region.computeFuzzyObject(target0.getUUID())
     expect(uuid.length).toBe(2)
-    const x = region.getResultByUUID(target0.getUUID())!.position![0]
+    const x = region.getResultByUUID(target0.getUUID())!.coord![0]
     expect(x > 59 && x < 61).toBeTruthy()
   })
 

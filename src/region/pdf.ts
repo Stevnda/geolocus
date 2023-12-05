@@ -2,24 +2,6 @@ import { Vector2 } from '../math'
 import { Position2 } from '../type'
 import { IRegionPDF } from './type'
 
-// interface IGetRegionPDF {
-//   0: () => 1
-//   1: (
-//     origin: Position2,
-//     target: Position2,
-//     distance: number,
-//     delta: number,
-//   ) => number
-//   2: (origin: Position2, target: Position2, azimuth: number) => number
-//   3: (
-//     origin: Position2,
-//     target: Position2,
-//     distance: number,
-//     delta: number,
-//     azimuth: number,
-//   ) => number
-// }
-
 export class RegionPDF {
   private static calculateNormalDistributionValue(
     x: number,

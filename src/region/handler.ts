@@ -137,7 +137,7 @@ export const regionHandlerOfTopology: IRegionHandler = (
 
   const { topologyRegion, topologyPDF } = map[topology](origin, target, result)
   result.region = topologyRegion
-  result.PDF.add(topologyPDF)
+  result.pdf.push(topologyPDF)
 }
 
 export const regionHandlerOfDistance: IRegionHandler = (
@@ -155,7 +155,7 @@ export const regionHandlerOfDistance: IRegionHandler = (
   ])
   result.region = Topology.intersection(result.region!, buffer)
 
-  result.PDF.add({
+  result.pdf.push({
     type: 1,
     origin: origin.getCenter(),
     distance,
@@ -176,7 +176,7 @@ export const regionHandlerOfDirection: IRegionHandler = (
   const fuzzyRegion = Direction.computeRegion(origin, direction)
   result.region = Topology.intersection(fuzzyRegion, result.region!)
 
-  result.PDF.add({
+  result.pdf.push({
     type: 2,
     origin: origin.getCenter(),
     distance: null,
@@ -307,7 +307,7 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
   const { region, pdf } = map[topology]()
   result.region = region
-  result.PDF.add(pdf)
+  result.pdf.push(pdf)
 }
 
 export const regionHandlerOfTopologyAndDistance: IRegionHandler = (
@@ -341,7 +341,7 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
     result.region!,
   )
 
-  result.PDF.add({
+  result.pdf.push({
     type: 3,
     origin: origin.getCenter(),
     distance,
