@@ -94,7 +94,7 @@ export class Region {
       result.mask = this.getRegionMask(currentUUID)
       const gird = this.getRegionGrid(currentUUID)
       result.resultGird = gird
-      const { coord } = this.getMaxValueAndCoord(currentUUID)
+      const { coord } = this.getCoordOfMaximum(currentUUID)
       result.coord = coord
 
       const object = context.getObjectByUUID(currentUUID) as GeolocusObject
@@ -107,10 +107,10 @@ export class Region {
   }
 
   private getRegionMask(uuid: string) {
-    const result = this.getResultByUUID(uuid)
-    if (!result) {
-      throw new Error('The result of this uuid is not existed.')
-    }
+    const result = this.getResultByUUID(uuid) as IRegionResult
+    // if (!result) {
+    //   throw new Error('The result of this uuid is not existed.')
+    // }
     const region = result.region as
       | GeolocusPolygonObject
       | GeolocusMultiPolygonObject
@@ -209,15 +209,15 @@ export class Region {
     return resultGird
   }
 
-  getMaxValueAndCoord(uuid: string) {
+  getCoordOfMaximum(uuid: string) {
     const result = this.getResultByUUID(uuid)
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
-    const resultGrid = result.resultGird
-    if (!resultGrid) {
-      throw new Error('Please compute the object first.')
-    }
+    const resultGrid = result.resultGird as RegionGird
+    // if (!resultGrid) {
+    //   throw new Error('Please compute the object first.')
+    // }
 
     const region = result.region as
       | GeolocusPolygonObject
@@ -245,50 +245,4 @@ export class Region {
 
     return { coord, max }
   }
-
-  // getMembershipValueOfPoint(uuid: string, coord: Position2) {
-  //   const result = this.getResultByUUID(uuid)
-  //   if (!result) {
-  //     throw new Error('The result of this uuid is not existed.')
-  //   }
-  //   const pdf = result.pdf
-  //   let value = 1
-  //   pdf.forEach((currentPDF) => {
-  //     const memberShipValue = RegionPDF.computePDF(currentPDF, coord)
-  //     value *= memberShipValue
-  //   })
-
-  //   return value
-  // }
-
-  // getMembershipGridOfRegion(uuid: string) {
-  //   const result = this.getResultByUUID(uuid)
-  //   if (!result) {
-  //     throw new Error('The result of this uuid is not existed.')
-  //   }
-  //   const region = result.region as
-  //     | GeolocusPolygonObject
-  //     | GeolocusMultiPolygonObject
-  //   const context = this._context
-  //   const bbox = region.getBBox()
-  //   const relation = context.getRelation()
-  //   const tripleSet = relation.getGeoTripleByUUID(uuid) as Set<IGeoTriple>
-  //   for (const triple of tripleSet) {
-  //     const originBBox = context
-  //       .getObjectByUUID(triple.origin)
-  //       ?.getBBox() as GeolocusBBox
-  //     if (originBBox[0] < bbox[0]) bbox[0] = originBBox[0]
-  //     if (originBBox[1] < bbox[1]) bbox[1] = originBBox[1]
-  //     if (originBBox[2] > bbox[2]) bbox[2] = originBBox[2]
-  //     if (originBBox[3] > bbox[3]) bbox[3] = originBBox[3]
-  //   }
-
-  //   const { gird, range } = this.getMembershipGridOfBBox(uuid, bbox)
-
-  //   return {
-  //     gird,
-  //     range,
-  //     bbox,
-  //   }
-  // }
 }

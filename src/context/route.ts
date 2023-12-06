@@ -110,9 +110,6 @@ export class Route {
     const visited: Set<string> = new Set()
     while (stack.length > 0) {
       const currentUUID = stack.pop() as string
-      if (!objectMap.has(currentUUID)) {
-        return false
-      }
       if (visited.has(currentUUID)) {
         return false
       }

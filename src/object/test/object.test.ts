@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { GeolocusContext } from '../../context'
+import { Compare } from '../../math'
 import { GeolocusBBox } from '../../type'
 import { GeoJSON } from '../geoJSON'
 import {
@@ -9,6 +11,24 @@ import {
 } from '../object'
 
 describe('Test the GeolocusPointObject class', () => {
+  const context = new GeolocusContext('default')
+  const object0 = new GeolocusPointObject([1, 1])
+  const object1 = new GeolocusPointObject([1, 1], context)
+  expect(object0.getContext()).toBeNull()
+  expect(object1.getContext()).toEqual(context)
+
+  test('Get and set the fuzzy tag', () => {
+    const object = new GeolocusPointObject([1, 1])
+    expect(object.getFuzzy()).toBeFalsy()
+    object.setFuzzy(true)
+    expect(object.getFuzzy()).toBeTruthy()
+  })
+
+  test('Get the name', () => {
+    const object = new GeolocusPointObject([1, 1])
+    expect(object.getName()).toBe('')
+  })
+
   test('Return the uuid', () => {
     const point = new GeolocusPointObject([1, 1])
     expect(point.getUUID()).toMatch(
@@ -49,6 +69,15 @@ describe('Test the GeolocusPointObject class', () => {
     expect(clone.getVertex()).toEqual(object.getVertex())
   })
 
+  test('Translate itself', () => {
+    const object = new GeolocusPointObject([1, 1])
+    object.translate([0, 0], [1, 1])
+    expect(
+      Compare.GE(object.getCenter()[0], 1.99) &&
+        Compare.LE(object.getCenter()[0], 2.01),
+    ).toBeTruthy()
+  })
+
   test('Get the GeolocusPolygonObject from geojson', () => {
     const point = new GeolocusPointObject([1, 1])
     const polygon = new GeolocusPolygonObject([
@@ -70,6 +99,41 @@ describe('Test the GeolocusPointObject class', () => {
 })
 
 describe('Test the GeolocusLineStringObject class', () => {
+  test('Get the context', () => {
+    const context = new GeolocusContext('default')
+    const object0 = new GeolocusLineStringObject([
+      [1, 1],
+      [1, 2],
+    ])
+    const object1 = new GeolocusLineStringObject(
+      [
+        [1, 1],
+        [1, 2],
+      ],
+      context,
+    )
+    expect(object0.getContext()).toBeNull()
+    expect(object1.getContext()).toEqual(context)
+  })
+
+  test('Get and set the fuzzy tag', () => {
+    const object = new GeolocusLineStringObject([
+      [1, 1],
+      [1, 2],
+    ])
+    expect(object.getFuzzy()).toBeFalsy()
+    object.setFuzzy(true)
+    expect(object.getFuzzy()).toBeTruthy()
+  })
+
+  test('Get the name', () => {
+    const object = new GeolocusLineStringObject([
+      [1, 1],
+      [1, 2],
+    ])
+    expect(object.getName()).toBe('')
+  })
+
   test('Return the uuid', () => {
     const object = new GeolocusLineStringObject([
       [1, 1],
@@ -138,6 +202,18 @@ describe('Test the GeolocusLineStringObject class', () => {
     expect(clone.getVertex()).toEqual(object.getVertex())
   })
 
+  test('Translate itself', () => {
+    const object = new GeolocusLineStringObject([
+      [0, 0],
+      [0, 2],
+    ])
+    object.translate([0, 0], [1, 1])
+    expect(
+      Compare.GE(object.getCenter()[0], 0.99) &&
+        Compare.LE(object.getCenter()[0], 1.01),
+    ).toBeTruthy()
+  })
+
   test('Get the GeolocusPolygonObject from geojson', () => {
     const line = new GeolocusLineStringObject([
       [1, 1],
@@ -162,6 +238,57 @@ describe('Test the GeolocusLineStringObject class', () => {
 })
 
 describe('Test the GeolocusPolygonObject class', () => {
+  test('Get the context', () => {
+    const context = new GeolocusContext('default')
+    const object0 = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+    const object1 = new GeolocusPolygonObject(
+      [
+        [
+          [1, 1],
+          [1, 2],
+          [1, 3],
+          [1, 1],
+        ],
+      ],
+      context,
+    )
+    expect(object0.getContext()).toBeNull()
+    expect(object1.getContext()).toEqual(context)
+  })
+
+  test('Get and set the fuzzy tag', () => {
+    const object = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+    expect(object.getFuzzy()).toBeFalsy()
+    object.setFuzzy(true)
+    expect(object.getFuzzy()).toBeTruthy()
+  })
+
+  test('Get the name', () => {
+    const object = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+    expect(object.getName()).toBe('')
+  })
+
   test('Return the uuid', () => {
     const object = new GeolocusPolygonObject([
       [
@@ -267,6 +394,15 @@ describe('Test the GeolocusPolygonObject class', () => {
     )
   })
 
+  test('Translate itself', () => {
+    const object = GeolocusPolygonObject.fromBBox([0, 0, 2, 2])
+    object.translate([0, 0], [1, 1])
+    expect(
+      Compare.GE(object.getCenter()[0], 1.99) &&
+        Compare.LE(object.getCenter()[0], 2.01),
+    ).toBeTruthy()
+  })
+
   test('Get the GeolocusPolygonObject from bbox', () => {
     const bbox: GeolocusBBox = [1, 2, 3, 4]
     const polygon = GeolocusPolygonObject.fromBBox(bbox)
@@ -298,6 +434,65 @@ describe('Test the GeolocusPolygonObject class', () => {
 })
 
 describe('Test the GeolocusMultiPolygonObject class', () => {
+  test('Get the context', () => {
+    const context = new GeolocusContext('default')
+    const object0 = new GeolocusMultiPolygonObject([
+      [
+        [
+          [1, 1],
+          [1, 2],
+          [1, 3],
+          [1, 1],
+        ],
+      ],
+    ])
+    const object1 = new GeolocusMultiPolygonObject(
+      [
+        [
+          [
+            [1, 1],
+            [1, 2],
+            [1, 3],
+            [1, 1],
+          ],
+        ],
+      ],
+      context,
+    )
+    expect(object0.getContext()).toBeNull()
+    expect(object1.getContext()).toEqual(context)
+  })
+
+  test('Get and set the fuzzy tag', () => {
+    const object = new GeolocusMultiPolygonObject([
+      [
+        [
+          [1, 1],
+          [1, 2],
+          [1, 3],
+          [1, 1],
+        ],
+      ],
+    ])
+    expect(object.getFuzzy()).toBeFalsy()
+    object.setFuzzy(true)
+    expect(object.getFuzzy()).toBeTruthy()
+  })
+
+  test('Get the name', () => {
+    const object = new GeolocusMultiPolygonObject([
+      [
+        [
+          [1, 1],
+          [1, 2],
+          [1, 3],
+          [1, 1],
+        ],
+      ],
+    ])
+    expect(object.getName()).toBe('')
+  })
+
   test('Return the uuid', () => {
     const object = new GeolocusMultiPolygonObject([
       [
@@ -419,6 +614,15 @@ describe('Test the GeolocusMultiPolygonObject class', () => {
     ])
     const clone = object.clone()
     expect(clone.getVertex()).toEqual(object.getVertex())
+  })
+
+  test('Translate itself', () => {
+    const object = GeolocusMultiPolygonObject.fromBBox([0, 0, 2, 2])
+    object.translate([0, 0], [1, 1])
+    expect(
+      Compare.GE(object.getCenter()[0], 1.99) &&
+        Compare.LE(object.getCenter()[0], 2.01),
+    ).toBeTruthy()
   })
 
   test('Get the GeolocusMultiPolygonObject from bbox', () => {
