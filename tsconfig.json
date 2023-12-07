@@ -13,7 +13,7 @@
     "declaration": true
   },
   "exclude": ["**/test.ts"],
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "example/sdf/sdf.demo.ts"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

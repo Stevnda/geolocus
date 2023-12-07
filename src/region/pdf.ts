@@ -1,6 +1,6 @@
 import { Vector2 } from '../math'
 import { Position2 } from '../type'
-import { IRegionPDF } from './type'
+import { IRegionPDF, IRegionResult, RegionGird } from './type'
 
 export class RegionPDF {
   private static calculateNormalDistributionValue(
@@ -95,7 +95,82 @@ export class RegionPDF {
     )
   }
 
-  static computePDF(pdf: IRegionPDF, target: Position2) {
+  private static compare(
+    gird: RegionGird,
+    originRow: number,
+    originCol: number,
+    rowOffset: number,
+    colOffset: number,
+  ) {
+    const row = gird.length
+    const col = gird[0].length
+    let other = 9999
+    const targetRow = originRow + rowOffset
+    const targetCol = originCol + colOffset
+    if (targetRow >= 0 && targetCol > 0 && targetRow < row && targetCol < col) {
+      other = gird[targetRow][targetCol]
+    }
+
+    const compareValue =
+      other + Vector2.distanceTo([0, 0], [rowOffset, colOffset])
+    if (gird[originRow][originCol] > compareValue) {
+      gird[originRow][originCol] = compareValue
+    }
+  }
+
+  static getUnsignedInternalDistanceField(mask: RegionGird) {
+    const resultGird: RegionGird = []
+    for (let row = 0; row < mask.length; row++) {
+      const temp = []
+      for (let col = 0; col < mask[0].length; col++) {
+        if (mask[row][col]) {
+          temp.push(9999)
+        } else {
+          temp.push(0)
+        }
+      }
+      resultGird.push(temp)
+    }
+
+    for (let row = 0; row < resultGird.length; row++) {
+      for (let col = 0; col < resultGird[0].length; col++) {
+        this.compare(resultGird, row, col, 0, -1)
+        this.compare(resultGird, row, col, -1, 0)
+        this.compare(resultGird, row, col, -1, -1)
+        this.compare(resultGird, row, col, -1, 1)
+      }
+      for (let col = resultGird[0].length - 1; col >= 0; col--) {
+        this.compare(resultGird, row, col, 0, 1)
+      }
+    }
+
+    for (let row = resultGird.length - 1; row >= 0; row--) {
+      for (let col = resultGird[0].length - 1; col >= 0; col--) {
+        this.compare(resultGird, row, col, 0, 1)
+        this.compare(resultGird, row, col, 1, 0)
+        this.compare(resultGird, row, col, 1, -1)
+        this.compare(resultGird, row, col, 1, 1)
+      }
+      for (let col = 0; col < resultGird[0].length; col++) {
+        this.compare(resultGird, row, col, 0, -1)
+      }
+    }
+
+    return resultGird
+  }
+
+  static computePDF(pdf: IRegionPDF, result: IRegionResult): RegionGird
+  static computePDF(
+    pdf: IRegionPDF,
+    result: IRegionResult,
+    target: Position2,
+  ): number
+
+  static computePDF(
+    pdf: IRegionPDF,
+    result: IRegionResult,
+    target?: Position2,
+  ): number | RegionGird {
     const type = pdf.type
     const origin = pdf.origin
     const map = {
@@ -103,26 +178,27 @@ export class RegionPDF {
       1: () =>
         this.distance(
           origin,
-          target,
+          target as Position2,
           pdf.distance as number,
           pdf.distanceDelta as number,
         ),
       2: () =>
         this.angle(
           origin,
-          target,
+          target as Position2,
           pdf.azimuth as number,
           pdf.azimuthDelta as number,
         ),
       3: () =>
         this.distanceAndAngle(
           origin,
-          target,
+          target as Position2,
           pdf.distance as number,
           pdf.distanceDelta as number,
           pdf.azimuth as number,
           pdf.azimuthDelta as number,
         ),
+      4: () => this.getUnsignedInternalDistanceField(result.mask as RegionGird),
     }
 
     return map[type]()

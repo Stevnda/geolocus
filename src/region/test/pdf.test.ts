@@ -1,6 +1,6 @@
 import { Compare } from '../../math'
 import { RegionPDF } from '../pdf'
-import { IRegionPDF } from '../type'
+import { IRegionPDF, IRegionResult } from '../type'
 
 describe('Test the RegionPDF class', () => {
   test('Test the constant PDF', () => {
@@ -12,8 +12,11 @@ describe('Test the RegionPDF class', () => {
       azimuth: null,
       azimuthDelta: null,
     }
+    const result = {}
 
-    expect(Compare.EQ(RegionPDF.computePDF(pdf, [1, 1]), 1)).toBeTruthy()
+    expect(
+      Compare.EQ(RegionPDF.computePDF(pdf, result as IRegionResult, [1, 1]), 1),
+    ).toBeTruthy()
   })
 
   test('Test the distance PDF', () => {
@@ -25,8 +28,14 @@ describe('Test the RegionPDF class', () => {
       azimuth: null,
       azimuthDelta: null,
     }
+    const result = {}
 
-    expect(Compare.EQ(RegionPDF.computePDF(pdf, [100, 0]), 1)).toBeTruthy()
+    expect(
+      Compare.EQ(
+        RegionPDF.computePDF(pdf, result as IRegionResult, [100, 0]),
+        1,
+      ),
+    ).toBeTruthy()
   })
 
   test('Test the angle PDF', () => {
@@ -38,8 +47,14 @@ describe('Test the RegionPDF class', () => {
       azimuth: Math.PI / 4,
       azimuthDelta: Math.PI / 6,
     }
+    const result = {}
 
-    expect(Compare.EQ(RegionPDF.computePDF(pdf, [100, 100]), 1)).toBeTruthy()
+    expect(
+      Compare.EQ(
+        RegionPDF.computePDF(pdf, result as IRegionResult, [100, 100]),
+        1,
+      ),
+    ).toBeTruthy()
   })
 
   test('Test the distanceAndAngle PDF', () => {
@@ -51,10 +66,14 @@ describe('Test the RegionPDF class', () => {
       azimuth: Math.PI / 4,
       azimuthDelta: Math.PI / 6,
     }
+    const result = {}
 
     expect(
       Compare.EQ(
-        RegionPDF.computePDF(pdf, [100 / Math.SQRT2, 100 / Math.SQRT2]),
+        RegionPDF.computePDF(pdf, result as IRegionResult, [
+          100 / Math.SQRT2,
+          100 / Math.SQRT2,
+        ]),
         1,
       ),
     ).toBeTruthy()

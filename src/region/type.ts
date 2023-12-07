@@ -23,7 +23,7 @@ export interface IRelationHandler {
 }
 
 export interface IRegionPDF {
-  type: 0 | 1 | 2 | 3
+  type: 0 | 1 | 2 | 3 | 4
   origin: Position2
   distance: number | null
   distanceDelta: number | null

@@ -125,9 +125,9 @@ export class Region {
     const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
 
     const mask = []
-    for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
-      const temp = []
-      for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
+    for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
+      const temp: number[] = []
+      for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
         const tempPoint = new GeolocusPointObject([x, y])
         if (Topology.isIntersect(tempPoint, region)) {
           temp.push(1)
@@ -161,47 +161,51 @@ export class Region {
     const pdfArray = result.pdf
     const pdfGirdArray = result.pdfGird
     pdfArray.forEach((currentPdf) => {
-      const gird = []
-      for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
-        const temp = []
+      let gird: RegionGird = []
+      if (currentPdf.type === 4) {
+        gird = RegionPDF.computePDF(currentPdf, result)
+      } else {
         for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
-          if (mask[col][row]) {
-            temp.push(RegionPDF.computePDF(currentPdf, [x, y]))
-          } else {
-            temp.push(0)
+          const temp: number[] = []
+          for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
+            if (mask[row][col]) {
+              temp.push(RegionPDF.computePDF(currentPdf, result, [x, y]))
+            } else {
+              temp.push(0)
+            }
           }
+          gird.push(temp)
         }
-        gird.push(temp)
       }
       pdfGirdArray.push(gird)
     })
 
     const resultGird: RegionGird = []
-    for (let col = 0; col < mask.length; col++) {
+    for (let row = 0; row < mask.length; row++) {
       const temp = []
-      for (let row = 0; row < mask[0].length; row++) {
+      for (let col = 0; col < mask[0].length; col++) {
         temp.push(1)
       }
       resultGird.push(temp)
     }
     pdfGirdArray.forEach((currentGird) => {
-      for (let col = 0; col < currentGird.length; col++) {
-        for (let row = 0; row < currentGird[0].length; row++) {
-          resultGird[col][row] *= currentGird[col][row]
+      for (let row = 0; row < currentGird.length; row++) {
+        for (let col = 0; col < currentGird[0].length; col++) {
+          resultGird[row][col] *= currentGird[row][col]
         }
       }
     })
 
     let max = -GEO_MAX_VALUE
-    for (let col = 0; col < resultGird.length; col++) {
-      for (let row = 0; row < resultGird[0].length; row++) {
-        if (resultGird[col][row] > max) max = resultGird[col][row]
+    for (let row = 0; row < resultGird.length; row++) {
+      for (let col = 0; col < resultGird[0].length; col++) {
+        if (resultGird[row][col] > max) max = resultGird[row][col]
       }
     }
     if (max !== 0) {
-      for (let col = 0; col < resultGird.length; col++) {
-        for (let row = 0; row < resultGird[0].length; row++) {
-          resultGird[col][row] = resultGird[col][row] / max
+      for (let row = 0; row < resultGird.length; row++) {
+        for (let col = 0; col < resultGird[0].length; col++) {
+          resultGird[row][col] = resultGird[row][col] / max
         }
       }
     }
@@ -234,10 +238,10 @@ export class Region {
 
     let max = -GEO_MAX_VALUE
     let coord: Position2 = [0, 0]
-    for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
-      for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
-        if (Compare.GE(resultGrid[col][row], max)) {
-          max = resultGrid[col][row]
+    for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
+      for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
+        if (Compare.GE(resultGrid[row][col], max)) {
+          max = resultGrid[row][col]
           coord = [x, y]
         }
       }
