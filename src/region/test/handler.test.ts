@@ -13,7 +13,7 @@ import {
   regionHandlerOfTopologyAndDirection,
   regionHandlerOfTopologyAndDistance,
 } from '../handler'
-import { IRegionResult } from '../type'
+import { IRegionResult } from '../region.type'
 
 describe('Test some handler functions of Region', () => {
   test('Test the regionHandlerOfTopology function', () => {

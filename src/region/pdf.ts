@@ -1,6 +1,6 @@
 import { Vector2 } from '../math'
 import { Position2 } from '../type'
-import { IRegionPDF, IRegionResult, RegionGird } from './type'
+import { IRegionPDF, IRegionResult, RegionGird } from './region.type'
 
 export class RegionPDF {
   private static calculateNormalDistributionValue(
@@ -95,7 +95,7 @@ export class RegionPDF {
     )
   }
 
-  private static compare(
+  private static sdfCompare(
     gird: RegionGird,
     originRow: number,
     originCol: number,
@@ -134,25 +134,25 @@ export class RegionPDF {
 
     for (let row = 0; row < resultGird.length; row++) {
       for (let col = 0; col < resultGird[0].length; col++) {
-        this.compare(resultGird, row, col, 0, -1)
-        this.compare(resultGird, row, col, -1, 0)
-        this.compare(resultGird, row, col, -1, -1)
-        this.compare(resultGird, row, col, -1, 1)
+        this.sdfCompare(resultGird, row, col, 0, -1)
+        this.sdfCompare(resultGird, row, col, -1, 0)
+        this.sdfCompare(resultGird, row, col, -1, -1)
+        this.sdfCompare(resultGird, row, col, -1, 1)
       }
       for (let col = resultGird[0].length - 1; col >= 0; col--) {
-        this.compare(resultGird, row, col, 0, 1)
+        this.sdfCompare(resultGird, row, col, 0, 1)
       }
     }
 
     for (let row = resultGird.length - 1; row >= 0; row--) {
       for (let col = resultGird[0].length - 1; col >= 0; col--) {
-        this.compare(resultGird, row, col, 0, 1)
-        this.compare(resultGird, row, col, 1, 0)
-        this.compare(resultGird, row, col, 1, -1)
-        this.compare(resultGird, row, col, 1, 1)
+        this.sdfCompare(resultGird, row, col, 0, 1)
+        this.sdfCompare(resultGird, row, col, 1, 0)
+        this.sdfCompare(resultGird, row, col, 1, -1)
+        this.sdfCompare(resultGird, row, col, 1, 1)
       }
       for (let col = 0; col < resultGird[0].length; col++) {
-        this.compare(resultGird, row, col, 0, -1)
+        this.sdfCompare(resultGird, row, col, 0, -1)
       }
     }
 
@@ -165,7 +165,6 @@ export class RegionPDF {
     result: IRegionResult,
     target: Position2,
   ): number
-
   static computePDF(
     pdf: IRegionPDF,
     result: IRegionResult,

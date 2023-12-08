@@ -5,7 +5,7 @@ import { Vector2 } from '../math'
 import { Direction } from '../relation'
 import { GeolocusBBox, Position2 } from '../type'
 import { GeoJSON } from './geoJSON'
-import { IGeolocusObject, IGeolocusObjectOption } from './type'
+import { IGeolocusObject, IGeolocusObjectOption } from './object.type'
 
 export class GeolocusPointObject implements IGeolocusObject {
   private _type: 'Point'

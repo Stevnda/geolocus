@@ -17,7 +17,7 @@ import {
   regionHandlerOfTopologyAndDistance,
 } from './handler'
 import { RegionPDF } from './pdf'
-import { IRegionResult, RegionGird } from './type'
+import { IRegionResult, RegionGird } from './region.type'
 
 const map = {
   0: () => {

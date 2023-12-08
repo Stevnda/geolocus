@@ -19,7 +19,7 @@ import {
   IRegionPDF,
   IRegionResult,
   IRelationHandler,
-} from './type'
+} from './region.type'
 
 const equalHandler: IRelationHandler = (
   origin: GeolocusObject,
@@ -73,7 +73,7 @@ const intersectHandler: IRelationHandler = (
     [targetBBox[0], targetBBox[1]],
     [targetBBox[2], targetBBox[3]],
   )
-  if (Compare.LE(targetLength, 0.05)) targetLength = 0.05
+  if (Compare.LE(targetLength, 0.005)) targetLength = 0.005
   const fuzzyRegion = Topology.bufferOfDistance(origin, targetLength)
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
 

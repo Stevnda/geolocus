@@ -4,7 +4,7 @@ import {
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from './object'
-import { IGeoRelationWithSemantic } from './relation/type'
+import { IGeoRelationWithSemantic } from './relation/relation.type'
 import { GeolocusObject, Position2 } from './type'
 
 interface IGeolocusObjectOption {

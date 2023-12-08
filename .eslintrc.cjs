@@ -19,6 +19,7 @@ module.exports = {
     'import/default': 0,
     'import/no-named-as-default-member': 0,
     'no-use-before-define': 0,
+    'lines-between-class-members': 0,
   },
   settings: {
     'import/resolver': {

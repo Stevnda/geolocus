@@ -1,6 +1,6 @@
 import { Compare } from '../../math'
 import { RegionPDF } from '../pdf'
-import { IRegionPDF, IRegionResult } from '../type'
+import { IRegionPDF, IRegionResult } from '../region.type'
 
 describe('Test the RegionPDF class', () => {
   test('Test the constant PDF', () => {
