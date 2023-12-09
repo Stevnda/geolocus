@@ -8,7 +8,28 @@ import {
   GeolocusMultiPolygonObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
+  getGeolocusObjectMaskWithinBBox,
 } from '../object'
+
+describe('Test handler function', () => {
+  test('Return the mask of object within its bbox', () => {
+    const polygon = new GeolocusPolygonObject([
+      [
+        [0, 0],
+        [2, 0],
+        [0, 2],
+        [0, 0],
+      ],
+    ])
+    const mask = getGeolocusObjectMaskWithinBBox(polygon, 16)
+    expect(mask).toEqual([
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 0],
+      [1, 1, 0, 0],
+    ])
+  })
+})
 
 describe('Test the GeolocusPointObject class', () => {
   const context = new GeolocusContext('default')
@@ -192,7 +213,6 @@ describe('Test the GeolocusLineStringObject class', () => {
       ]),
     )
   })
-
   test('Clone itself', () => {
     const object = new GeolocusLineStringObject([
       [1, 1],
@@ -334,19 +354,6 @@ describe('Test the GeolocusPolygonObject class', () => {
     ])
   })
 
-  test('Clone itself', () => {
-    const object = new GeolocusPolygonObject([
-      [
-        [1, 1],
-        [1, 2],
-        [1, 3],
-        [1, 1],
-      ],
-    ])
-    const clone = object.clone()
-    expect(clone.getVertex()).toEqual(object.getVertex())
-  })
-
   test('Return the bbox', () => {
     const object = new GeolocusPolygonObject([
       [
@@ -401,6 +408,30 @@ describe('Test the GeolocusPolygonObject class', () => {
       Compare.GE(object.getCenter()[0], 1.99) &&
         Compare.LE(object.getCenter()[0], 2.01),
     ).toBeTruthy()
+  })
+
+  test('Return the mask of object within its bbox', () => {
+    const object = GeolocusPolygonObject.fromBBox([1, 1, 2, 2])
+    const mask = object.getMaskWithinBBox(16)
+    expect(mask).toEqual([
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+    ])
+  })
+
+  test('Clone itself', () => {
+    const object = new GeolocusPolygonObject([
+      [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [1, 1],
+      ],
+    ])
+    const clone = object.clone()
+    expect(clone.getVertex()).toEqual(object.getVertex())
   })
 
   test('Get the GeolocusPolygonObject from bbox', () => {
@@ -599,6 +630,17 @@ describe('Test the GeolocusMultiPolygonObject class', () => {
         ],
       ]),
     )
+  })
+
+  test('Return the mask of object within its bbox', () => {
+    const object = GeolocusMultiPolygonObject.fromBBox([1, 1, 2, 2])
+    const mask = object.getMaskWithinBBox(16)
+    expect(mask).toEqual([
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+      [1, 1, 1, 1],
+    ])
   })
 
   test('Clone itself', () => {

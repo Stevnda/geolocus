@@ -1,6 +1,6 @@
 import { Vector2 } from '../math'
-import { Position2 } from '../type'
-import { IRegionPDF, IRegionResult, RegionGird } from './region.type'
+import { GeolocusGird, Position2 } from '../type'
+import { IRegionPDF } from './region.type'
 
 export class RegionPDF {
   private static calculateNormalDistributionValue(
@@ -45,6 +45,7 @@ export class RegionPDF {
     distance: number,
     delta: number,
   ) {
+    console.log(origin)
     const x = Vector2.distanceTo(origin, target)
 
     return this.calculateNormalDistributionValue(x, distance, delta / 2)
@@ -56,6 +57,7 @@ export class RegionPDF {
     azimuth: number,
     delta: number,
   ) {
+    console.log(origin)
     const radiansTransform = -azimuth + Math.PI / 2
     const v1 = Vector2.sub(target, origin)
     const v2: Position2 = [
@@ -96,7 +98,7 @@ export class RegionPDF {
   }
 
   private static sdfCompare(
-    gird: RegionGird,
+    gird: GeolocusGird,
     originRow: number,
     originCol: number,
     rowOffset: number,
@@ -118,8 +120,11 @@ export class RegionPDF {
     }
   }
 
-  static getUnsignedInternalDistanceField(mask: RegionGird) {
-    const resultGird: RegionGird = []
+  private static getUnsignedInternalDistanceField(pdf: IRegionPDF) {
+    const resultGird: GeolocusGird = []
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const mask = pdf.sdf.geolocusObject!.getMaskWithinBBox(pdf.sdf.girdNum!)
+
     for (let row = 0; row < mask.length; row++) {
       const temp = []
       for (let col = 0; col < mask[0].length; col++) {
@@ -159,17 +164,12 @@ export class RegionPDF {
     return resultGird
   }
 
-  static computePDF(pdf: IRegionPDF, result: IRegionResult): RegionGird
+  static computePDF(pdf: IRegionPDF): GeolocusGird
+  static computePDF(pdf: IRegionPDF, target: Position2): number
   static computePDF(
     pdf: IRegionPDF,
-    result: IRegionResult,
-    target: Position2,
-  ): number
-  static computePDF(
-    pdf: IRegionPDF,
-    result: IRegionResult,
     target?: Position2,
-  ): number | RegionGird {
+  ): number | GeolocusGird {
     const type = pdf.type
     const origin = pdf.origin
     const map = {
@@ -178,26 +178,26 @@ export class RegionPDF {
         this.distance(
           origin,
           target as Position2,
-          pdf.distance as number,
-          pdf.distanceDelta as number,
+          pdf.gdf.distance as number,
+          pdf.gdf.distanceDelta as number,
         ),
       2: () =>
         this.angle(
           origin,
           target as Position2,
-          pdf.azimuth as number,
-          pdf.azimuthDelta as number,
+          pdf.gdf.azimuth as number,
+          pdf.gdf.azimuthDelta as number,
         ),
       3: () =>
         this.distanceAndAngle(
           origin,
           target as Position2,
-          pdf.distance as number,
-          pdf.distanceDelta as number,
-          pdf.azimuth as number,
-          pdf.azimuthDelta as number,
+          pdf.gdf.distance as number,
+          pdf.gdf.distanceDelta as number,
+          pdf.gdf.azimuth as number,
+          pdf.gdf.azimuthDelta as number,
         ),
-      4: () => this.getUnsignedInternalDistanceField(result.mask as RegionGird),
+      4: () => this.getUnsignedInternalDistanceField(pdf),
     }
 
     return map[type]()

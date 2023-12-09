@@ -10,3 +10,5 @@ export {
   SemanticDistance,
   TopologyRelation,
 } from './relation'
+
+export { GeolocusGird } from './common'

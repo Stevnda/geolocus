@@ -110,8 +110,10 @@ export class Topology {
     object: GeolocusObject,
     range: EuclideanDistanceRange,
   ) => {
-    const buffer0 = this.buffer(object, range[0])
-    const buffer1 = this.buffer(object, range[1])
+    const min = Math.min(...range)
+    const max = Math.max(...range)
+    const buffer0 = this.buffer(object, min)
+    const buffer1 = this.buffer(object, max)
 
     const mask = turf.mask(buffer1, buffer0)
     return new GeolocusPolygonObject(mask.geometry.coordinates as Position2[][])

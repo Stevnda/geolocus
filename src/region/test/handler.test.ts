@@ -25,6 +25,7 @@ describe('Test some handler functions of Region', () => {
     ])
     const context = new GeolocusContext('test')
     const origin = new GeolocusPointObject([0, 0], context)
+    const origin1 = GeolocusPolygonObject.fromBBox([-1, -1, 1, 1], context)
     const target = new GeolocusPointObject([0, 0], context)
     let result: IRegionResult = {
       region: MaxBBoxPolygon,
@@ -32,7 +33,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
     const relation: IGeoRelation[] = [
       'equal',
@@ -59,13 +60,13 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
     // contain
     regionHandlerOfTopology(origin, relation[1], target, result)
     bbox = result.region?.getBBox() as GeolocusBBox
     expect(
-      (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
+      (() => Compare.GT(bbox[0], -0.0051) && Compare.LT(bbox[2], 0.0051))(),
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
@@ -73,13 +74,13 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
     // intersect
     regionHandlerOfTopology(origin, relation[2], target, result)
     bbox = result.region?.getBBox() as GeolocusBBox
     expect(
-      (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
+      (() => Compare.GT(bbox[0], -0.0051) && Compare.LT(bbox[2], 0.0051))(),
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
@@ -87,7 +88,20 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
+    }
+    regionHandlerOfTopology(origin1, relation[2], target, result)
+    bbox = result.region?.getBBox() as GeolocusBBox
+    expect(
+      (() => Compare.GT(bbox[0], -1.0051) && Compare.LT(bbox[2], 1.0051))(),
+    ).toBeTruthy()
+    result = {
+      region: MaxBBoxPolygon,
+      pdf: [],
+      coord: null,
+      pdfGird: [],
+      resultGird: null,
+      regionMask: null,
     }
     // disjoint
     regionHandlerOfTopology(origin, relation[3], target, result)
@@ -115,7 +129,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
 
     const relation: IGeoRelation = {
@@ -128,7 +142,7 @@ describe('Test some handler functions of Region', () => {
     result.pdf.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta ===
+          value.gdf.distanceDelta ===
           100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })
@@ -150,7 +164,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
 
     const relation: IGeoRelation = {
@@ -180,7 +194,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
 
     const relation: IGeoRelation[] = [
@@ -208,7 +222,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
     // contain
     regionHandlerOfTopologyAndDirection(origin, relation[1], target, result)
@@ -222,7 +236,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
     // intersect
     regionHandlerOfTopologyAndDirection(origin, relation[2], target, result)
@@ -236,7 +250,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
     // disjoint
     regionHandlerOfTopologyAndDirection(origin, relation[3], target, result)
@@ -260,7 +274,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
 
     const relation: IGeoRelation = {
@@ -273,7 +287,7 @@ describe('Test some handler functions of Region', () => {
     result.pdf.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta ===
+          value.gdf.distanceDelta ===
           100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })
@@ -295,7 +309,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
 
     const relation: IGeoRelation = {
@@ -308,7 +322,7 @@ describe('Test some handler functions of Region', () => {
     result.pdf.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta ===
+          value.gdf.distanceDelta ===
           100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })
@@ -330,7 +344,7 @@ describe('Test some handler functions of Region', () => {
       coord: null,
       pdfGird: [],
       resultGird: null,
-      mask: null,
+      regionMask: null,
     }
 
     const relation: IGeoRelation = {
@@ -343,7 +357,7 @@ describe('Test some handler functions of Region', () => {
     result.pdf.forEach((value) => {
       expect(
         (() =>
-          value.distanceDelta ===
+          value.gdf.distanceDelta ===
           100 * origin.getContext()!.getDistanceDelta())(),
       ).toBeTruthy()
     })

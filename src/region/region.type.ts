@@ -1,5 +1,5 @@
 import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '../object'
-import { GeolocusObject, IGeoRelation, Position2 } from '../type'
+import { GeolocusGird, GeolocusObject, IGeoRelation, Position2 } from '../type'
 
 export interface IRegionHandler {
   (
@@ -18,26 +18,29 @@ export interface IRelationHandler {
   ): {
     topologyRegion: IRegionResult['region']
     topologyPDF: IRegionPDF
-    fuzzyRegion: GeolocusPolygonObject
   }
 }
 
 export interface IRegionPDF {
   type: 0 | 1 | 2 | 3 | 4
   origin: Position2
-  distance: number | null
-  distanceDelta: number | null
-  azimuth: number | null
-  azimuthDelta: number | null
+  gdf: {
+    distance: number | null
+    distanceDelta: number | null
+    azimuth: number | null
+    azimuthDelta: number | null
+  }
+  sdf: {
+    geolocusObject: GeolocusMultiPolygonObject | GeolocusPolygonObject | null
+    girdNum: number | null
+  }
 }
-
-export type RegionGird = number[][]
 
 export interface IRegionResult {
   region: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
   pdf: IRegionPDF[]
   coord: Position2 | null
-  pdfGird: RegionGird[]
-  resultGird: RegionGird | null
-  mask: RegionGird | null
+  pdfGird: GeolocusGird[]
+  resultGird: GeolocusGird | null
+  regionMask: GeolocusGird | null
 }

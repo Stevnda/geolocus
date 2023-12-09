@@ -1,12 +1,7 @@
 import { GeolocusContext } from '../context'
 import { Compare, GEO_MAX_VALUE } from '../math'
-import {
-  GeolocusMultiPolygonObject,
-  GeolocusPointObject,
-  GeolocusPolygonObject,
-} from '../object'
-import { Topology } from '../relation'
-import { GeolocusObject, IGeoTriple, Position2 } from '../type'
+import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '../object'
+import { GeolocusGird, GeolocusObject, IGeoTriple, Position2 } from '../type'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -17,7 +12,7 @@ import {
   regionHandlerOfTopologyAndDistance,
 } from './handler'
 import { RegionPDF } from './pdf'
-import { IRegionResult, RegionGird } from './region.type'
+import { IRegionResult } from './region.type'
 
 const map = {
   0: () => {
@@ -68,7 +63,7 @@ export class Region {
         coord: null,
         pdfGird: [],
         resultGird: null,
-        mask: null,
+        regionMask: null,
       }
 
       const tripleSet = relation.getGeoTripleByUUID(
@@ -91,9 +86,11 @@ export class Region {
       }
       this._resultMap.set(currentUUID, result)
 
-      result.mask = this.getRegionMask(currentUUID)
-      const gird = this.getRegionGrid(currentUUID)
-      result.resultGird = gird
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      result.regionMask = result.region!.getMaskWithinBBox(
+        context.getGirdSize(),
+      )
+      result.resultGird = this.getRegionGrid(currentUUID)
       const { coord } = this.getCoordOfMaximum(currentUUID)
       result.coord = coord
 
@@ -104,41 +101,6 @@ export class Region {
     }
 
     return uuidArray
-  }
-
-  private getRegionMask(uuid: string) {
-    const result = this.getResultByUUID(uuid) as IRegionResult
-    // if (!result) {
-    //   throw new Error('The result of this uuid is not existed.')
-    // }
-    const region = result.region as
-      | GeolocusPolygonObject
-      | GeolocusMultiPolygonObject
-    const bbox = region.getBBox()
-    const xStart = bbox[0]
-    const xEnd = bbox[2]
-    const dx = xEnd - xStart
-    const yStart = bbox[1]
-    const yEnd = bbox[3]
-    const dy = yEnd - yStart
-    const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
-
-    const mask = []
-    for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
-      const temp: number[] = []
-      for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
-        const tempPoint = new GeolocusPointObject([x, y])
-        if (Topology.isIntersect(tempPoint, region)) {
-          temp.push(1)
-        } else {
-          temp.push(0)
-        }
-      }
-      mask.push(temp)
-    }
-
-    return mask
   }
 
   getRegionGrid(uuid: string) {
@@ -157,19 +119,19 @@ export class Region {
     const ratio = dy / dx
     const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
 
-    const mask = result.mask as RegionGird
+    const mask = result.regionMask as GeolocusGird
     const pdfArray = result.pdf
     const pdfGirdArray = result.pdfGird
     pdfArray.forEach((currentPdf) => {
-      let gird: RegionGird = []
+      let gird: GeolocusGird = []
       if (currentPdf.type === 4) {
-        gird = RegionPDF.computePDF(currentPdf, result)
+        gird = RegionPDF.computePDF(currentPdf)
       } else {
         for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
           const temp: number[] = []
           for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
             if (mask[row][col]) {
-              temp.push(RegionPDF.computePDF(currentPdf, result, [x, y]))
+              temp.push(RegionPDF.computePDF(currentPdf, [x, y]))
             } else {
               temp.push(0)
             }
@@ -180,7 +142,7 @@ export class Region {
       pdfGirdArray.push(gird)
     })
 
-    const resultGird: RegionGird = []
+    const resultGird: GeolocusGird = []
     for (let row = 0; row < mask.length; row++) {
       const temp = []
       for (let col = 0; col < mask[0].length; col++) {
@@ -218,7 +180,7 @@ export class Region {
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
-    const resultGrid = result.resultGird as RegionGird
+    const resultGrid = result.resultGird as GeolocusGird
     // if (!resultGrid) {
     //   throw new Error('Please compute the object first.')
     // }

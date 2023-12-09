@@ -1,7 +1,9 @@
 import { GeolocusContext } from '.'
 
 export class Route {
+  // the child nodes of node
   private _children: Map<string, Set<string>>
+  // the parent nodes of node
   private _parent: Map<string, Set<string>>
   private _context: GeolocusContext
 
@@ -55,15 +57,7 @@ export class Route {
     // generate inDegree of graph
     const inDegree: Record<string, number> = {}
     for (const key of this._children.keys()) {
-      inDegree[key] = 0
-    }
-    for (const key of this._children.keys()) {
-      const children = this._children.get(key)
-      if (children) {
-        for (const child of children) {
-          inDegree[child] += 1
-        }
-      }
+      inDegree[key] = (this._parent.get(key) as Set<string>).size
     }
 
     // traversal the node that its inDegree is 0

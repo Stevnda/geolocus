@@ -2,10 +2,41 @@ import crypto from 'crypto'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
 import { GeolocusContext } from '../context'
 import { Vector2 } from '../math'
-import { Direction } from '../relation'
-import { GeolocusBBox, Position2 } from '../type'
+import { Direction, Topology } from '../relation'
+import { GeolocusBBox, GeolocusGird, GeolocusObject, Position2 } from '../type'
 import { GeoJSON } from './geoJSON'
 import { IGeolocusObject, IGeolocusObjectOption } from './object.type'
+
+export const getGeolocusObjectMaskWithinBBox = (
+  object: GeolocusObject,
+  girdNum: number,
+): GeolocusGird => {
+  const bbox = object.getBBox()
+  const xStart = bbox[0]
+  const xEnd = bbox[2]
+  const dx = xEnd - xStart
+  const yStart = bbox[1]
+  const yEnd = bbox[3]
+  const dy = yEnd - yStart
+  const ratio = dy / dx
+  const girdSize = dx / Math.sqrt(girdNum / ratio)
+
+  const mask = []
+  for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
+    const temp: number[] = []
+    for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
+      const tempPoint = new GeolocusPointObject([x, y])
+      if (Topology.isIntersect(tempPoint, object)) {
+        temp.push(1)
+      } else {
+        temp.push(0)
+      }
+    }
+    mask.push(temp)
+  }
+
+  return mask
+}
 
 export class GeolocusPointObject implements IGeolocusObject {
   private _type: 'Point'
@@ -77,7 +108,6 @@ export class GeolocusPointObject implements IGeolocusObject {
   getGeoJSON(): Feature<Point> {
     return this._geoJSON
   }
-
   clone(): GeolocusPointObject {
     return new GeolocusPointObject(
       this._geoJSON.geometry.coordinates.slice() as Position2,
@@ -190,7 +220,6 @@ export class GeolocusLineStringObject implements IGeolocusObject {
   getGeoJSON(): Feature<LineString> {
     return this._geoJSON
   }
-
   clone(): GeolocusLineStringObject {
     return new GeolocusLineStringObject(
       this._geoJSON.geometry.coordinates.slice() as Position2[],
@@ -301,6 +330,10 @@ export class GeolocusPolygonObject implements IGeolocusObject {
 
   getGeoJSON(): Feature<Polygon> {
     return this._geoJSON
+  }
+
+  getMaskWithinBBox(girdNum: number): GeolocusGird {
+    return getGeolocusObjectMaskWithinBBox(this, girdNum)
   }
 
   clone(): GeolocusPolygonObject {
@@ -433,6 +466,10 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
 
   getGeoJSON(): Feature<MultiPolygon> {
     return this._geoJSON
+  }
+
+  getMaskWithinBBox(girdNum: number): GeolocusGird {
+    return getGeolocusObjectMaskWithinBBox(this, girdNum)
   }
 
   clone(): GeolocusMultiPolygonObject {
