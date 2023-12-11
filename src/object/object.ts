@@ -29,11 +29,7 @@ export const getGeolocusObjectMaskWithinBBox = (
         xStart + col * girdSize,
         yStart + row * girdSize,
       ])
-      if (Topology.isIntersect(tempPoint, object)) {
-        return 1
-      } else {
-        return 0
-      }
+      return +Topology.isIntersect(tempPoint, object)
     },
   )
 

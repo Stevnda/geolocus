@@ -36,7 +36,7 @@ export class Distance {
     maxY: number,
   ) {
     const clampX = MathUtil.clamp(x, minX, maxX)
-    const clampY = MathUtil.clamp(x, minY, maxY)
+    const clampY = MathUtil.clamp(y, minY, maxY)
     return Vector2.distanceTo([clampX, clampY], [x, y])
   }
 }

@@ -75,6 +75,10 @@ export class Region {
       resultRegion = topologyRegion
       resultPdf.push(topologyPDF)
     }
+    if (!resultRegion) {
+      throw new Error('The fuzzy region is not existed.')
+    }
+
     return { resultRegion, resultPdf }
   }
 
@@ -92,13 +96,13 @@ export class Region {
     const dy = yEnd - yStart
     const ratio = dy / dx
     const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
-    const sdfArray = pdfArray.filter((pdf) => pdf.type !== 4)
-    const gdfArray = pdfArray.filter((pdf) => pdf.type === 4)
+    const sdfArray = pdfArray.filter((pdf) => pdf.type === 4)
+    const gdfArray = pdfArray.filter((pdf) => pdf.type !== 4)
     const pdfGirdArray: IRegionResultPdfGird[] = []
     const rowCount = Math.ceil(dy / girdSize)
     const colCount = Math.ceil(dx / girdSize)
 
-    sdfArray.forEach((pdf) => {
+    gdfArray.forEach((pdf) => {
       const gird = Gird.getGirdWithFilter(rowCount, colCount, (row, col) => {
         const x = xStart + col * girdSize
         const y = yStart + row * girdSize
@@ -111,7 +115,7 @@ export class Region {
       }
       pdfGirdArray.push(tempPdfGird)
     })
-    gdfArray.forEach((pdf) => {
+    sdfArray.forEach((pdf) => {
       const tempPdfGird: IRegionResultPdfGird = {
         type: 'sdf',
         gird: RegionPDF.computePDF(pdf),

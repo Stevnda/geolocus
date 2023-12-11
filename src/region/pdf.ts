@@ -123,37 +123,56 @@ export class RegionPDF {
   private static getUnsignedInternalDistanceField(pdf: IRegionPDF) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const mask = pdf.sdf.girdRegion!.getMaskWithinBBox(pdf.sdf.girdNum!)
+    const tempGird = Gird.getGirdWithFilter(
+      mask.length + 4,
+      mask[0].length + 4,
+      (row, col) => {
+        if (
+          row <= 1 ||
+          col <= 1 ||
+          row >= mask.length + 2 ||
+          col >= mask[0].length + 2
+        ) {
+          return 0
+        } else {
+          console.log(row - 2, col - 2)
+          return mask[row - 2][col - 2] ? 9999 : 0
+        }
+      },
+    )
+
+    for (let row = 0; row < tempGird.length; row++) {
+      for (let col = 0; col < tempGird[0].length; col++) {
+        this.sdfCompare(tempGird, row, col, 0, -1)
+        this.sdfCompare(tempGird, row, col, -1, 0)
+        this.sdfCompare(tempGird, row, col, -1, -1)
+        this.sdfCompare(tempGird, row, col, -1, 1)
+      }
+      for (let col = tempGird[0].length - 1; col >= 0; col--) {
+        this.sdfCompare(tempGird, row, col, 0, 1)
+      }
+    }
+
+    for (let row = tempGird.length - 1; row >= 0; row--) {
+      for (let col = tempGird[0].length - 1; col >= 0; col--) {
+        this.sdfCompare(tempGird, row, col, 0, 1)
+        this.sdfCompare(tempGird, row, col, 1, 0)
+        this.sdfCompare(tempGird, row, col, 1, -1)
+        this.sdfCompare(tempGird, row, col, 1, 1)
+      }
+      for (let col = 0; col < tempGird[0].length; col++) {
+        this.sdfCompare(tempGird, row, col, 0, -1)
+      }
+    }
+
     const resultGird = Gird.getGirdWithFilter(
       mask.length,
       mask[0].length,
       (row, col) => {
-        return mask[row][col] ? 9999 : 0
+        console.log(tempGird[row + 2][col + 2])
+        return tempGird[row + 2][col + 2]
       },
     )
-
-    for (let row = 0; row < resultGird.length; row++) {
-      for (let col = 0; col < resultGird[0].length; col++) {
-        this.sdfCompare(resultGird, row, col, 0, -1)
-        this.sdfCompare(resultGird, row, col, -1, 0)
-        this.sdfCompare(resultGird, row, col, -1, -1)
-        this.sdfCompare(resultGird, row, col, -1, 1)
-      }
-      for (let col = resultGird[0].length - 1; col >= 0; col--) {
-        this.sdfCompare(resultGird, row, col, 0, 1)
-      }
-    }
-
-    for (let row = resultGird.length - 1; row >= 0; row--) {
-      for (let col = resultGird[0].length - 1; col >= 0; col--) {
-        this.sdfCompare(resultGird, row, col, 0, 1)
-        this.sdfCompare(resultGird, row, col, 1, 0)
-        this.sdfCompare(resultGird, row, col, 1, -1)
-        this.sdfCompare(resultGird, row, col, 1, 1)
-      }
-      for (let col = 0; col < resultGird[0].length; col++) {
-        this.sdfCompare(resultGird, row, col, 0, -1)
-      }
-    }
 
     return resultGird
   }

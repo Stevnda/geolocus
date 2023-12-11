@@ -88,7 +88,7 @@ describe('Test the RegionPDF class', () => {
 
     const gird = RegionPDF.computePDF(pdf)
     expect(
-      Compare.EQ(gird[3][0], 2) && Compare.EQ(gird[1][1], 1 + Math.SQRT2),
+      Compare.EQ(gird[1][1], 2) && Compare.EQ(gird[1][2], Math.SQRT2),
     ).toBeTruthy()
   })
 })
