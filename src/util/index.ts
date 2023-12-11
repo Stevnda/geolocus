@@ -1,3 +1,4 @@
+export { Gird } from './gird'
 export { Compare, MathUtil } from './mathUtil'
 export { Vector2 } from './vector'
 

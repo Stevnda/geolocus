@@ -1,4 +1,4 @@
-import { Compare } from '../../math'
+import { Compare } from '../../util'
 import { GeoJSON } from '../geoJSON'
 
 describe('Test the GeoJSON class', () => {

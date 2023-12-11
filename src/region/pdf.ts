@@ -1,5 +1,6 @@
-import { Vector2 } from '../math'
-import { GeolocusGird, Position2 } from '../type'
+import { Distance } from '../relation'
+import { GeolocusBBox, GeolocusGird, Position2 } from '../type'
+import { Gird, Vector2 } from '../util'
 import { IRegionPDF } from './region.type'
 
 export class RegionPDF {
@@ -40,13 +41,12 @@ export class RegionPDF {
   }
 
   private static distance(
-    origin: Position2,
+    bbox: GeolocusBBox,
     target: Position2,
     distance: number,
     delta: number,
   ) {
-    console.log(origin)
-    const x = Vector2.distanceTo(origin, target)
+    const x = Distance.distanceToBBox(...target, ...bbox)
 
     return this.calculateNormalDistributionValue(x, distance, delta / 2)
   }
@@ -57,7 +57,6 @@ export class RegionPDF {
     azimuth: number,
     delta: number,
   ) {
-    console.log(origin)
     const radiansTransform = -azimuth + Math.PI / 2
     const v1 = Vector2.sub(target, origin)
     const v2: Position2 = [
@@ -71,13 +70,14 @@ export class RegionPDF {
 
   private static distanceAndAngle(
     origin: Position2,
+    bbox: GeolocusBBox,
     target: Position2,
     distance: number,
     deltaDistance: number,
     azimuth: number,
     deltaAzimuth: number,
   ) {
-    const x = Vector2.distanceTo(origin, target)
+    const x = Distance.distanceToBBox(...target, ...bbox)
 
     const radiansTransform = -azimuth + Math.PI / 2
     const v1 = Vector2.sub(target, origin)
@@ -121,21 +121,15 @@ export class RegionPDF {
   }
 
   private static getUnsignedInternalDistanceField(pdf: IRegionPDF) {
-    const resultGird: GeolocusGird = []
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const mask = pdf.sdf.geolocusObject!.getMaskWithinBBox(pdf.sdf.girdNum!)
-
-    for (let row = 0; row < mask.length; row++) {
-      const temp = []
-      for (let col = 0; col < mask[0].length; col++) {
-        if (mask[row][col]) {
-          temp.push(9999)
-        } else {
-          temp.push(0)
-        }
-      }
-      resultGird.push(temp)
-    }
+    const mask = pdf.sdf.girdRegion!.getMaskWithinBBox(pdf.sdf.girdNum!)
+    const resultGird = Gird.getGirdWithFilter(
+      mask.length,
+      mask[0].length,
+      (row, col) => {
+        return mask[row][col] ? 9999 : 0
+      },
+    )
 
     for (let row = 0; row < resultGird.length; row++) {
       for (let col = 0; col < resultGird[0].length; col++) {
@@ -172,25 +166,28 @@ export class RegionPDF {
   ): number | GeolocusGird {
     const type = pdf.type
     const origin = pdf.origin
+    const center = origin.getCenter()
+    const bbox = origin.getBBox()
     const map = {
       0: () => this.constant(),
       1: () =>
         this.distance(
-          origin,
+          bbox,
           target as Position2,
           pdf.gdf.distance as number,
           pdf.gdf.distanceDelta as number,
         ),
       2: () =>
         this.angle(
-          origin,
+          center,
           target as Position2,
           pdf.gdf.azimuth as number,
           pdf.gdf.azimuthDelta as number,
         ),
       3: () =>
         this.distanceAndAngle(
-          origin,
+          center,
+          bbox,
           target as Position2,
           pdf.gdf.distance as number,
           pdf.gdf.distanceDelta as number,

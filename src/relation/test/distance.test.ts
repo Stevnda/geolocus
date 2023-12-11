@@ -1,5 +1,5 @@
 import { GeolocusContext } from '../../context'
-import { GEO_MAX_VALUE } from '../../math'
+import { GEO_MAX_VALUE } from '../../util'
 import { Distance } from '../distance'
 
 describe('Test the Distance class', () => {

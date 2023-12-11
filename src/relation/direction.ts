@@ -1,6 +1,6 @@
-import { GEO_MAX_VALUE } from '../math'
 import { GeolocusPolygonObject } from '../object'
 import { GeolocusBBox, GeolocusObject, Position2 } from '../type'
+import { GEO_MAX_VALUE } from '../util'
 
 export class Direction {
   // radian

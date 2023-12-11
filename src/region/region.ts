@@ -1,7 +1,14 @@
 import { GeolocusContext } from '../context'
-import { Compare, GEO_MAX_VALUE } from '../math'
 import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '../object'
-import { GeolocusGird, GeolocusObject, IGeoTriple, Position2 } from '../type'
+import {
+  EuclideanDistanceRange,
+  GeolocusBBox,
+  GeolocusGird,
+  GeolocusObject,
+  IGeoTriple,
+  Position2,
+} from '../type'
+import { Compare, GEO_MAX_VALUE, Gird } from '../util'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -12,7 +19,7 @@ import {
   regionHandlerOfTopologyAndDistance,
 } from './handler'
 import { RegionPDF } from './pdf'
-import { IRegionResult } from './region.type'
+import { IRegionPDF, IRegionResult, IRegionResultPdfGird } from './region.type'
 
 const map = {
   0: () => {
@@ -103,12 +110,11 @@ export class Region {
     return uuidArray
   }
 
-  getRegionGrid(uuid: string) {
-    const result = this.getResultByUUID(uuid)
-    if (!result) {
-      throw new Error('The result of this uuid is not existed.')
-    }
-    const region = result.region as GeolocusMultiPolygonObject
+  private getPdfGird(
+    mask: GeolocusGird,
+    pdfArray: IRegionPDF[],
+    region: GeolocusMultiPolygonObject,
+  ) {
     const bbox = region.getBBox()
     const xStart = bbox[0]
     const xEnd = bbox[2]
@@ -118,61 +124,104 @@ export class Region {
     const dy = yEnd - yStart
     const ratio = dy / dx
     const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
-
-    const mask = result.regionMask as GeolocusGird
-    const pdfArray = result.pdf
-    const pdfGirdArray = result.pdfGird
-    pdfArray.forEach((currentPdf) => {
-      let gird: GeolocusGird = []
-      if (currentPdf.type === 4) {
-        gird = RegionPDF.computePDF(currentPdf)
-      } else {
-        for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
-          const temp: number[] = []
-          for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
-            if (mask[row][col]) {
-              temp.push(RegionPDF.computePDF(currentPdf, [x, y]))
-            } else {
-              temp.push(0)
-            }
-          }
-          gird.push(temp)
-        }
+    const sdfArray = pdfArray.filter((pdf) => pdf.type !== 4)
+    const gdfArray = pdfArray.filter((pdf) => pdf.type === 4)
+    const pdfGirdArray: IRegionResultPdfGird[] = []
+    const rowCount = Math.ceil(dy / girdSize)
+    const colCount = Math.ceil(dx / girdSize)
+    sdfArray.forEach((pdf) => {
+      const gird = Gird.getGirdWithFilter(rowCount, colCount, (row, col) => {
+        const x = xStart + col * girdSize
+        const y = yStart + row * girdSize
+        return mask[row][col] && RegionPDF.computePDF(pdf, [x, y])
+      })
+      const tempPdfGird: IRegionResultPdfGird = {
+        type: 'gdf',
+        gird,
+        bbox: null,
       }
-      pdfGirdArray.push(gird)
+      pdfGirdArray.push(tempPdfGird)
+    })
+    gdfArray.forEach((pdf) => {
+      const tempPdfGird: IRegionResultPdfGird = {
+        type: 'sdf',
+        gird: RegionPDF.computePDF(pdf),
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        bbox: pdf.sdf.girdRegion!.getBBox(),
+      }
+      pdfGirdArray.push(tempPdfGird)
     })
 
-    const resultGird: GeolocusGird = []
-    for (let row = 0; row < mask.length; row++) {
-      const temp = []
-      for (let col = 0; col < mask[0].length; col++) {
-        temp.push(1)
-      }
-      resultGird.push(temp)
-    }
-    pdfGirdArray.forEach((currentGird) => {
-      for (let row = 0; row < currentGird.length; row++) {
-        for (let col = 0; col < currentGird[0].length; col++) {
-          resultGird[row][col] *= currentGird[row][col]
-        }
-      }
-    })
+    return pdfGirdArray
+  }
 
-    let max = -GEO_MAX_VALUE
-    for (let row = 0; row < resultGird.length; row++) {
-      for (let col = 0; col < resultGird[0].length; col++) {
-        if (resultGird[row][col] > max) max = resultGird[row][col]
-      }
-    }
-    if (max !== 0) {
-      for (let row = 0; row < resultGird.length; row++) {
-        for (let col = 0; col < resultGird[0].length; col++) {
-          resultGird[row][col] = resultGird[row][col] / max
-        }
-      }
-    }
+  private extractRegionGird(
+    gird: GeolocusGird,
+    originBBox: GeolocusBBox,
+    targetBBox: GeolocusBBox,
+  ): GeolocusGird {
+    const girdRow = gird.length
+    const girdCol = gird[0].length
+
+    const originXStart = originBBox[0]
+    const originXEnd = originBBox[2]
+    const originDx = originXEnd - originXStart
+    const originYStart = originBBox[1]
+    const originYEnd = originBBox[3]
+    const originDy = originYEnd - originYStart
+
+    const targetXStart = targetBBox[0]
+    const targetXEnd = targetBBox[2]
+    const targetDx = targetXEnd - targetXStart
+    const targetYStart = targetBBox[1]
+    const targetYEnd = targetBBox[3]
+    const targetDy = targetYEnd - targetYStart
+    const ratio = targetDy / targetDx
+    const girdSize = targetDx / Math.sqrt(this._context.getGirdSize() / ratio)
+    const resultGird = Gird.getGirdWithFilter(
+      Math.ceil(targetDy / girdSize),
+      Math.ceil(targetDx / girdSize),
+      (row, col) => {
+        const x = originXStart + col * girdSize
+        const y = originYStart + row * girdSize
+        const transformX = Math.floor(((x - originXStart) / originDx) * girdCol)
+        const transformY = Math.floor(((y - originYStart) / originDy) * girdRow)
+        return gird[transformY][transformX]
+      },
+    )
 
     return resultGird
+  }
+
+  getRegionGrid(uuid: string) {
+    const result = this.getResultByUUID(uuid)
+    if (!result) {
+      throw new Error('The result of this uuid is not existed.')
+    }
+    const mask = result.regionMask as GeolocusGird
+    const resultGird: GeolocusGird = Gird.getGirdWithFillValue(
+      mask.length,
+      mask[0].length,
+      1,
+    )
+
+    const region = result.region as GeolocusMultiPolygonObject
+    const bbox = region.getBBox()
+    result.pdfGird = this.getPdfGird(mask, result.pdf, region)
+    result.pdfGird.forEach((pdfGird) => {
+      const tempGird = pdfGird.gird as GeolocusGird
+      const transformGird =
+        pdfGird.type === 'gdf'
+          ? tempGird
+          : this.extractRegionGird(tempGird, pdfGird.bbox as GeolocusBBox, bbox)
+
+      Gird.forEach(resultGird, (_, row, col) => {
+        resultGird[row][col] *= transformGird[row][col]
+      })
+    })
+
+    const transformGird = Gird.normalize(resultGird)
+    return transformGird
   }
 
   getCoordOfMaximum(uuid: string) {
@@ -181,9 +230,6 @@ export class Region {
       throw new Error('The result of this uuid is not existed.')
     }
     const resultGrid = result.resultGird as GeolocusGird
-    // if (!resultGrid) {
-    //   throw new Error('Please compute the object first.')
-    // }
 
     const region = result.region as
       | GeolocusPolygonObject
@@ -199,16 +245,17 @@ export class Region {
     const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
 
     let max = -GEO_MAX_VALUE
+    let min = GEO_MAX_VALUE
     let coord: Position2 = [0, 0]
-    for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
-      for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
-        if (Compare.GE(resultGrid[row][col], max)) {
-          max = resultGrid[row][col]
-          coord = [x, y]
-        }
+    Gird.forEach(resultGrid, (value, row, col) => {
+      const x = xStart + col * girdSize
+      const y = yStart + row * girdSize
+      if (Compare.GE(resultGrid[row][col], max)) {
+        max = value
+        coord = [x, y]
       }
-    }
-
-    return { coord, max }
+      if (Compare.LE(resultGrid[row][col], min)) min = value
+    })
+    return { coord, range: [min, max] as EuclideanDistanceRange }
   }
 }

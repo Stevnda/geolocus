@@ -1,9 +1,9 @@
 import crypto from 'crypto'
 import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
 import { GeolocusContext } from '../context'
-import { Vector2 } from '../math'
 import { Direction, Topology } from '../relation'
 import { GeolocusBBox, GeolocusGird, GeolocusObject, Position2 } from '../type'
+import { Gird, Vector2 } from '../util'
 import { GeoJSON } from './geoJSON'
 import { IGeolocusObject, IGeolocusObjectOption } from './object.type'
 
@@ -21,19 +21,21 @@ export const getGeolocusObjectMaskWithinBBox = (
   const ratio = dy / dx
   const girdSize = dx / Math.sqrt(girdNum / ratio)
 
-  const mask = []
-  for (let y = yStart, row = 0; y < yEnd; y += girdSize, row++) {
-    const temp: number[] = []
-    for (let x = xStart, col = 0; x < xEnd; x += girdSize, col++) {
-      const tempPoint = new GeolocusPointObject([x, y])
+  const mask = Gird.getGirdWithFilter(
+    Math.ceil(dy / girdSize),
+    Math.ceil(dx / girdSize),
+    (row, col) => {
+      const tempPoint = new GeolocusPointObject([
+        xStart + col * girdSize,
+        yStart + row * girdSize,
+      ])
       if (Topology.isIntersect(tempPoint, object)) {
-        temp.push(1)
+        return 1
       } else {
-        temp.push(0)
+        return 0
       }
-    }
-    mask.push(temp)
-  }
+    },
+  )
 
   return mask
 }

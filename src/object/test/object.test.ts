@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { GeolocusContext } from '../../context'
-import { Compare } from '../../math'
 import { GeolocusBBox } from '../../type'
+import { Compare } from '../../util'
 import { GeoJSON } from '../geoJSON'
 import {
   GeolocusLineStringObject,

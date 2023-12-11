@@ -114,9 +114,12 @@ export class Topology {
     const max = Math.max(...range)
     const buffer0 = this.buffer(object, min)
     const buffer1 = this.buffer(object, max)
+    const difference = martinez.diff(
+      buffer1.geometry.coordinates,
+      buffer0.geometry.coordinates,
+    )
 
-    const mask = turf.mask(buffer1, buffer0)
-    return new GeolocusPolygonObject(mask.geometry.coordinates as Position2[][])
+    return new GeolocusMultiPolygonObject(difference as Position2[][][])
   }
 
   static transformTranslate(

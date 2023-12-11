@@ -1,6 +1,6 @@
-import { Compare, GEO_MAX_VALUE } from '../../math'
 import { GeolocusPolygonObject } from '../../object'
 import { Position2 } from '../../type'
+import { Compare, GEO_MAX_VALUE } from '../../util'
 import { Direction } from '../direction'
 
 describe('Test the Direction class', () => {

@@ -1,7 +1,7 @@
-import { GEO_MAX_VALUE } from '../math'
 import { Region } from '../region'
 import { Relation } from '../relation'
 import { AbsoluteDirection, GeolocusObject } from '../type'
+import { GEO_MAX_VALUE } from '../util'
 import { Route } from './route'
 
 export class GeolocusContext {

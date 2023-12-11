@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GeolocusContext } from '../context'
-import { Compare, GEO_MAX_VALUE, Vector2 } from '../math'
 import { GeolocusPointObject, GeolocusPolygonObject } from '../object'
 import { Direction, Topology } from '../relation'
 import {
@@ -10,6 +9,7 @@ import {
   IGeoRelation,
   TopologyRelation,
 } from '../type'
+import { Compare, GEO_MAX_VALUE, Vector2 } from '../util'
 import {
   IRegionHandler,
   IRegionPDF,
@@ -26,7 +26,7 @@ const equalHandler: IRelationHandler = (
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
   const topologyPDF: IRegionPDF = {
     type: 0,
-    origin: origin.getCenter(),
+    origin,
     gdf: {
       distance: null,
       distanceDelta: null,
@@ -34,7 +34,7 @@ const equalHandler: IRelationHandler = (
       azimuthDelta: null,
     },
     sdf: {
-      geolocusObject: null,
+      girdRegion: null,
       girdNum: null,
     },
   }
@@ -50,7 +50,7 @@ const containHandler: IRelationHandler = (
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
   const topologyPDF: IRegionPDF = {
     type: 4,
-    origin: origin.getCenter(),
+    origin,
     gdf: {
       distance: null,
       distanceDelta: null,
@@ -58,7 +58,7 @@ const containHandler: IRelationHandler = (
       azimuthDelta: null,
     },
     sdf: {
-      geolocusObject: fuzzyRegion,
+      girdRegion: fuzzyRegion,
       girdNum: origin.getContext()!.getGirdSize(),
     },
   }
@@ -71,12 +71,19 @@ const intersectHandler: IRelationHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
+  const originBBox = origin.getBBox()
+  const originLength =
+    Vector2.distanceTo(
+      [originBBox[0], originBBox[1]],
+      [originBBox[2], originBBox[3]],
+    ) * 0.05
   const targetBBox = target.getBBox()
   let targetLength = Vector2.distanceTo(
     [targetBBox[0], targetBBox[1]],
     [targetBBox[2], targetBBox[3]],
   )
   if (Compare.LE(targetLength, 0.005)) targetLength = 0.005
+  if (Compare.LE(targetLength, originLength)) targetLength = originLength
   const objectType = origin.getType()
   let fuzzyRegion = null
   if (objectType === 'Point' || objectType === 'LineString') {
@@ -88,7 +95,7 @@ const intersectHandler: IRelationHandler = (
 
   const topologyPDF: IRegionPDF = {
     type: 4,
-    origin: origin.getCenter(),
+    origin,
     gdf: {
       distance: null,
       distanceDelta: null,
@@ -96,7 +103,7 @@ const intersectHandler: IRelationHandler = (
       azimuthDelta: null,
     },
     sdf: {
-      geolocusObject: fuzzyRegion,
+      girdRegion: fuzzyRegion,
       girdNum: origin.getContext()!.getGirdSize(),
     },
   }
@@ -109,7 +116,8 @@ const disjointHandler: IRelationHandler = (
   target: GeolocusObject,
   result: IRegionResult,
 ) => {
-  const buffer = Topology.bufferOfDistance(origin, 0.005)
+  const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
+  const buffer = Topology.bufferOfDistance(bboxPolygon, 0.005)
   const fuzzyRegion = Topology.mask(
     GeolocusPolygonObject.fromBBox(
       [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
@@ -120,7 +128,7 @@ const disjointHandler: IRelationHandler = (
   const topologyRegion = Topology.intersection(fuzzyRegion, result.region!)
   const topologyPDF: IRegionPDF = {
     type: 0,
-    origin: origin.getCenter(),
+    origin,
     gdf: {
       distance: null,
       distanceDelta: null,
@@ -128,7 +136,7 @@ const disjointHandler: IRelationHandler = (
       azimuthDelta: null,
     },
     sdf: {
-      geolocusObject: null,
+      girdRegion: null,
       girdNum: null,
     },
   }
@@ -164,8 +172,9 @@ export const regionHandlerOfDistance: IRegionHandler = (
 ) => {
   const context = origin.getContext() as GeolocusContext
   const distance = relation.distance as EuclideanDistance
+  const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
   // martinez-polygon-clipping 的 intersect 函数的 bug, 加一个极小的随机误差
-  const buffer = Topology.bufferOfRange(origin, [
+  const buffer = Topology.bufferOfRange(bboxPolygon, [
     (1 - context.getDistanceDelta() * 1.5) * distance - Math.random() / 100,
     (1 + context.getDistanceDelta() * 1.5) * distance + Math.random() / 100,
   ])
@@ -173,7 +182,7 @@ export const regionHandlerOfDistance: IRegionHandler = (
 
   result.pdf.push({
     type: 1,
-    origin: origin.getCenter(),
+    origin,
     gdf: {
       distance,
       distanceDelta: context.getDistanceDelta() * distance,
@@ -181,7 +190,7 @@ export const regionHandlerOfDistance: IRegionHandler = (
       azimuthDelta: null,
     },
     sdf: {
-      geolocusObject: null,
+      girdRegion: null,
       girdNum: null,
     },
   })
@@ -201,7 +210,7 @@ export const regionHandlerOfDirection: IRegionHandler = (
 
   result.pdf.push({
     type: 2,
-    origin: origin.getCenter(),
+    origin,
     gdf: {
       distance: null,
       distanceDelta: null,
@@ -209,7 +218,7 @@ export const regionHandlerOfDirection: IRegionHandler = (
       azimuthDelta: context.getDirectionDelta()[direction][1],
     },
     sdf: {
-      geolocusObject: null,
+      girdRegion: null,
       girdNum: null,
     },
   })
@@ -292,6 +301,7 @@ export const regionHandlerOfTopologyAndDistance: IRegionHandler = (
   regionHandlerOfDistance(origin, relation, target, result)
 }
 
+// 默认相离
 export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   origin: GeolocusObject,
   relation: IGeoRelation,
@@ -303,8 +313,9 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   const directionRegion = Direction.computeRegion(origin, direction)
 
   const distance = relation.distance as EuclideanDistance
+  const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
   // martinez-polygon-clipping 的 intersect 函数的 bug, 加一个极小的随机误差
-  const buffer = Topology.bufferOfRange(origin, [
+  const buffer = Topology.bufferOfRange(bboxPolygon, [
     (1 - context.getDistanceDelta() * 1.5) * distance - Math.random() / 100,
     (1 + context.getDistanceDelta() * 1.5) * distance + Math.random() / 100,
   ])
@@ -315,7 +326,7 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
   )
   result.pdf.push({
     type: 3,
-    origin: origin.getCenter(),
+    origin,
     gdf: {
       distance,
       distanceDelta: context.getDistanceDelta() * distance,
@@ -323,7 +334,7 @@ export const regionHandlerOfDirectionAndDistance: IRegionHandler = (
       azimuthDelta: context.getDirectionDelta()[direction][1],
     },
     sdf: {
-      geolocusObject: null,
+      girdRegion: null,
       girdNum: null,
     },
   })

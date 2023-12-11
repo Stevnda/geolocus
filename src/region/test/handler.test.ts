@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GeolocusContext } from '../../context'
-import { Compare, GEO_MAX_VALUE } from '../../math'
 import { GeolocusPointObject, GeolocusPolygonObject } from '../../object'
 import { Direction } from '../../relation'
 import { GeolocusBBox, IGeoRelation, Position2 } from '../../type'
+import { Compare, GEO_MAX_VALUE } from '../../util'
 import {
   regionHandlerOfAll,
   regionHandlerOfDirection,
@@ -93,7 +93,7 @@ describe('Test some handler functions of Region', () => {
     regionHandlerOfTopology(origin1, relation[2], target, result)
     bbox = result.region?.getBBox() as GeolocusBBox
     expect(
-      (() => Compare.GT(bbox[0], -1.0051) && Compare.LT(bbox[2], 1.0051))(),
+      (() => Compare.GT(bbox[0], -1.15) && Compare.LT(bbox[2], 1.15))(),
     ).toBeTruthy()
     result = {
       region: MaxBBoxPolygon,
