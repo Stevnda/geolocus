@@ -75,7 +75,7 @@ const intersectHandler: IRelationHandler = (
     Vector2.distanceTo(
       [originBBox[0], originBBox[1]],
       [originBBox[2], originBBox[3]],
-    ) * 0.05
+    ) * 0.005
   const targetBBox = target.getBBox()
   let targetLength = Vector2.distanceTo(
     [targetBBox[0], targetBBox[1]],

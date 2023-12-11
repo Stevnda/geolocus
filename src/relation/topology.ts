@@ -110,16 +110,27 @@ export class Topology {
     object: GeolocusObject,
     range: EuclideanDistanceRange,
   ) => {
-    const min = Math.min(...range)
+    let min = Math.min(...range)
     const max = Math.max(...range)
-    const buffer0 = this.buffer(object, min)
-    const buffer1 = this.buffer(object, max)
-    const difference = martinez.diff(
-      buffer1.geometry.coordinates,
-      buffer0.geometry.coordinates,
-    )
+    let result: null | GeolocusPolygonObject | GeolocusMultiPolygonObject = null
+    let count = 0
+    while (!result) {
+      try {
+        const buffer0 = this.buffer(object, min)
+        const buffer1 = this.buffer(object, max)
+        const difference = martinez.diff(
+          buffer1.geometry.coordinates,
+          buffer0.geometry.coordinates,
+        )
+        result = new GeolocusMultiPolygonObject(difference as Position2[][][])
+      } catch {
+        min /= 2
+        count++
+        count >= 3 && (result = this.bufferOfDistance(object, max))
+      }
+    }
 
-    return new GeolocusMultiPolygonObject(difference as Position2[][][])
+    return result
   }
 
   static transformTranslate(
