@@ -242,7 +242,6 @@ export class Region {
         pdfGird.type === 'gdf'
           ? tempGird
           : this.extractRegionGird(tempGird, pdfGird.bbox as GeolocusBBox, bbox)
-
       Gird.forEach(resultGird, (_, row, col) => {
         resultGird[row][col] *= transformGird[row][col]
       })

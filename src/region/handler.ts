@@ -203,8 +203,9 @@ export const regionHandlerOfDirection: IRegionHandler = (
   region: GeolocusPolygonObject | GeolocusMultiPolygonObject,
 ) => {
   const context = origin.getContext() as GeolocusContext
+  const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
   const direction = relation.direction as AbsoluteDirection
-  const directionRegion = Direction.computeRegion(origin, direction)
+  const directionRegion = Direction.computeRegion(bboxPolygon, direction)
   const topologyRegion = Topology.intersection(directionRegion, region)
   const topologyPDF: IRegionPDF = {
     type: 2,
@@ -251,15 +252,17 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
 
       const originCenter = origin.getCenter()
       const directionRegion = Direction.computeRegion(
-        new GeolocusPointObject(originCenter, null),
+        new GeolocusPointObject(originCenter),
         direction,
       )
       let tempRegion = topologyRegion
       if (topologyRegion) {
         tempRegion = Topology.intersection(topologyRegion, directionRegion)
       }
+      const tempPDF = topologyPDF
+      tempPDF.sdf.girdRegion = tempRegion
 
-      return { topologyRegion: tempRegion, topologyPDF }
+      return { topologyRegion: tempRegion, topologyPDF: tempPDF }
     },
     intersect: () => {
       const { topologyRegion, topologyPDF } = intersectHandler(
@@ -277,8 +280,10 @@ export const regionHandlerOfTopologyAndDirection: IRegionHandler = (
       if (topologyRegion) {
         tempRegion = Topology.intersection(topologyRegion, directionRegion)
       }
+      const tempPDF = topologyPDF
+      tempPDF.sdf.girdRegion = tempRegion
 
-      return { topologyRegion: tempRegion, topologyPDF }
+      return { topologyRegion: tempRegion, topologyPDF: tempPDF }
     },
     disjoint: () => {
       return regionHandlerOfDirection(origin, relation, target, region)

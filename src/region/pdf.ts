@@ -135,7 +135,6 @@ export class RegionPDF {
         ) {
           return 0
         } else {
-          console.log(row - 2, col - 2)
           return mask[row - 2][col - 2] ? 9999 : 0
         }
       },
@@ -169,7 +168,6 @@ export class RegionPDF {
       mask.length,
       mask[0].length,
       (row, col) => {
-        console.log(tempGird[row + 2][col + 2])
         return tempGird[row + 2][col + 2]
       },
     )
