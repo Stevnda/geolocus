@@ -43,71 +43,39 @@ export class Region {
     this._context = context
   }
 
-  getResultByUUID(uuid: string) {
-    return this._resultMap.get(uuid)
-  }
-
-  computeFuzzyObject(uuid: string) {
-    const context = this._context
-    const route = context.getRoute()
-    const computedOrderStack = route.validateFuzzy(uuid)
-    if (!computedOrderStack) {
-      throw new Error(
-        'Can not compute this object or it is not necessary be computed.',
-      )
-    }
-
+  private getRegionAndPdf(
+    uuid: string,
+    result: IRegionResult,
+    context: GeolocusContext,
+  ) {
     const relation = context.getRelation()
-    const uuidArray = computedOrderStack.slice()
-    while (computedOrderStack.length > 0) {
-      const currentUUID = computedOrderStack.pop() as string
-      const result: IRegionResult = {
-        region: GeolocusPolygonObject.fromBBox(
-          [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
-          null,
-        ),
-        pdf: [],
-        coord: null,
-        pdfGird: [],
-        resultGird: null,
-        regionMask: null,
+    const tripleSet = relation.getGeoTripleByUUID(uuid) as Set<IGeoTriple>
+    const resultPdf: IRegionPDF[] = []
+    let resultRegion:
+      | GeolocusPolygonObject
+      | GeolocusMultiPolygonObject
+      | null = result.region
+    for (const triple of tripleSet) {
+      if (!resultRegion) {
+        throw new Error("Can't compute the fuzzy region.")
       }
-
-      const tripleSet = relation.getGeoTripleByUUID(
-        currentUUID,
-      ) as Set<IGeoTriple>
-      for (const triple of tripleSet) {
-        const relation = triple.relation
-        const origin = context.getObjectByUUID(triple.origin) as GeolocusObject
-        const target = context.getObjectByUUID(triple.target) as GeolocusObject
-        const topologyTag = relation.topology ? 1 : 0
-        const directionTag = relation.direction ? 3 : 0
-        const distanceTag = relation.distance ? 7 : 0
-        const tag = (topologyTag +
-          directionTag +
-          distanceTag) as keyof typeof map
-        map[tag](origin, relation, target, result)
-        if (!result.region) {
-          throw new Error("Can't compute the fuzzy region.")
-        }
-      }
-      this._resultMap.set(currentUUID, result)
-
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      result.regionMask = result.region!.getMaskWithinBBox(
-        context.getGirdSize(),
+      const relation = triple.relation
+      const origin = context.getObjectByUUID(triple.origin) as GeolocusObject
+      const target = context.getObjectByUUID(triple.target) as GeolocusObject
+      const topologyTag = relation.topology ? 1 : 0
+      const directionTag = relation.direction ? 3 : 0
+      const distanceTag = relation.distance ? 7 : 0
+      const tag = (topologyTag + directionTag + distanceTag) as keyof typeof map
+      const { topologyPDF, topologyRegion } = map[tag](
+        origin,
+        relation,
+        target,
+        resultRegion,
       )
-      result.resultGird = this.getRegionGrid(currentUUID)
-      const { coord } = this.getCoordOfMaximum(currentUUID)
-      result.coord = coord
-
-      const object = context.getObjectByUUID(currentUUID) as GeolocusObject
-      const center = object.getCenter()
-      object.setFuzzy(false)
-      object.translate(center, coord)
+      resultRegion = topologyRegion
+      resultPdf.push(topologyPDF)
     }
-
-    return uuidArray
+    return { resultRegion, resultPdf }
   }
 
   private getPdfGird(
@@ -129,6 +97,7 @@ export class Region {
     const pdfGirdArray: IRegionResultPdfGird[] = []
     const rowCount = Math.ceil(dy / girdSize)
     const colCount = Math.ceil(dx / girdSize)
+
     sdfArray.forEach((pdf) => {
       const gird = Gird.getGirdWithFilter(rowCount, colCount, (row, col) => {
         const x = xStart + col * girdSize
@@ -178,6 +147,7 @@ export class Region {
     const targetDy = targetYEnd - targetYStart
     const ratio = targetDy / targetDx
     const girdSize = targetDx / Math.sqrt(this._context.getGirdSize() / ratio)
+
     const resultGird = Gird.getGirdWithFilter(
       Math.ceil(targetDy / girdSize),
       Math.ceil(targetDx / girdSize),
@@ -191,6 +161,60 @@ export class Region {
     )
 
     return resultGird
+  }
+
+  getResultByUUID(uuid: string) {
+    return this._resultMap.get(uuid)
+  }
+
+  computeFuzzyObject(uuid: string) {
+    const context = this._context
+    const route = context.getRoute()
+    const computedOrderStack = route.validateFuzzy(uuid)
+    if (!computedOrderStack) {
+      throw new Error(
+        'Can not compute this object or it is not necessary be computed.',
+      )
+    }
+
+    const uuidArray = computedOrderStack.slice()
+    while (computedOrderStack.length > 0) {
+      const currentUUID = computedOrderStack.pop() as string
+      const result: IRegionResult = {
+        region: GeolocusPolygonObject.fromBBox(
+          [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
+          null,
+        ),
+        pdf: [],
+        coord: null,
+        pdfGird: [],
+        resultGird: null,
+        regionMask: null,
+      }
+      this._resultMap.set(currentUUID, result)
+
+      const { resultPdf, resultRegion } = this.getRegionAndPdf(
+        currentUUID,
+        result,
+        context,
+      )
+      result.pdf = resultPdf
+      result.region = resultRegion
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      result.regionMask = result.region!.getMaskWithinBBox(
+        context.getGirdSize(),
+      )
+      result.resultGird = this.getRegionGrid(currentUUID)
+      const { coord } = this.getCoordOfMaximum(currentUUID)
+      result.coord = coord
+
+      const object = context.getObjectByUUID(currentUUID) as GeolocusObject
+      const center = object.getCenter()
+      object.setFuzzy(false)
+      object.translate(center, coord)
+    }
+
+    return uuidArray
   }
 
   getRegionGrid(uuid: string) {

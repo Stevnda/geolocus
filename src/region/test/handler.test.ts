@@ -13,7 +13,6 @@ import {
   regionHandlerOfTopologyAndDirection,
   regionHandlerOfTopologyAndDistance,
 } from '../handler'
-import { IRegionResult } from '../region.type'
 
 describe('Test some handler functions of Region', () => {
   test('Test the regionHandlerOfTopology function', () => {
@@ -27,14 +26,6 @@ describe('Test some handler functions of Region', () => {
     const origin = new GeolocusPointObject([0, 0], context)
     const origin1 = GeolocusPolygonObject.fromBBox([-1, -1, 1, 1], context)
     const target = new GeolocusPointObject([0, 0], context)
-    let result: IRegionResult = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
     const relation: IGeoRelation[] = [
       'equal',
       'contain',
@@ -49,63 +40,56 @@ describe('Test some handler functions of Region', () => {
     })
 
     // equal
-    regionHandlerOfTopology(origin, relation[0], target, result)
-    let bbox = result.region?.getBBox() as GeolocusBBox
+    let topologyRegion = regionHandlerOfTopology(
+      origin,
+      relation[0],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    let bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
     ).toBeTruthy()
-    result = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
     // contain
-    regionHandlerOfTopology(origin, relation[1], target, result)
-    bbox = result.region?.getBBox() as GeolocusBBox
+    topologyRegion = regionHandlerOfTopology(
+      origin,
+      relation[1],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.0051) && Compare.LT(bbox[2], 0.0051))(),
     ).toBeTruthy()
-    result = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
     // intersect
-    regionHandlerOfTopology(origin, relation[2], target, result)
-    bbox = result.region?.getBBox() as GeolocusBBox
+    topologyRegion = regionHandlerOfTopology(
+      origin,
+      relation[2],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.0051) && Compare.LT(bbox[2], 0.0051))(),
     ).toBeTruthy()
-    result = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
-    regionHandlerOfTopology(origin1, relation[2], target, result)
-    bbox = result.region?.getBBox() as GeolocusBBox
+    topologyRegion = regionHandlerOfTopology(
+      origin1,
+      relation[2],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -1.15) && Compare.LT(bbox[2], 1.15))(),
     ).toBeTruthy()
-    result = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
     // disjoint
-    regionHandlerOfTopology(origin, relation[3], target, result)
-    bbox = result.region?.getBBox() as GeolocusBBox
+    topologyRegion = regionHandlerOfTopology(
+      origin,
+      relation[3],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect(
       (() =>
         Compare.EQ(bbox[0], -281474956479743) &&
@@ -123,14 +107,6 @@ describe('Test some handler functions of Region', () => {
     const context = new GeolocusContext('test')
     const origin = new GeolocusPointObject([0, 0], context)
     const target = new GeolocusPointObject([0, 0], context)
-    const result: IRegionResult = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
 
     const relation: IGeoRelation = {
       topology: null,
@@ -138,14 +114,17 @@ describe('Test some handler functions of Region', () => {
       distance: 100,
     }
 
-    regionHandlerOfDistance(origin, relation, target, result)
-    result.pdf.forEach((value) => {
-      expect(
-        (() =>
-          value.gdf.distanceDelta ===
-          100 * origin.getContext()!.getDistanceDelta())(),
-      ).toBeTruthy()
-    })
+    const pdf = regionHandlerOfDistance(
+      origin,
+      relation,
+      target,
+      MaxBBoxPolygon,
+    ).topologyPDF
+    expect(
+      (() =>
+        pdf.gdf.distanceDelta ===
+        100 * origin.getContext()!.getDistanceDelta())(),
+    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfDirection function', () => {
@@ -158,14 +137,6 @@ describe('Test some handler functions of Region', () => {
     const context = new GeolocusContext('test')
     const origin = new GeolocusPointObject([0, 0], context)
     const target = new GeolocusPointObject([0, 0], context)
-    const result: IRegionResult = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
 
     const relation: IGeoRelation = {
       topology: null,
@@ -174,8 +145,13 @@ describe('Test some handler functions of Region', () => {
     }
 
     const fuzzyRegion = Direction.computeRegion(origin, 'N')
-    regionHandlerOfDirection(origin, relation, target, result)
-    expect(result.region?.getBBox()).toEqual(fuzzyRegion.getBBox())
+    const topologyRegion = regionHandlerOfDirection(
+      origin,
+      relation,
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    expect(topologyRegion?.getBBox()).toEqual(fuzzyRegion.getBBox())
   })
 
   test('Test the regionHandlerOfTopologyAndDirection function', () => {
@@ -188,14 +164,6 @@ describe('Test some handler functions of Region', () => {
     const context = new GeolocusContext('test')
     const origin = new GeolocusPointObject([0, 0], context)
     const target = new GeolocusPointObject([0, 0], context)
-    let result: IRegionResult = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
 
     const relation: IGeoRelation[] = [
       'equal',
@@ -211,50 +179,46 @@ describe('Test some handler functions of Region', () => {
     })
 
     // equal
-    regionHandlerOfTopologyAndDirection(origin, relation[0], target, result)
-    let bbox = result.region?.getBBox() as GeolocusBBox
+    let topologyRegion = regionHandlerOfTopologyAndDirection(
+      origin,
+      relation[0],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    let bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
     ).toBeTruthy()
-    result = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
     // contain
-    regionHandlerOfTopologyAndDirection(origin, relation[1], target, result)
-    let center = result.region?.getCenter() as Position2
+    topologyRegion = regionHandlerOfTopologyAndDirection(
+      origin,
+      relation[1],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    let center = topologyRegion?.getCenter() as Position2
     expect(
       (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
     ).toBeTruthy()
-    result = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
     // intersect
-    regionHandlerOfTopologyAndDirection(origin, relation[2], target, result)
-    center = result.region?.getCenter() as Position2
+    topologyRegion = regionHandlerOfTopologyAndDirection(
+      origin,
+      relation[2],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    center = topologyRegion?.getCenter() as Position2
     expect(
       (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
     ).toBeTruthy()
-    result = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
     // disjoint
-    regionHandlerOfTopologyAndDirection(origin, relation[3], target, result)
-    bbox = result.region?.getBBox() as GeolocusBBox
+    topologyRegion = regionHandlerOfTopologyAndDirection(
+      origin,
+      relation[3],
+      target,
+      MaxBBoxPolygon,
+    ).topologyRegion
+    bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect((() => Compare.EQ(bbox[1], 0))()).toBeTruthy()
   })
 
@@ -268,14 +232,6 @@ describe('Test some handler functions of Region', () => {
     const context = new GeolocusContext('test')
     const origin = new GeolocusPointObject([0, 0], context)
     const target = new GeolocusPointObject([0, 0], context)
-    const result: IRegionResult = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
 
     const relation: IGeoRelation = {
       topology: null,
@@ -283,14 +239,17 @@ describe('Test some handler functions of Region', () => {
       distance: 100,
     }
 
-    regionHandlerOfTopologyAndDistance(origin, relation, target, result)
-    result.pdf.forEach((value) => {
-      expect(
-        (() =>
-          value.gdf.distanceDelta ===
-          100 * origin.getContext()!.getDistanceDelta())(),
-      ).toBeTruthy()
-    })
+    const pdf = regionHandlerOfTopologyAndDistance(
+      origin,
+      relation,
+      target,
+      MaxBBoxPolygon,
+    ).topologyPDF
+    expect(
+      (() =>
+        pdf.gdf.distanceDelta ===
+        100 * origin.getContext()!.getDistanceDelta())(),
+    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfDirectionAndDistance function', () => {
@@ -303,14 +262,6 @@ describe('Test some handler functions of Region', () => {
     const context = new GeolocusContext('test')
     const origin = new GeolocusPointObject([0, 0], context)
     const target = new GeolocusPointObject([0, 0], context)
-    const result: IRegionResult = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
 
     const relation: IGeoRelation = {
       topology: null,
@@ -318,14 +269,17 @@ describe('Test some handler functions of Region', () => {
       distance: 100,
     }
 
-    regionHandlerOfDirectionAndDistance(origin, relation, target, result)
-    result.pdf.forEach((value) => {
-      expect(
-        (() =>
-          value.gdf.distanceDelta ===
-          100 * origin.getContext()!.getDistanceDelta())(),
-      ).toBeTruthy()
-    })
+    const pdf = regionHandlerOfDirectionAndDistance(
+      origin,
+      relation,
+      target,
+      MaxBBoxPolygon,
+    ).topologyPDF
+    expect(
+      (() =>
+        pdf.gdf.distanceDelta ===
+        100 * origin.getContext()!.getDistanceDelta())(),
+    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfAll function', () => {
@@ -338,14 +292,6 @@ describe('Test some handler functions of Region', () => {
     const context = new GeolocusContext('test')
     const origin = new GeolocusPointObject([0, 0], context)
     const target = new GeolocusPointObject([0, 0], context)
-    const result: IRegionResult = {
-      region: MaxBBoxPolygon,
-      pdf: [],
-      coord: null,
-      pdfGird: [],
-      resultGird: null,
-      regionMask: null,
-    }
 
     const relation: IGeoRelation = {
       topology: null,
@@ -353,13 +299,17 @@ describe('Test some handler functions of Region', () => {
       distance: 100,
     }
 
-    regionHandlerOfAll(origin, relation, target, result)
-    result.pdf.forEach((value) => {
-      expect(
-        (() =>
-          value.gdf.distanceDelta ===
-          100 * origin.getContext()!.getDistanceDelta())(),
-      ).toBeTruthy()
-    })
+    const pdf = regionHandlerOfAll(
+      origin,
+      relation,
+      target,
+      MaxBBoxPolygon,
+    ).topologyPDF
+
+    expect(
+      (() =>
+        pdf.gdf.distanceDelta ===
+        100 * origin.getContext()!.getDistanceDelta())(),
+    ).toBeTruthy()
   })
 })

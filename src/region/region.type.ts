@@ -12,17 +12,20 @@ export interface IRegionHandler {
     origin: GeolocusObject,
     relation: IGeoRelation,
     target: GeolocusObject,
-    result: IRegionResult,
-  ): void
+    region: GeolocusPolygonObject | GeolocusMultiPolygonObject,
+  ): {
+    topologyRegion: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
+    topologyPDF: IRegionPDF
+  }
 }
 
 export interface IRelationHandler {
   (
     origin: GeolocusObject,
     target: GeolocusObject,
-    result: IRegionResult,
+    region: GeolocusPolygonObject | GeolocusMultiPolygonObject,
   ): {
-    topologyRegion: IRegionResult['region']
+    topologyRegion: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
     topologyPDF: IRegionPDF
   }
 }
