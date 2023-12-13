@@ -21,7 +21,7 @@ export const getGeolocusObjectMaskWithinBBox = (
   const ratio = dy / dx
   const girdSize = dx / Math.sqrt(girdNum / ratio)
 
-  const mask = Gird.getGirdWithFilter(
+  const mask = Gird.createGirdWithFilter(
     Math.ceil(dy / girdSize),
     Math.ceil(dx / girdSize),
     (row, col) => {

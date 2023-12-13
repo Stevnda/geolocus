@@ -55,10 +55,8 @@ export class Region {
       | GeolocusPolygonObject
       | GeolocusMultiPolygonObject
       | null = result.region
+
     for (const triple of tripleSet) {
-      if (!resultRegion) {
-        throw new Error("Can't compute the fuzzy region.")
-      }
       const relation = triple.relation
       const origin = context.getObjectByUUID(triple.origin) as GeolocusObject
       const target = context.getObjectByUUID(triple.target) as GeolocusObject
@@ -70,13 +68,13 @@ export class Region {
         origin,
         relation,
         target,
-        resultRegion,
+        resultRegion as GeolocusPolygonObject | GeolocusMultiPolygonObject,
       )
       resultRegion = topologyRegion
       resultPdf.push(topologyPDF)
-    }
-    if (!resultRegion) {
-      throw new Error('The fuzzy region is not existed.')
+      if (!resultRegion) {
+        throw new Error("Can't compute the fuzzy region.")
+      }
     }
 
     return { resultRegion, resultPdf }
@@ -103,7 +101,7 @@ export class Region {
     const colCount = Math.ceil(dx / girdSize)
 
     gdfArray.forEach((pdf) => {
-      const gird = Gird.getGirdWithFilter(rowCount, colCount, (row, col) => {
+      const gird = Gird.createGirdWithFilter(rowCount, colCount, (row, col) => {
         const x = xStart + col * girdSize
         const y = yStart + row * girdSize
         return mask[row][col] && RegionPDF.computePDF(pdf, [x, y])
@@ -152,7 +150,7 @@ export class Region {
     const ratio = targetDy / targetDx
     const girdSize = targetDx / Math.sqrt(this._context.getGirdSize() / ratio)
 
-    const resultGird = Gird.getGirdWithFilter(
+    const resultGird = Gird.createGirdWithFilter(
       Math.ceil(targetDy / girdSize),
       Math.ceil(targetDx / girdSize),
       (row, col) => {
@@ -227,7 +225,7 @@ export class Region {
       throw new Error('The result of this uuid is not existed.')
     }
     const mask = result.regionMask as GeolocusGird
-    const resultGird: GeolocusGird = Gird.getGirdWithFillValue(
+    const resultGird: GeolocusGird = Gird.createGirdWithFillValue(
       mask.length,
       mask[0].length,
       1,

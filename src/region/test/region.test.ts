@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { GeolocusContext } from '../../context'
-import { GeolocusPointObject } from '../../object'
+import { GeolocusPointObject, GeolocusPolygonObject } from '../../object'
 
 describe('Test the Region class', () => {
   test('Return the result by uuid', () => {
@@ -25,25 +25,27 @@ describe('Test the Region class', () => {
   test('Compute the result property of Region class', () => {
     const context = new GeolocusContext('test')
     const origin0 = new GeolocusPointObject([0, 0], context)
+    const origin1 = GeolocusPolygonObject.fromBBox([1, 1, 2, 2], context)
     const target0 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
     const target1 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
     const target2 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
     const target3 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const target4 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
 
     const region = context.getRegion()
     const relation = context.getRelation()
 
-    // validateFuzzy
+    // validateFuzzy and compute order
     expect(() => region.computeFuzzyObject(origin0.getUUID())).toThrow()
     expect(() => region.computeFuzzyObject(target0.getUUID())).toThrow()
-
+    // The geoRelation is null
     relation.define(target1, origin0, {})
     expect(() => region.computeFuzzyObject(target1.getUUID())).toThrow()
-
+    // The result region is null
     relation.define(target2, origin0, { direction: 'NE', distance: 100 })
     relation.define(target2, origin0, { direction: 'SW', distance: 100 })
     expect(() => region.computeFuzzyObject(target2.getUUID())).toThrow()
-
+    // gdf
     relation.define(target0, target3, {
       direction: 'E',
       distance: 60,
@@ -55,6 +57,14 @@ describe('Test the Region class', () => {
     expect(uuid.length).toBe(2)
     const x = region.getResultByUUID(target0.getUUID())!.coord![0]
     expect(x > 59 && x < 61).toBeTruthy()
+
+    // sdf
+    relation.define(target4, origin1, {
+      topology: 'contain',
+    })
+    region.computeFuzzyObject(target4.getUUID())
+    const sdfX = region.getResultByUUID(target4.getUUID())!.coord![0]
+    expect(sdfX > 1.49 && sdfX < 1.51).toBeTruthy()
   })
 
   test('Get the gird of Region', () => {

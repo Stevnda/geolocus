@@ -123,7 +123,7 @@ export class RegionPDF {
   private static getUnsignedInternalDistanceField(pdf: IRegionPDF) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const mask = pdf.sdf.girdRegion!.getMaskWithinBBox(pdf.sdf.girdNum!)
-    const tempGird = Gird.getGirdWithFilter(
+    const tempGird = Gird.createGirdWithFilter(
       mask.length + 4,
       mask[0].length + 4,
       (row, col) => {
@@ -164,7 +164,7 @@ export class RegionPDF {
       }
     }
 
-    const resultGird = Gird.getGirdWithFilter(
+    const resultGird = Gird.createGirdWithFilter(
       mask.length,
       mask[0].length,
       (row, col) => {

@@ -2,7 +2,7 @@ import { GEO_MAX_VALUE } from '.'
 import { GeolocusGird } from '../type'
 
 export class Gird {
-  static getGirdWithFillValue(row: number, col: number, fillValue: number) {
+  static createGirdWithFillValue(row: number, col: number, fillValue: number) {
     const resultGird: GeolocusGird = []
     for (let y = 0; y < row; y++) {
       const temp = []
@@ -15,7 +15,7 @@ export class Gird {
     return resultGird
   }
 
-  static getGirdWithFilter(
+  static createGirdWithFilter(
     rowLength: number,
     colLength: number,
     filter: (row: number, col: number, gird: GeolocusGird) => number,
@@ -49,7 +49,7 @@ export class Gird {
   }
 
   static normalize(gird: GeolocusGird) {
-    const transformGird = this.getGirdWithFillValue(
+    const transformGird = this.createGirdWithFillValue(
       gird.length,
       gird[0].length,
       0,
@@ -72,7 +72,7 @@ export class Gird {
     } else {
       for (let row = 0; row < gird.length; row++) {
         for (let col = 0; col < gird[0].length; col++) {
-          transformGird[row][col] = gird[row][col]
+          transformGird[row][col] = 1
         }
       }
     }

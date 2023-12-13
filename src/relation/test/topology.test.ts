@@ -228,8 +228,13 @@ describe('Test the Topology class', () => {
 
   test('Return the buffer area of specified distance range', () => {
     const point = new GeolocusPointObject([1000, 1000])
+    const polygon = GeolocusPolygonObject.fromBBox([-1, -1, 1, 1])
     expect(
       Topology.bufferOfRange(point, [100, 200]).getGeoJSON().geometry
+        .coordinates,
+    ).toBeTruthy()
+    expect(
+      Topology.bufferOfRange(polygon, [-10, 10]).getGeoJSON().geometry
         .coordinates,
     ).toBeTruthy()
   })
