@@ -20,9 +20,13 @@ export type RelativeDirection =
   | 'L'
   | 'FL'
 
-export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
-// | 'within'
-// | 'touch'
+export type TopologyRelation =
+  | 'equal'
+  | 'intersect'
+  | 'disjoint'
+  | 'contain'
+  // | 'within'
+  | 'touch'
 
 export interface IGeoRelation {
   topology: TopologyRelation | null

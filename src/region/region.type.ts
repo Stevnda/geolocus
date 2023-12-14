@@ -7,26 +7,17 @@ import {
   Position2,
 } from '../type'
 
-export interface IRegionHandler {
+export type IRegionRegion = GeolocusPolygonObject | GeolocusMultiPolygonObject
+
+export interface IRegionResultHandler {
   (
     origin: GeolocusObject,
     relation: IGeoRelation,
     target: GeolocusObject,
-    region: GeolocusPolygonObject | GeolocusMultiPolygonObject,
   ): {
-    topologyRegion: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
-    topologyPDF: IRegionPDF
-  }
-}
-
-export interface IRelationHandler {
-  (
-    origin: GeolocusObject,
-    target: GeolocusObject,
-    region: GeolocusPolygonObject | GeolocusMultiPolygonObject,
-  ): {
-    topologyRegion: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
-    topologyPDF: IRegionPDF
+    region: GeolocusMultiPolygonObject | GeolocusPolygonObject
+    pdf: IRegionPDF
+    boundless: boolean
   }
 }
 
@@ -40,7 +31,7 @@ export interface IRegionPDF {
     azimuthDelta: number | null
   }
   sdf: {
-    girdRegion: GeolocusMultiPolygonObject | GeolocusPolygonObject | null
+    girdRegion: IRegionRegion | null
     girdNum: number | null
   }
 }
@@ -52,7 +43,7 @@ export interface IRegionResultPdfGird {
 }
 
 export interface IRegionResult {
-  region: GeolocusPolygonObject | GeolocusMultiPolygonObject | null
+  region: IRegionRegion
   pdf: IRegionPDF[]
   coord: Position2 | null
   pdfGird: IRegionResultPdfGird[]

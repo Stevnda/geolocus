@@ -1,5 +1,6 @@
 import { GeolocusContext } from '../context'
 import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '../object'
+import { Topology } from '../relation'
 import {
   EuclideanDistanceRange,
   GeolocusBBox,
@@ -9,29 +10,26 @@ import {
   Position2,
 } from '../type'
 import { Compare, GEO_MAX_VALUE, Gird } from '../util'
-import {
-  regionHandlerOfAll,
-  regionHandlerOfDirection,
-  regionHandlerOfDirectionAndDistance,
-  regionHandlerOfDistance,
-  regionHandlerOfTopology,
-  regionHandlerOfTopologyAndDirection,
-  regionHandlerOfTopologyAndDistance,
-} from './handler'
+import { RegionResultHandler } from './handler'
 import { RegionPDF } from './pdf'
-import { IRegionPDF, IRegionResult, IRegionResultPdfGird } from './region.type'
+import {
+  IRegionPDF,
+  IRegionRegion,
+  IRegionResult,
+  IRegionResultPdfGird,
+} from './region.type'
 
 const map = {
   0: () => {
     throw new Error('The geoRelation is null.')
   },
-  1: regionHandlerOfTopology,
-  3: regionHandlerOfDirection,
-  7: regionHandlerOfDistance,
-  4: regionHandlerOfTopologyAndDirection,
-  8: regionHandlerOfTopologyAndDistance,
-  10: regionHandlerOfDirectionAndDistance,
-  11: regionHandlerOfAll,
+  1: RegionResultHandler.topology,
+  3: RegionResultHandler.direction,
+  7: RegionResultHandler.distance,
+  4: RegionResultHandler.topologyAndDirection,
+  8: RegionResultHandler.topologyAndDistance,
+  10: RegionResultHandler.directionAndDistance,
+  11: RegionResultHandler.all,
 }
 
 export class Region {
@@ -51,11 +49,9 @@ export class Region {
     const relation = context.getRelation()
     const tripleSet = relation.getGeoTripleByUUID(uuid) as Set<IGeoTriple>
     const resultPdf: IRegionPDF[] = []
-    let resultRegion:
-      | GeolocusPolygonObject
-      | GeolocusMultiPolygonObject
-      | null = result.region
-
+    let resultRegion: IRegionRegion = result.region
+    const unboundedRegionArray: IRegionRegion[] = []
+    const boundedRegionArray: IRegionRegion[] = []
     for (const triple of tripleSet) {
       const relation = triple.relation
       const origin = context.getObjectByUUID(triple.origin) as GeolocusObject
@@ -64,20 +60,35 @@ export class Region {
       const directionTag = relation.direction ? 3 : 0
       const distanceTag = relation.distance ? 7 : 0
       const tag = (topologyTag + directionTag + distanceTag) as keyof typeof map
-      const { topologyPDF, topologyRegion } = map[tag](
-        origin,
-        relation,
-        target,
-        resultRegion as GeolocusPolygonObject | GeolocusMultiPolygonObject,
-      )
-      resultRegion = topologyRegion
-      resultPdf.push(topologyPDF)
-      if (!resultRegion) {
-        throw new Error("Can't compute the fuzzy region.")
-      }
+      const { region, pdf, boundless } = map[tag](origin, relation, target)
+      resultPdf.push(pdf)
+      boundless
+        ? unboundedRegionArray.push(region)
+        : boundedRegionArray.push(region)
     }
 
-    return { resultRegion, resultPdf }
+    for (const currentRegion of boundedRegionArray) {
+      const intersection = Topology.intersection(
+        resultRegion as GeolocusPolygonObject,
+        currentRegion,
+      )
+      if (!intersection) {
+        throw new Error("Can't compute the fuzzy region.")
+      }
+      resultRegion = intersection
+    }
+    for (const currentRegion of unboundedRegionArray) {
+      const intersection = Topology.intersection(
+        resultRegion as GeolocusPolygonObject,
+        currentRegion,
+      )
+      if (!intersection) {
+        throw new Error("Can't compute the fuzzy region.")
+      }
+      resultRegion = intersection
+    }
+
+    return { resultPdf, resultRegion }
   }
 
   private getPdfGird(
