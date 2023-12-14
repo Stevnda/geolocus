@@ -107,6 +107,7 @@ describe('Test some handler functions of Region', () => {
       topology: null,
       direction: null,
       distance: 100,
+      weight: 1,
     }
 
     const pdf = RegionResultHandler.distance(origin, relation, target).pdf
@@ -126,6 +127,7 @@ describe('Test some handler functions of Region', () => {
       topology: null,
       direction: 'N',
       distance: null,
+      weight: 1,
     }
 
     const fuzzyRegion = Direction.computeRegion(origin, 'N')
@@ -215,6 +217,7 @@ describe('Test some handler functions of Region', () => {
       topology: null,
       direction: null,
       distance: 100,
+      weight: 1,
     }
 
     const pdf = RegionResultHandler.topologyAndDistance(
@@ -238,6 +241,7 @@ describe('Test some handler functions of Region', () => {
       topology: null,
       direction: 'N',
       distance: 100,
+      weight: 1,
     }
 
     const pdf = RegionResultHandler.directionAndDistance(
@@ -261,6 +265,7 @@ describe('Test some handler functions of Region', () => {
       topology: null,
       direction: 'N',
       distance: 100,
+      weight: 1,
     }
 
     const pdf = RegionResultHandler.all(origin, relation, target).pdf

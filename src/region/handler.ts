@@ -19,6 +19,7 @@ import { IRegionPDF, IRegionResultHandler } from './region.type'
 export class RegionResultHandler {
   private static equalHandler: IRegionResultHandler = (
     origin: GeolocusObject,
+    relation: IGeoRelation,
   ) => {
     const region = Topology.bufferOfDistance(origin, 0.005)
     const pdf: IRegionPDF = {
@@ -34,12 +35,14 @@ export class RegionResultHandler {
         girdRegion: null,
         girdNum: null,
       },
+      weight: relation.weight,
     }
     return { region, pdf, boundless: false }
   }
 
   private static containHandler: IRegionResultHandler = (
     origin: GeolocusObject,
+    relation: IGeoRelation,
   ) => {
     const region = Topology.bufferOfDistance(origin, 0.005)
     const pdf: IRegionPDF = {
@@ -55,6 +58,7 @@ export class RegionResultHandler {
         girdRegion: region,
         girdNum: origin.getContext()!.getGirdSize(),
       },
+      weight: relation.weight,
     }
     return { region, pdf, boundless: false }
   }
@@ -97,6 +101,7 @@ export class RegionResultHandler {
         girdRegion: region,
         girdNum: origin.getContext()!.getGirdSize(),
       },
+      weight: relation.weight,
     }
 
     return { region, pdf, boundless: false }
@@ -112,7 +117,7 @@ export class RegionResultHandler {
       Vector2.distanceTo(
         [originBBox[0], originBBox[1]],
         [originBBox[2], originBBox[3]],
-      ) * 0.05
+      ) * 0.005
     const targetBBox = target.getBBox()
     let targetLength = Vector2.distanceTo(
       [targetBBox[0], targetBBox[1]],
@@ -140,6 +145,7 @@ export class RegionResultHandler {
         girdRegion: region,
         girdNum: origin.getContext()!.getGirdSize(),
       },
+      weight: relation.weight,
     }
 
     return { region, pdf, boundless: false }
@@ -147,6 +153,7 @@ export class RegionResultHandler {
 
   private static disjointHandler: IRegionResultHandler = (
     origin: GeolocusObject,
+    relation: IGeoRelation,
   ) => {
     const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
     const buffer = Topology.bufferOfDistance(bboxPolygon, 0.005)
@@ -170,6 +177,7 @@ export class RegionResultHandler {
         girdRegion: null,
         girdNum: null,
       },
+      weight: relation.weight,
     }
     return { region, pdf, boundless: true }
   }
@@ -247,6 +255,7 @@ export class RegionResultHandler {
         girdRegion: null,
         girdNum: null,
       },
+      weight: relation.weight,
     }
 
     return { region, pdf, boundless: false }
@@ -274,6 +283,7 @@ export class RegionResultHandler {
         girdRegion: null,
         girdNum: null,
       },
+      weight: relation.weight,
     }
 
     return { region, pdf, boundless: true }
@@ -369,6 +379,7 @@ export class RegionResultHandler {
         girdRegion: null,
         girdNum: null,
       },
+      weight: relation.weight,
     }
 
     return { region, pdf, boundless: false }

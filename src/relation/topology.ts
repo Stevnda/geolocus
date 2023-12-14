@@ -85,6 +85,18 @@ export class Topology {
     return new GeolocusMultiPolygonObject(intersection as Position2[][][])
   }
 
+  static union = (
+    polygon0: GeolocusPolygonObject | GeolocusMultiPolygonObject,
+    polygon1: GeolocusPolygonObject | GeolocusMultiPolygonObject,
+  ) => {
+    const union = martinez.union(
+      polygon0.getGeoJSON().geometry.coordinates,
+      polygon1.getGeoJSON().geometry.coordinates,
+    )
+
+    return new GeolocusMultiPolygonObject(union as Position2[][][])
+  }
+
   private static buffer = (
     object: GeolocusObject,
     distance: EuclideanDistance,

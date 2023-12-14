@@ -34,16 +34,18 @@ export interface IRegionPDF {
     girdRegion: IRegionRegion | null
     girdNum: number | null
   }
+  weight: number
 }
 
 export interface IRegionResultPdfGird {
   type: 'gdf' | 'sdf' | null
   gird: GeolocusGird | null
   bbox: GeolocusBBox | null
+  weight: number
 }
 
 export interface IRegionResult {
-  region: IRegionRegion
+  region: IRegionRegion | null
   pdf: IRegionPDF[]
   coord: Position2 | null
   pdfGird: IRegionResultPdfGird[]

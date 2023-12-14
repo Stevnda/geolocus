@@ -49,6 +49,7 @@ export class Relation {
       direction: relation.direction || null,
       distance: relation.distance || null,
       topology: relation.topology || null,
+      weight: relation.weight || 1,
     }
     return result
   }

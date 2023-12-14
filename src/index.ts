@@ -47,8 +47,13 @@ class Geolocus {
     this._context.getRelation().define(target, origin, relation)
   }
 
-  computeFuzzyObject(object: GeolocusObject) {
-    const uuid = this._context.getRegion().computeFuzzyObject(object.getUUID())
+  computeFuzzyObject(
+    object: GeolocusObject,
+    strategy: 'intersection' | 'union' = 'intersection',
+  ) {
+    const uuid = this._context
+      .getRegion()
+      .computeFuzzyObject(object.getUUID(), strategy)
     return uuid.map(
       (uuid) => this._context.getObjectByUUID(uuid) as GeolocusObject,
     )

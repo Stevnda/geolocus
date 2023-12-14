@@ -43,13 +43,13 @@ export class Region {
 
   private getRegionAndPdf(
     uuid: string,
-    result: IRegionResult,
     context: GeolocusContext,
+    strategy: 'intersection' | 'union',
   ) {
     const relation = context.getRelation()
     const tripleSet = relation.getGeoTripleByUUID(uuid) as Set<IGeoTriple>
     const resultPdf: IRegionPDF[] = []
-    let resultRegion: IRegionRegion = result.region
+
     const unboundedRegionArray: IRegionRegion[] = []
     const boundedRegionArray: IRegionRegion[] = []
     for (const triple of tripleSet) {
@@ -67,25 +67,32 @@ export class Region {
         : boundedRegionArray.push(region)
     }
 
+    let resultRegion: IRegionRegion =
+      strategy === 'intersection'
+        ? GeolocusPolygonObject.fromBBox(
+            [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
+            null,
+          )
+        : (boundedRegionArray.shift() as IRegionRegion)
     for (const currentRegion of boundedRegionArray) {
-      const intersection = Topology.intersection(
-        resultRegion as GeolocusPolygonObject,
-        currentRegion,
-      )
-      if (!intersection) {
+      const tempRegion =
+        strategy === 'intersection'
+          ? Topology.intersection(resultRegion, currentRegion)
+          : Topology.union(resultRegion, currentRegion)
+      if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
       }
-      resultRegion = intersection
+      resultRegion = tempRegion
     }
     for (const currentRegion of unboundedRegionArray) {
-      const intersection = Topology.intersection(
-        resultRegion as GeolocusPolygonObject,
-        currentRegion,
-      )
-      if (!intersection) {
+      const tempRegion =
+        strategy === 'intersection'
+          ? Topology.intersection(resultRegion, currentRegion)
+          : resultRegion
+      if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
       }
-      resultRegion = intersection
+      resultRegion = tempRegion
     }
 
     return { resultPdf, resultRegion }
@@ -105,33 +112,36 @@ export class Region {
     const dy = yEnd - yStart
     const ratio = dy / dx
     const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
-    const sdfArray = pdfArray.filter((pdf) => pdf.type === 4)
-    const gdfArray = pdfArray.filter((pdf) => pdf.type !== 4)
     const pdfGirdArray: IRegionResultPdfGird[] = []
     const rowCount = Math.ceil(dy / girdSize)
     const colCount = Math.ceil(dx / girdSize)
 
-    gdfArray.forEach((pdf) => {
-      const gird = Gird.createGirdWithFilter(rowCount, colCount, (row, col) => {
-        const x = xStart + col * girdSize
-        const y = yStart + row * girdSize
-        return mask[row][col] && RegionPDF.computePDF(pdf, [x, y])
-      })
-      const tempPdfGird: IRegionResultPdfGird = {
-        type: 'gdf',
-        gird,
-        bbox: null,
+    pdfArray.forEach((pdf) => {
+      if (pdf.type === 4) {
+        pdfGirdArray.push({
+          type: 'sdf',
+          gird: RegionPDF.computePDF(pdf),
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          bbox: pdf.sdf.girdRegion!.getBBox(),
+          weight: pdf.weight,
+        })
+      } else {
+        const gird = Gird.createGirdWithFilter(
+          rowCount,
+          colCount,
+          (row, col) => {
+            const x = xStart + col * girdSize
+            const y = yStart + row * girdSize
+            return mask[row][col] && RegionPDF.computePDF(pdf, [x, y])
+          },
+        )
+        pdfGirdArray.push({
+          type: 'gdf',
+          gird,
+          bbox: null,
+          weight: pdf.weight,
+        })
       }
-      pdfGirdArray.push(tempPdfGird)
-    })
-    sdfArray.forEach((pdf) => {
-      const tempPdfGird: IRegionResultPdfGird = {
-        type: 'sdf',
-        gird: RegionPDF.computePDF(pdf),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        bbox: pdf.sdf.girdRegion!.getBBox(),
-      }
-      pdfGirdArray.push(tempPdfGird)
     })
 
     return pdfGirdArray
@@ -180,7 +190,7 @@ export class Region {
     return this._resultMap.get(uuid)
   }
 
-  computeFuzzyObject(uuid: string) {
+  computeFuzzyObject(uuid: string, strategy: 'intersection' | 'union') {
     const context = this._context
     const route = context.getRoute()
     const computedOrderStack = route.validateFuzzy(uuid)
@@ -194,10 +204,7 @@ export class Region {
     while (computedOrderStack.length > 0) {
       const currentUUID = computedOrderStack.pop() as string
       const result: IRegionResult = {
-        region: GeolocusPolygonObject.fromBBox(
-          [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
-          null,
-        ),
+        region: null,
         pdf: [],
         coord: null,
         pdfGird: [],
@@ -208,8 +215,8 @@ export class Region {
 
       const { resultPdf, resultRegion } = this.getRegionAndPdf(
         currentUUID,
-        result,
         context,
+        strategy,
       )
       result.pdf = resultPdf
       result.region = resultRegion
@@ -217,7 +224,7 @@ export class Region {
       result.regionMask = result.region!.getMaskWithinBBox(
         context.getGirdSize(),
       )
-      result.resultGird = this.getRegionGrid(currentUUID)
+      result.resultGird = this.getRegionGrid(currentUUID, strategy)
       const { coord } = this.getCoordOfMaximum(currentUUID)
       result.coord = coord
 
@@ -230,16 +237,17 @@ export class Region {
     return uuidArray
   }
 
-  getRegionGrid(uuid: string) {
+  getRegionGrid(uuid: string, strategy: 'intersection' | 'union') {
     const result = this.getResultByUUID(uuid)
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
     const mask = result.regionMask as GeolocusGird
+    const fillValue = Number(strategy === 'intersection')
     const resultGird: GeolocusGird = Gird.createGirdWithFillValue(
       mask.length,
       mask[0].length,
-      1,
+      fillValue,
     )
 
     const region = result.region as GeolocusMultiPolygonObject
@@ -247,13 +255,20 @@ export class Region {
     result.pdfGird = this.getPdfGird(mask, result.pdf, region)
     result.pdfGird.forEach((pdfGird) => {
       const tempGird = pdfGird.gird as GeolocusGird
+      const weight = pdfGird.weight
       const transformGird =
         pdfGird.type === 'gdf'
           ? tempGird
           : this.extractRegionGird(tempGird, pdfGird.bbox as GeolocusBBox, bbox)
-      Gird.forEach(resultGird, (_, row, col) => {
-        resultGird[row][col] *= transformGird[row][col]
-      })
+      if (strategy === 'intersection') {
+        Gird.forEach(resultGird, (_, row, col) => {
+          resultGird[row][col] *= weight * transformGird[row][col]
+        })
+      } else {
+        Gird.forEach(resultGird, (_, row, col) => {
+          resultGird[row][col] += weight * transformGird[row][col]
+        })
+      }
     })
 
     const transformGird = Gird.normalize(resultGird)

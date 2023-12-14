@@ -32,4 +32,5 @@ export interface IGeoRelation {
   topology: TopologyRelation | null
   direction: AbsoluteDirection | null
   distance: EuclideanDistance | EuclideanDistanceRange | null
+  weight: number
 }

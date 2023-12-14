@@ -17,7 +17,7 @@ describe('Test the Region class', () => {
       direction: 'E',
       distance: 60,
     })
-    region.computeFuzzyObject(target0.getUUID())
+    region.computeFuzzyObject(target0.getUUID(), 'intersection')
     expect(region.getResultByUUID(origin0.getUUID())).toEqual(undefined)
     expect(region.getResultByUUID(target0.getUUID())).toBeTruthy()
   })
@@ -31,20 +31,30 @@ describe('Test the Region class', () => {
     const target2 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
     const target3 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
     const target4 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const target5 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const target6 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
 
     const region = context.getRegion()
     const relation = context.getRelation()
 
     // validateFuzzy and compute order
-    expect(() => region.computeFuzzyObject(origin0.getUUID())).toThrow()
-    expect(() => region.computeFuzzyObject(target0.getUUID())).toThrow()
+    expect(() =>
+      region.computeFuzzyObject(origin0.getUUID(), 'intersection'),
+    ).toThrow()
+    expect(() =>
+      region.computeFuzzyObject(target0.getUUID(), 'intersection'),
+    ).toThrow()
     // The geoRelation is null
     relation.define(target1, origin0, {})
-    expect(() => region.computeFuzzyObject(target1.getUUID())).toThrow()
+    expect(() =>
+      region.computeFuzzyObject(target1.getUUID(), 'intersection'),
+    ).toThrow()
     // The result region is null
     relation.define(target2, origin0, { direction: 'NE', distance: 100 })
     relation.define(target2, origin0, { direction: 'SW', distance: 100 })
-    expect(() => region.computeFuzzyObject(target2.getUUID())).toThrow()
+    expect(() =>
+      region.computeFuzzyObject(target2.getUUID(), 'intersection'),
+    ).toThrow()
     // gdf
     relation.define(target0, target3, {
       direction: 'E',
@@ -53,18 +63,43 @@ describe('Test the Region class', () => {
     relation.define(target3, origin0, {
       topology: 'equal',
     })
-    const uuid = region.computeFuzzyObject(target0.getUUID())
+    const uuid = region.computeFuzzyObject(target0.getUUID(), 'intersection')
     expect(uuid.length).toBe(2)
     const x = region.getResultByUUID(target0.getUUID())!.coord![0]
     expect(x > 59 && x < 61).toBeTruthy()
-
     // sdf
     relation.define(target4, origin1, {
       topology: 'contain',
     })
-    region.computeFuzzyObject(target4.getUUID())
+    region.computeFuzzyObject(target4.getUUID(), 'intersection')
     const sdfX = region.getResultByUUID(target4.getUUID())!.coord![0]
     expect(sdfX > 1.49 && sdfX < 1.51).toBeTruthy()
+
+    // union
+    relation.define(target5, origin0, {
+      direction: 'E',
+      distance: 60,
+    })
+    region.computeFuzzyObject(target5.getUUID(), 'union')
+    const unionX = region.getResultByUUID(target5.getUUID())!.coord![0]
+    expect(unionX > 59 && unionX < 61).toBeTruthy()
+    // the unboundedRegion is null
+    relation.define(target6, origin0, {
+      direction: 'E',
+      distance: 60,
+    })
+    relation.define(target6, origin0, {
+      direction: 'N',
+      distance: 60,
+    })
+    relation.define(target6, origin1, {
+      direction: 'SW',
+    })
+    expect(() =>
+      region.computeFuzzyObject(target6.getUUID(), 'intersection'),
+    ).toThrow()
+    region.computeFuzzyObject(target6.getUUID(), 'union')
+    expect(region.getResultByUUID(target5.getUUID())!.coord![0]).toBeTruthy()
   })
 
   test('Get the gird of Region', () => {
@@ -72,7 +107,9 @@ describe('Test the Region class', () => {
     const target = new GeolocusPointObject([0, 0], context, { fuzzy: true })
 
     const region = context.getRegion()
-    expect(() => region.getRegionGrid(target.getUUID())).toThrow()
+    expect(() =>
+      region.getRegionGrid(target.getUUID(), 'intersection'),
+    ).toThrow()
   })
 
   test('Get the coordinates of the maximum value.', () => {
