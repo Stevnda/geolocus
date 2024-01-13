@@ -1,5 +1,5 @@
 export { Position2, Position3 } from './context'
-export { GeolocusBBox, GeolocusGeometry, GeolocusObject } from './object'
+export { GeolocusBBox, GeolocusObject, GeolocusObjectStatus } from './object'
 export { IGeoTriple } from './region'
 export {
   AbsoluteDirection,

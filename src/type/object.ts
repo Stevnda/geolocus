@@ -1,20 +1,20 @@
 import {
   GeolocusLineStringObject,
+  GeolocusMultiLineStringObject,
+  GeolocusMultiPointObject,
   GeolocusMultiPolygonObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
-} from '../object'
+} from '@/object'
 
 export type GeolocusBBox = [number, number, number, number]
-
-export type GeolocusGeometry =
-  | 'Point'
-  | 'LineString'
-  | 'Polygon'
-  | 'MultiPolygon'
 
 export type GeolocusObject =
   | GeolocusPointObject
   | GeolocusLineStringObject
   | GeolocusPolygonObject
+  | GeolocusMultiLineStringObject
+  | GeolocusMultiPointObject
   | GeolocusMultiPolygonObject
+
+export type GeolocusObjectStatus = 'fuzzy' | 'precise' | 'computed'

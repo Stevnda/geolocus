@@ -4,12 +4,12 @@ import {
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from './object'
-import { IGeoRelationWithSemantic } from './relation/relation.type'
-import { GeolocusObject, Position2 } from './type'
+import { IGeoRelationWithSemantic } from './relation/type'
+import { GeolocusObject, GeolocusObjectStatus, Position2 } from './type'
 
-interface IGeolocusObjectOption {
+interface IGeolocusObjectInit {
   name?: string
-  fuzzy?: boolean
+  status?: GeolocusObjectStatus
 }
 
 class Geolocus {
@@ -18,24 +18,27 @@ class Geolocus {
     this._context = new GeolocusContext(name)
   }
 
-  point(position: Position2, option?: IGeolocusObjectOption) {
-    return new GeolocusPointObject(position, this._context, {
+  point(position: Position2, option?: IGeolocusObjectInit) {
+    return new GeolocusPointObject(position, {
+      context: this._context,
       name: option?.name || '',
-      fuzzy: option?.fuzzy || false,
+      status: option?.status || 'precise',
     })
   }
 
-  lineString(position: Position2[], option?: IGeolocusObjectOption) {
-    return new GeolocusLineStringObject(position, this._context, {
+  lineString(position: Position2[], option?: IGeolocusObjectInit) {
+    return new GeolocusLineStringObject(position, {
+      context: this._context,
       name: option?.name || '',
-      fuzzy: option?.fuzzy || false,
+      status: option?.status || 'precise',
     })
   }
 
-  polygon(position: Position2[][], option?: IGeolocusObjectOption) {
-    return new GeolocusPolygonObject(position, this._context, {
+  polygon(position: Position2[][], option?: IGeolocusObjectInit) {
+    return new GeolocusPolygonObject(position, {
+      context: this._context,
       name: option?.name || '',
-      fuzzy: option?.fuzzy || false,
+      status: option?.status || 'precise',
     })
   }
 

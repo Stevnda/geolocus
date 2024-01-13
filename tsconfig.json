@@ -3,6 +3,7 @@
     "target": "ES2020",
     "module": "ESNext",
     "moduleResolution": "node",
+    "baseUrl": ".",
     "outDir": "dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -10,10 +11,14 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "declaration": true
+    "declaration": true,
+    "allowJs": true,
+    "paths": {
+      "@/*": ["src/*"]
+    }
   },
   "exclude": ["**/test.ts"],
-  "include": ["src/**/*", "example/sdf/sdf.demo.ts"],
+  "include": ["src/**/*", "example/**/*", "loader.js"],
   "ts-node": {
     "esm": true,
     "experimentalSpecifierResolution": "node"

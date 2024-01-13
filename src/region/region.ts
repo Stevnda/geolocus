@@ -1,6 +1,15 @@
-import { GeolocusContext } from '../context'
-import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '../object'
-import { Topology } from '../relation'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+import { GeolocusContext } from '@/context'
+import {
+  GeolocusMultiPolygonObject,
+  GeolocusPolygonObject,
+  Transformation,
+  createPolygonFromBBox,
+  geolocusObjectMapping,
+  getGeolocusObjectMaskGrid,
+} from '@/object'
+import { Topology } from '@/relation'
 import {
   EuclideanDistanceRange,
   GeolocusBBox,
@@ -8,8 +17,8 @@ import {
   GeolocusObject,
   IGeoTriple,
   Position2,
-} from '../type'
-import { Compare, GEO_MAX_VALUE, Gird } from '../util'
+} from '@/type'
+import { Compare, GEO_MAX_VALUE, Gird, Vector2 } from '@/util'
 import { RegionResultHandler } from './handler'
 import { RegionPDF } from './pdf'
 import {
@@ -17,7 +26,7 @@ import {
   IRegionRegion,
   IRegionResult,
   IRegionResultPdfGird,
-} from './region.type'
+} from './type'
 
 const map = {
   0: () => {
@@ -69,10 +78,12 @@ export class Region {
 
     let resultRegion: IRegionRegion =
       strategy === 'intersection'
-        ? GeolocusPolygonObject.fromBBox(
-            [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
-            null,
-          )
+        ? createPolygonFromBBox([
+            -GEO_MAX_VALUE,
+            -GEO_MAX_VALUE,
+            GEO_MAX_VALUE,
+            GEO_MAX_VALUE,
+          ])
         : (boundedRegionArray.shift() as IRegionRegion)
     for (const currentRegion of boundedRegionArray) {
       const tempRegion =
@@ -111,7 +122,7 @@ export class Region {
     const yEnd = bbox[3]
     const dy = yEnd - yStart
     const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
+    const girdSize = dx / Math.sqrt(this._context.getResultGirdNum() / ratio)
     const pdfGirdArray: IRegionResultPdfGird[] = []
     const rowCount = Math.ceil(dy / girdSize)
     const colCount = Math.ceil(dx / girdSize)
@@ -169,7 +180,8 @@ export class Region {
     const targetYEnd = targetBBox[3]
     const targetDy = targetYEnd - targetYStart
     const ratio = targetDy / targetDx
-    const girdSize = targetDx / Math.sqrt(this._context.getGirdSize() / ratio)
+    const girdSize =
+      targetDx / Math.sqrt(this._context.getResultGirdNum() / ratio)
 
     const resultGird = Gird.createGirdWithFilter(
       Math.ceil(targetDy / girdSize),
@@ -220,18 +232,35 @@ export class Region {
       )
       result.pdf = resultPdf
       result.region = resultRegion
+
+      console.timeLog()
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      result.regionMask = result.region!.getMaskWithinBBox(
-        context.getGirdSize(),
+      result.regionMask = getGeolocusObjectMaskGrid(
+        result.region!,
+        context.getResultGirdNum(),
       )
       result.resultGird = this.getRegionGrid(currentUUID, strategy)
       const { coord } = this.getCoordOfMaximum(currentUUID)
       result.coord = coord
+      console.timeLog()
 
       const object = context.getObjectByUUID(currentUUID) as GeolocusObject
       const center = object.getCenter()
-      object.setFuzzy(false)
-      object.translate(center, coord)
+      const offset = Vector2.sub(coord, center)
+      const translatedObject = Transformation.translate(object, ...offset)
+      const type = translatedObject.getType()
+      const ObjectFactory = geolocusObjectMapping[type]
+      // eslint-disable-next-line no-new
+      new ObjectFactory([0, 0] as any, {
+        type: translatedObject.getType() as any,
+        bbox: translatedObject.getBBox(),
+        center: translatedObject.getCenter(),
+        context: translatedObject.getContext(),
+        geometry: translatedObject.getGeometry(),
+        name: translatedObject.getName(),
+        status: 'computed',
+        uuid: translatedObject.getUUID(),
+      })
     }
 
     return uuidArray
@@ -244,7 +273,7 @@ export class Region {
     }
     const mask = result.regionMask as GeolocusGird
     const fillValue = Number(strategy === 'intersection')
-    const resultGird: GeolocusGird = Gird.createGirdWithFillValue(
+    const resultGird: GeolocusGird = Gird.createGirdWithValue(
       mask.length,
       mask[0].length,
       fillValue,
@@ -293,7 +322,7 @@ export class Region {
     const yEnd = bbox[3]
     const dy = yEnd - yStart
     const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(this._context.getGirdSize() / ratio)
+    const girdSize = dx / Math.sqrt(this._context.getResultGirdNum() / ratio)
 
     let max = -GEO_MAX_VALUE
     let min = GEO_MAX_VALUE

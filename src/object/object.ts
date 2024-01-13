@@ -1,86 +1,49 @@
+import { GeolocusContext } from '@/context'
+import { GeolocusBBox, Position2 } from '@/type'
+import { GeolocusObjectStatus } from '@/type/object'
 import crypto from 'crypto'
-import { Feature, LineString, MultiPolygon, Point, Polygon } from 'geojson'
-import { GeolocusContext } from '../context'
-import { Direction, Topology } from '../relation'
-import { GeolocusBBox, GeolocusGird, GeolocusObject, Position2 } from '../type'
-import { Gird, Vector2 } from '../util'
-import { GeoJSON } from './geoJSON'
-import { IGeolocusObject, IGeolocusObjectOption } from './object.type'
-
-export const getGeolocusObjectMaskWithinBBox = (
-  object: GeolocusObject,
-  girdNum: number,
-): GeolocusGird => {
-  const bbox = object.getBBox()
-  const xStart = bbox[0]
-  const xEnd = bbox[2]
-  const dx = xEnd - xStart
-  const yStart = bbox[1]
-  const yEnd = bbox[3]
-  const dy = yEnd - yStart
-  const ratio = dy / dx
-  const girdSize = dx / Math.sqrt(girdNum / ratio)
-
-  const mask = Gird.createGirdWithFilter(
-    Math.ceil(dy / girdSize),
-    Math.ceil(dx / girdSize),
-    (row, col) => {
-      const tempPoint = new GeolocusPointObject([
-        xStart + col * girdSize,
-        yStart + row * girdSize,
-      ])
-      return +Topology.isIntersect(tempPoint, object)
-    },
-  )
-
-  return mask
-}
+import { GeolocusGeometryFactory, GeolocusGeometryMeta } from './geometry'
+import {
+  GeolocusGeometry,
+  GeolocusLineStringGeometry,
+  GeolocusMultiLineStringGeometry,
+  GeolocusMultiPointGeometry,
+  GeolocusMultiPolygonGeometry,
+  GeolocusPointGeometry,
+  GeolocusPolygonGeometry,
+  IGeolocusObject,
+  IGeolocusObjectInit,
+} from './type'
 
 export class GeolocusPointObject implements IGeolocusObject {
-  private _type: 'Point'
   private _context: GeolocusContext | null
-  private _fuzzy: boolean
-  private _name: string
   private _uuid: string
-  private _geoJSON: Feature<Point>
-  private _vertex: Position2
+  private _type: 'Point'
+  private _status: GeolocusObjectStatus
+  private _name: string
+  private _geometry: GeolocusGeometry
   private _bbox: GeolocusBBox
   private _center: Position2
 
   constructor(
     position: Position2,
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
+    option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'Point' },
   ) {
-    this._type = 'Point'
-    this._context = context || null
-    this._fuzzy = option?.fuzzy || false
+    this._context = option?.context || null
+    this._uuid = option?.uuid || crypto.randomUUID()
+    this._type = option?.type || 'Point'
+    this._status = option?.status || 'precise'
     this._name = option?.name || ''
-    this._uuid = crypto.randomUUID()
-    this._geoJSON = GeoJSON.point(position)
-    this._vertex = position
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = [
-      (this._bbox[0] + this._bbox[2]) / 2,
-      (this._bbox[1] + this._bbox[3]) / 2,
-    ]
+    this._geometry = option?.geometry || GeolocusGeometryFactory.point(position)
+    this._bbox = option?.bbox || GeolocusGeometryMeta.getBBox(this._geometry)
+    this._center =
+      option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
+
     this._context && this._context.addObject(this._uuid, this)
   }
 
-  getContext() {
+  getContext(): GeolocusContext | null {
     return this._context
-  }
-
-  getFuzzy(): boolean {
-    return this._fuzzy
-  }
-
-  setFuzzy(value: boolean) {
-    this._fuzzy = value
-  }
-
-  getName(): string {
-    return this._name
   }
 
   getUUID(): string {
@@ -91,8 +54,16 @@ export class GeolocusPointObject implements IGeolocusObject {
     return this._type
   }
 
-  getVertex(): Position2 {
-    return this._vertex
+  getStatus(): GeolocusObjectStatus {
+    return this._status
+  }
+
+  getName(): string {
+    return this._name
+  }
+
+  getGeometry(): GeolocusPointGeometry {
+    return this._geometry as GeolocusPointGeometry
   }
 
   getBBox(): GeolocusBBox {
@@ -102,97 +73,38 @@ export class GeolocusPointObject implements IGeolocusObject {
   getCenter(): Position2 {
     return this._center
   }
-
-  getGeoJSON(): Feature<Point> {
-    return this._geoJSON
-  }
-  clone(): GeolocusPointObject {
-    return new GeolocusPointObject(
-      this._geoJSON.geometry.coordinates.slice() as Position2,
-      this._context,
-      {
-        fuzzy: this._fuzzy,
-        name: this._name,
-      },
-    )
-  }
-
-  translate(origin: Position2, target: Position2) {
-    const distance = Vector2.distanceTo(origin, target)
-    const direction = Direction.azimuth(Vector2.sub(target, origin))
-    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
-    this._vertex = this._geoJSON.geometry.coordinates as Position2
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = [
-      (this._bbox[0] + this._bbox[2]) / 2,
-      (this._bbox[1] + this._bbox[3]) / 2,
-    ]
-  }
-
-  static fromGeoJSON(
-    geojson: Feature<Point>,
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
-  ) {
-    const geometryType = geojson.geometry.type
-    if (geometryType === 'Point') {
-      return new GeolocusPointObject(
-        geojson.geometry.coordinates as Position2,
-        context,
-        {
-          fuzzy: option?.fuzzy,
-          name: option?.name,
-        },
-      )
-    } else {
-      throw Error(`${geometryType} is invalid geometry type`)
-    }
-  }
 }
 
 export class GeolocusLineStringObject implements IGeolocusObject {
-  private _type: 'LineString'
   private _context: GeolocusContext | null
-  private _fuzzy: boolean
-  private _name: string
   private _uuid: string
-
-  private _geoJSON: Feature<LineString>
-  private _vertex: Position2[]
+  private _type: 'LineString'
+  private _status: GeolocusObjectStatus
+  private _name: string
+  private _geometry: GeolocusGeometry
   private _bbox: GeolocusBBox
   private _center: Position2
 
   constructor(
     position: Position2[],
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
+    option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'LineString' },
   ) {
-    this._type = 'LineString'
-    this._context = context || null
-    this._fuzzy = option?.fuzzy || false
+    this._context = option?.context || null
+    this._uuid = option?.uuid || crypto.randomUUID()
+    this._type = option?.type || 'LineString'
+    this._status = option?.status || 'precise'
     this._name = option?.name || ''
-    this._uuid = crypto.randomUUID()
-    this._geoJSON = GeoJSON.lineString(position)
-    this._vertex = position
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = GeoJSON.centerOfMass(this._geoJSON)
+    this._geometry =
+      option?.geometry || GeolocusGeometryFactory.lineString(position)
+    this._bbox = option?.bbox || GeolocusGeometryMeta.getBBox(this._geometry)
+    this._center =
+      option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
+
     this._context && this._context.addObject(this._uuid, this)
   }
 
-  getContext() {
+  getContext(): GeolocusContext | null {
     return this._context
-  }
-
-  getFuzzy(): boolean {
-    return this._fuzzy
-  }
-
-  setFuzzy(value: boolean) {
-    this._fuzzy = value
-  }
-
-  getName(): string {
-    return this._name
   }
 
   getUUID(): string {
@@ -203,8 +115,16 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     return this._type
   }
 
-  getVertex(): Position2[] {
-    return this._vertex
+  getStatus(): GeolocusObjectStatus {
+    return this._status
+  }
+
+  getName(): string {
+    return this._name
+  }
+
+  getGeometry(): GeolocusLineStringGeometry {
+    return this._geometry as GeolocusLineStringGeometry
   }
 
   getBBox(): GeolocusBBox {
@@ -214,96 +134,38 @@ export class GeolocusLineStringObject implements IGeolocusObject {
   getCenter(): Position2 {
     return this._center
   }
-
-  getGeoJSON(): Feature<LineString> {
-    return this._geoJSON
-  }
-  clone(): GeolocusLineStringObject {
-    return new GeolocusLineStringObject(
-      this._geoJSON.geometry.coordinates.slice() as Position2[],
-      this._context,
-      {
-        fuzzy: this._fuzzy,
-        name: this._name,
-      },
-    )
-  }
-
-  translate(origin: Position2, target: Position2) {
-    const distance = Vector2.distanceTo(origin, target)
-    const direction = Direction.azimuth(Vector2.sub(target, origin))
-    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
-    this._vertex = this._geoJSON.geometry.coordinates as Position2[]
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = [
-      (this._bbox[0] + this._bbox[2]) / 2,
-      (this._bbox[1] + this._bbox[3]) / 2,
-    ]
-  }
-
-  static fromGeoJSON(
-    geojson: Feature<LineString>,
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
-  ) {
-    const geometryType = geojson.geometry.type
-    if (geometryType === 'LineString') {
-      return new GeolocusLineStringObject(
-        geojson.geometry.coordinates as Position2[],
-        context,
-        {
-          fuzzy: option?.fuzzy,
-          name: option?.name,
-        },
-      )
-    } else {
-      throw Error(`${geometryType} is invalid geometry type`)
-    }
-  }
 }
 
 export class GeolocusPolygonObject implements IGeolocusObject {
-  private _type: 'Polygon'
   private _context: GeolocusContext | null
-  private _fuzzy: boolean
-  private _name: string
   private _uuid: string
-  private _geoJSON: Feature<Polygon>
-  private _vertex: Position2[][]
+  private _type: 'Polygon'
+  private _status: GeolocusObjectStatus
+  private _name: string
+  private _geometry: GeolocusGeometry
   private _bbox: GeolocusBBox
   private _center: Position2
 
   constructor(
     position: Position2[][],
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
+    option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'Polygon' },
   ) {
-    this._type = 'Polygon'
-    this._context = context || null
-    this._fuzzy = option?.fuzzy || false
+    this._context = option?.context || null
+    this._uuid = option?.uuid || crypto.randomUUID()
+    this._type = option?.type || 'Polygon'
+    this._status = option?.status || 'precise'
     this._name = option?.name || ''
-    this._uuid = crypto.randomUUID()
-    this._geoJSON = GeoJSON.polygon(position)
-    this._vertex = position
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = GeoJSON.centerOfMass(this._geoJSON)
+    this._geometry =
+      option?.geometry || GeolocusGeometryFactory.polygon(position)
+    this._bbox = option?.bbox || GeolocusGeometryMeta.getBBox(this._geometry)
+    this._center =
+      option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
+
     this._context && this._context.addObject(this._uuid, this)
   }
 
-  getContext() {
+  getContext(): GeolocusContext | null {
     return this._context
-  }
-
-  getFuzzy(): boolean {
-    return this._fuzzy
-  }
-
-  setFuzzy(value: boolean) {
-    this._fuzzy = value
-  }
-
-  getName(): string {
-    return this._name
   }
 
   getUUID(): string {
@@ -314,8 +176,16 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     return this._type
   }
 
-  getVertex(): Position2[][] {
-    return this._vertex
+  getStatus(): GeolocusObjectStatus {
+    return this._status
+  }
+
+  getName(): string {
+    return this._name
+  }
+
+  getGeometry(): GeolocusPolygonGeometry {
+    return this._geometry as GeolocusPolygonGeometry
   }
 
   getBBox(): GeolocusBBox {
@@ -325,121 +195,160 @@ export class GeolocusPolygonObject implements IGeolocusObject {
   getCenter(): Position2 {
     return this._center
   }
+}
 
-  getGeoJSON(): Feature<Polygon> {
-    return this._geoJSON
-  }
+export class GeolocusMultiPointObject implements IGeolocusObject {
+  private _context: GeolocusContext | null
+  private _uuid: string
+  private _type: 'MultiPoint'
+  private _status: GeolocusObjectStatus
+  private _name: string
+  private _geometry: GeolocusGeometry
+  private _bbox: GeolocusBBox
+  private _center: Position2
 
-  getMaskWithinBBox(girdNum: number): GeolocusGird {
-    return getGeolocusObjectMaskWithinBBox(this, girdNum)
-  }
-
-  clone(): GeolocusPolygonObject {
-    return new GeolocusPolygonObject(
-      this._geoJSON.geometry.coordinates.slice() as Position2[][],
-      this._context,
-      {
-        fuzzy: this._fuzzy,
-        name: this._name,
-      },
-    )
-  }
-
-  translate(origin: Position2, target: Position2) {
-    const distance = Vector2.distanceTo(origin, target)
-    const direction = Direction.azimuth(Vector2.sub(target, origin))
-    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
-    this._vertex = this._geoJSON.geometry.coordinates as Position2[][]
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = [
-      (this._bbox[0] + this._bbox[2]) / 2,
-      (this._bbox[1] + this._bbox[3]) / 2,
-    ]
-  }
-
-  static fromBBox(
-    position: GeolocusBBox,
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
-  ): GeolocusPolygonObject {
-    const leftDown: Position2 = [position[0], position[1]]
-    const rightDown: Position2 = [position[2], position[1]]
-    const rightUp: Position2 = [position[2], position[3]]
-    const leftUp: Position2 = [position[0], position[3]]
-
-    return new GeolocusPolygonObject(
-      [[leftDown, rightDown, rightUp, leftUp, leftDown]],
-      context,
-      {
-        fuzzy: option?.fuzzy,
-        name: option?.name,
-      },
-    )
-  }
-
-  static fromGeoJSON(
-    geojson: Feature<Polygon>,
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
+  constructor(
+    position: Position2[],
+    option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'MultiPoint' },
   ) {
-    const geometryType = geojson.geometry.type
-    if (geometryType === 'Polygon') {
-      return new GeolocusPolygonObject(
-        geojson.geometry.coordinates as Position2[][],
-        context,
-        {
-          fuzzy: option?.fuzzy,
-          name: option?.name,
-        },
-      )
-    } else {
-      throw Error(`${geometryType} is invalid geometry type`)
-    }
+    this._context = option?.context || null
+    this._uuid = option?.uuid || crypto.randomUUID()
+    this._type = option?.type || 'MultiPoint'
+    this._status = option?.status || 'precise'
+    this._name = option?.name || ''
+    this._geometry =
+      option?.geometry || GeolocusGeometryFactory.multiPoint(position)
+    this._bbox = option?.bbox || GeolocusGeometryMeta.getBBox(this._geometry)
+    this._center =
+      option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
+
+    this._context && this._context.addObject(this._uuid, this)
+  }
+
+  getContext(): GeolocusContext | null {
+    return this._context
+  }
+
+  getUUID(): string {
+    return this._uuid
+  }
+
+  getType(): 'MultiPoint' {
+    return this._type
+  }
+
+  getStatus(): GeolocusObjectStatus {
+    return this._status
+  }
+
+  getName(): string {
+    return this._name
+  }
+
+  getGeometry(): GeolocusMultiPointGeometry {
+    return this._geometry as GeolocusMultiPointGeometry
+  }
+
+  getBBox(): GeolocusBBox {
+    return this._bbox
+  }
+
+  getCenter(): Position2 {
+    return this._center
+  }
+}
+
+export class GeolocusMultiLineStringObject implements IGeolocusObject {
+  private _context: GeolocusContext | null
+  private _uuid: string
+  private _type: 'MultiLineString'
+  private _status: GeolocusObjectStatus
+  private _name: string
+  private _geometry: GeolocusGeometry
+  private _bbox: GeolocusBBox
+  private _center: Position2
+
+  constructor(
+    position: Position2[][],
+    option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'MultiLineString' },
+  ) {
+    this._context = option?.context || null
+    this._uuid = option?.uuid || crypto.randomUUID()
+    this._type = option?.type || 'MultiLineString'
+    this._status = option?.status || 'precise'
+    this._name = option?.name || ''
+    this._geometry =
+      option?.geometry || GeolocusGeometryFactory.multiLineString(position)
+    this._bbox = option?.bbox || GeolocusGeometryMeta.getBBox(this._geometry)
+    this._center =
+      option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
+
+    this._context && this._context.addObject(this._uuid, this)
+  }
+
+  getContext(): GeolocusContext | null {
+    return this._context
+  }
+
+  getUUID(): string {
+    return this._uuid
+  }
+
+  getType(): 'MultiLineString' {
+    return this._type
+  }
+
+  getStatus(): GeolocusObjectStatus {
+    return this._status
+  }
+
+  getName(): string {
+    return this._name
+  }
+
+  getGeometry(): GeolocusMultiLineStringGeometry {
+    return this._geometry as GeolocusMultiLineStringGeometry
+  }
+
+  getBBox(): GeolocusBBox {
+    return this._bbox
+  }
+
+  getCenter(): Position2 {
+    return this._center
   }
 }
 
 export class GeolocusMultiPolygonObject implements IGeolocusObject {
-  private _type: 'MultiPolygon'
   private _context: GeolocusContext | null
-  private _fuzzy: boolean
-  private _name: string
   private _uuid: string
-  private _geoJSON: Feature<MultiPolygon>
-  private _vertex: Position2[][][]
+  private _type: 'MultiPolygon'
+  private _status: GeolocusObjectStatus
+  private _name: string
+  private _geometry: GeolocusGeometry
   private _bbox: GeolocusBBox
   private _center: Position2
 
   constructor(
     position: Position2[][][],
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
+    option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'MultiPolygon' },
   ) {
-    this._type = 'MultiPolygon'
-    this._context = context || null
-    this._fuzzy = option?.fuzzy || false
+    this._context = option?.context || null
+    this._uuid = option?.uuid || crypto.randomUUID()
+    this._type = option?.type || 'MultiPolygon'
+    this._status = option?.status || 'precise'
     this._name = option?.name || ''
-    this._uuid = crypto.randomUUID()
-    this._geoJSON = GeoJSON.multiPolygon(position)
-    this._vertex = position
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = GeoJSON.centerOfMass(this._geoJSON)
+    this._geometry =
+      option?.geometry || GeolocusGeometryFactory.multiPolygon(position)
+    this._bbox = option?.bbox || GeolocusGeometryMeta.getBBox(this._geometry)
+    this._center =
+      option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
+
     this._context && this._context.addObject(this._uuid, this)
   }
 
-  getContext() {
+  getContext(): GeolocusContext | null {
     return this._context
-  }
-
-  getFuzzy(): boolean {
-    return this._fuzzy
-  }
-
-  setFuzzy(value: boolean) {
-    this._fuzzy = value
-  }
-
-  getName(): string {
-    return this._name
   }
 
   getUUID(): string {
@@ -450,8 +359,16 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
     return this._type
   }
 
-  getVertex(): Position2[][][] {
-    return this._vertex
+  getStatus(): GeolocusObjectStatus {
+    return this._status
+  }
+
+  getName(): string {
+    return this._name
+  }
+
+  getGeometry(): GeolocusMultiPolygonGeometry {
+    return this._geometry as GeolocusMultiPolygonGeometry
   }
 
   getBBox(): GeolocusBBox {
@@ -460,85 +377,5 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
 
   getCenter(): Position2 {
     return this._center
-  }
-
-  getGeoJSON(): Feature<MultiPolygon> {
-    return this._geoJSON
-  }
-
-  getMaskWithinBBox(girdNum: number): GeolocusGird {
-    return getGeolocusObjectMaskWithinBBox(this, girdNum)
-  }
-
-  clone(): GeolocusMultiPolygonObject {
-    return new GeolocusMultiPolygonObject(
-      this._geoJSON.geometry.coordinates.slice() as Position2[][][],
-      this._context,
-      {
-        fuzzy: this._fuzzy,
-        name: this._name,
-      },
-    )
-  }
-
-  translate(origin: Position2, target: Position2) {
-    const distance = Vector2.distanceTo(origin, target)
-    const direction = Direction.azimuth(Vector2.sub(target, origin))
-    this._geoJSON = GeoJSON.translate(this._geoJSON, distance, direction)
-    this._vertex = this._geoJSON.geometry.coordinates as Position2[][][]
-    this._bbox = GeoJSON.bbox(this._geoJSON)
-    this._center = [
-      (this._bbox[0] + this._bbox[2]) / 2,
-      (this._bbox[1] + this._bbox[3]) / 2,
-    ]
-  }
-
-  static fromBBox(
-    position: GeolocusBBox,
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
-  ): GeolocusMultiPolygonObject {
-    const leftDown: Position2 = [position[0], position[1]]
-    const rightDown: Position2 = [position[2], position[1]]
-    const rightUp: Position2 = [position[2], position[3]]
-    const leftUp: Position2 = [position[0], position[3]]
-
-    return new GeolocusMultiPolygonObject(
-      [[[leftDown, rightDown, rightUp, leftUp, leftDown]]],
-      context,
-      {
-        fuzzy: option?.fuzzy,
-        name: option?.name,
-      },
-    )
-  }
-
-  static fromGeoJSON(
-    geojson: Feature<Polygon | MultiPolygon>,
-    context: GeolocusContext | null = null,
-    option?: IGeolocusObjectOption,
-  ) {
-    const geometryType = geojson.geometry.type
-    if (geometryType === 'Polygon') {
-      return new GeolocusMultiPolygonObject(
-        [geojson.geometry.coordinates] as Position2[][][],
-        context,
-        {
-          fuzzy: option?.fuzzy,
-          name: option?.name,
-        },
-      )
-    } else if (geometryType === 'MultiPolygon') {
-      return new GeolocusMultiPolygonObject(
-        geojson.geometry.coordinates as Position2[][][],
-        context,
-        {
-          fuzzy: option?.fuzzy,
-          name: option?.name,
-        },
-      )
-    } else {
-      throw Error(`${geometryType} is invalid geometry type`)
-    }
   }
 }

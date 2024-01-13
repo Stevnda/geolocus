@@ -1,6 +1,6 @@
-import { GeolocusContext } from '../context'
-import { EuclideanDistanceRange, SemanticDistance } from '../type'
-import { MathUtil, Vector2 } from '../util'
+import { GeolocusContext } from '@/context'
+import { EuclideanDistanceRange, SemanticDistance } from '@/type'
+import { MathUtil, Vector2 } from '@/util'
 
 export class Distance {
   static SEMANTIC_MAP: {
@@ -17,13 +17,9 @@ export class Distance {
     term: SemanticDistance,
     context: GeolocusContext,
   ): EuclideanDistanceRange {
-    const tag = this.SEMANTIC_MAP[term]
-    const scale = context.getScale()
+    const index = this.SEMANTIC_MAP[term]
     const threshold = context.getSemanticDistanceThreshold()
-    const range: EuclideanDistanceRange = [
-      Math.floor(scale * threshold[tag]),
-      Math.floor(scale * threshold[tag + 1]),
-    ]
+    const range: EuclideanDistanceRange = threshold[index]
     return range
   }
 

@@ -1,20 +1,21 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext } from '../context'
+import { GeolocusContext } from '@/context'
 import {
   GeolocusMultiPolygonObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
-} from '../object'
-import { Direction, Topology } from '../relation'
+  createPolygonFromBBox,
+} from '@/object'
+import { Direction, Topology } from '@/relation'
 import {
   AbsoluteDirection,
   EuclideanDistance,
   GeolocusObject,
   IGeoRelation,
   TopologyRelation,
-} from '../type'
-import { Compare, GEO_MAX_VALUE, Vector2 } from '../util'
-import { IRegionPDF, IRegionResultHandler } from './region.type'
+} from '@/type'
+import { Compare, GEO_MAX_VALUE, Vector2 } from '@/util'
+import { IRegionPDF, IRegionResultHandler } from './type'
 
 export class RegionResultHandler {
   private static equalHandler: IRegionResultHandler = (
@@ -56,7 +57,7 @@ export class RegionResultHandler {
       },
       sdf: {
         girdRegion: region,
-        girdNum: origin.getContext()!.getGirdSize(),
+        girdNum: origin.getContext()!.getResultGirdNum(),
       },
       weight: relation.weight,
     }
@@ -82,7 +83,7 @@ export class RegionResultHandler {
     if (Compare.LE(targetLength, 0.005)) targetLength = 0.005
     if (Compare.LE(targetLength, originLength)) targetLength = originLength
     const objectType = origin.getType()
-    let region = null
+    let region: null | GeolocusPolygonObject = null
     if (objectType === 'Point' || objectType === 'LineString') {
       region = Topology.bufferOfDistance(origin, targetLength)
     } else {
@@ -99,7 +100,7 @@ export class RegionResultHandler {
       },
       sdf: {
         girdRegion: region,
-        girdNum: origin.getContext()!.getGirdSize(),
+        girdNum: origin.getContext()!.getResultGirdNum(),
       },
       weight: relation.weight,
     }
@@ -126,7 +127,7 @@ export class RegionResultHandler {
     if (Compare.LE(targetLength, 0.005)) targetLength = 0.005
     if (Compare.LE(targetLength, originLength)) targetLength = originLength
     const objectType = origin.getType()
-    let region = null
+    let region: null | GeolocusPolygonObject = null
     if (objectType === 'Point' || objectType === 'LineString') {
       region = Topology.bufferOfDistance(origin, targetLength)
     } else {
@@ -143,7 +144,7 @@ export class RegionResultHandler {
       },
       sdf: {
         girdRegion: region,
-        girdNum: origin.getContext()!.getGirdSize(),
+        girdNum: origin.getContext()!.getResultGirdNum(),
       },
       weight: relation.weight,
     }
@@ -155,13 +156,15 @@ export class RegionResultHandler {
     origin: GeolocusObject,
     relation: IGeoRelation,
   ) => {
-    const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
+    const bboxPolygon = createPolygonFromBBox(origin.getBBox())
     const buffer = Topology.bufferOfDistance(bboxPolygon, 0.005)
     const region = Topology.mask(
-      GeolocusPolygonObject.fromBBox(
-        [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE],
-        null,
-      ),
+      createPolygonFromBBox([
+        -GEO_MAX_VALUE,
+        -GEO_MAX_VALUE,
+        GEO_MAX_VALUE,
+        GEO_MAX_VALUE,
+      ]),
       buffer,
     )
     const pdf: IRegionPDF = {
@@ -182,7 +185,7 @@ export class RegionResultHandler {
     return { region, pdf, boundless: true }
   }
 
-  private static td = (
+  private static topologyAndDirectionHelper = (
     origin: GeolocusObject,
     direction: string,
     region: GeolocusMultiPolygonObject | GeolocusPolygonObject,
@@ -236,7 +239,7 @@ export class RegionResultHandler {
   ) => {
     const context = origin.getContext() as GeolocusContext
     const distance = relation.distance as EuclideanDistance
-    const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
+    const bboxPolygon = createPolygonFromBBox(origin.getBBox())
     // martinez-polygon-clipping 的 intersect 函数的 bug, 加一个极小的随机误差
     const region = Topology.bufferOfRange(bboxPolygon, [
       (1 - context.getDistanceDelta() * 1.5) * distance - Math.random() / 100,
@@ -267,7 +270,7 @@ export class RegionResultHandler {
     relation: IGeoRelation,
   ) => {
     const context = origin.getContext() as GeolocusContext
-    const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
+    const bboxPolygon = createPolygonFromBBox(origin.getBBox())
     const direction = relation.direction as AbsoluteDirection
     const region = Direction.computeRegion(bboxPolygon, direction)
     const pdf: IRegionPDF = {
@@ -312,7 +315,13 @@ export class RegionResultHandler {
           relation,
           target,
         )
-        return this.td(origin, direction, region, pdf, boundless)
+        return this.topologyAndDirectionHelper(
+          origin,
+          direction,
+          region,
+          pdf,
+          boundless,
+        )
       },
       intersect: () => {
         const { region, pdf, boundless } = this.intersectHandler(
@@ -320,7 +329,13 @@ export class RegionResultHandler {
           relation,
           target,
         )
-        return this.td(origin, direction, region, pdf, boundless)
+        return this.topologyAndDirectionHelper(
+          origin,
+          direction,
+          region,
+          pdf,
+          boundless,
+        )
       },
       touch: () => {
         const { region, pdf, boundless } = this.touchHandler(
@@ -328,7 +343,13 @@ export class RegionResultHandler {
           relation,
           target,
         )
-        return this.td(origin, direction, region, pdf, boundless)
+        return this.topologyAndDirectionHelper(
+          origin,
+          direction,
+          region,
+          pdf,
+          boundless,
+        )
       },
       disjoint: () => {
         return this.direction(origin, relation, target)
@@ -356,7 +377,7 @@ export class RegionResultHandler {
     const directionRegion = Direction.computeRegion(origin, direction)
 
     const distance = relation.distance as EuclideanDistance
-    const bboxPolygon = GeolocusPolygonObject.fromBBox(origin.getBBox())
+    const bboxPolygon = createPolygonFromBBox(origin.getBBox())
     // martinez-polygon-clipping 的 intersect 函数的 bug, 加一个极小的随机误差
     const buffer = Topology.bufferOfRange(bboxPolygon, [
       (1 - context.getDistanceDelta() * 1.5) * distance - Math.random() / 100,

@@ -1,10 +1,8 @@
 import { GeolocusContext } from '.'
 
 export class Route {
-  // the child nodes of node
-  private _children: Map<string, Set<string>>
-  // the parent nodes of node
-  private _parent: Map<string, Set<string>>
+  private _children: Map<string, Set<string>> // the child nodes of node
+  private _parent: Map<string, Set<string>> // the parent nodes of node
   private _context: GeolocusContext
 
   constructor(context: GeolocusContext) {
@@ -88,13 +86,13 @@ export class Route {
   }
 
   validateFuzzy(uuid: string) {
-    if (!this._context.getObjectByUUID(uuid)?.getFuzzy()) {
+    if (!(this._context.getObjectByUUID(uuid)?.getStatus() === 'fuzzy')) {
       return false
     }
     const objectMap = this._context.getAllObject()
     const fuzzyObject: Set<string> = new Set()
     objectMap.forEach((value, key) => {
-      if (value.getFuzzy()) {
+      if (value.getStatus() === 'fuzzy') {
         fuzzyObject.add(key)
       }
     })

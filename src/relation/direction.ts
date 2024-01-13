@@ -1,6 +1,6 @@
-import { GeolocusPolygonObject } from '../object'
-import { GeolocusBBox, GeolocusObject, Position2 } from '../type'
-import { GEO_MAX_VALUE } from '../util'
+import { createPolygonFromBBox } from '@/object'
+import { GeolocusBBox, GeolocusObject, Position2 } from '@/type'
+import { GEO_MAX_VALUE } from '@/util'
 
 export class Direction {
   // radian
@@ -40,7 +40,7 @@ export class Direction {
       }
     })
 
-    return GeolocusPolygonObject.fromBBox(target, null)
+    return createPolygonFromBBox(target)
   }
 
   private static north = (

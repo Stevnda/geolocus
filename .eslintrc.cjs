@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-undef
 module.exports = {
   root: true,
-  env: { es2020: true, node: true, 'jest/globals': true },
+  env: { es2020: true, node: true },
   extends: [
     'eslint:recommended',
     'standard',
@@ -13,7 +13,7 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-  plugins: ['@typescript-eslint', 'import', 'promise', 'jest'],
+  plugins: ['@typescript-eslint', 'import', 'promise'],
   rules: {
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
     'import/default': 0,

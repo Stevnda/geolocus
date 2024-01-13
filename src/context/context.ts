@@ -1,48 +1,38 @@
-import { Region } from '../region'
-import { Relation } from '../relation'
-import { AbsoluteDirection, GeolocusObject } from '../type'
-import { GEO_MAX_VALUE } from '../util'
+import { Region } from '@/region'
+import { Relation } from '@/relation'
+import {
+  AbsoluteDirection,
+  EuclideanDistanceRange,
+  GeolocusObject,
+} from '@/type'
+import { GEO_MAX_VALUE } from '@/util'
 import { Route } from './route'
 
 export class GeolocusContext {
   private _name: string
-  private _object: Map<string, GeolocusObject>
+  private _objectMap: Map<string, GeolocusObject>
   private _route: Route
   private _relation: Relation
   private _region: Region
-  private _scale: number
-  private _distanceDelta: number
-  private _semanticDistanceThreshold: [
-    number,
-    number,
-    number,
-    number,
-    number,
-    number,
-  ]
-
-  private _girdSize = 16384
-
   private _directionDelta: {
     [props in AbsoluteDirection]: [number, number]
   }
+  private _distanceDelta: number
+  private _semanticDistanceThreshold: [
+    EuclideanDistanceRange,
+    EuclideanDistanceRange,
+    EuclideanDistanceRange,
+    EuclideanDistanceRange,
+    EuclideanDistanceRange,
+  ]
+  private _resultGirdNum = 16384
 
   constructor(name: string) {
     this._name = name
-    this._object = new Map()
+    this._objectMap = new Map()
     this._route = new Route(this)
     this._relation = new Relation(this)
     this._region = new Region(this)
-    this._scale = 5000
-    this._distanceDelta = 0.2
-    this._semanticDistanceThreshold = [
-      0,
-      1 / 6,
-      0.5,
-      1,
-      2,
-      GEO_MAX_VALUE / this._scale,
-    ]
     this._directionDelta = {
       N: [0, Math.PI / 3],
       NE: [Math.PI / 4, Math.PI / 6],
@@ -53,6 +43,14 @@ export class GeolocusContext {
       W: [(Math.PI / 2) * 3, Math.PI / 3],
       NW: [(Math.PI / 4) * 7, Math.PI / 6],
     }
+    this._distanceDelta = 0.2
+    this._semanticDistanceThreshold = [
+      [0, 400],
+      [400, 1000],
+      [1000, 2500],
+      [2500, 5000],
+      [5000, GEO_MAX_VALUE],
+    ]
   }
 
   getName() {
@@ -60,15 +58,15 @@ export class GeolocusContext {
   }
 
   addObject(uuid: string, object: GeolocusObject): void {
-    this._object.set(uuid, object)
+    this._objectMap.set(uuid, object)
   }
 
   getObjectByUUID(key: string): GeolocusObject | undefined {
-    return this._object.get(key)
+    return this._objectMap.get(key)
   }
 
   getAllObject(): Map<string, GeolocusObject> {
-    return this._object
+    return this._objectMap
   }
 
   getRoute() {
@@ -83,32 +81,8 @@ export class GeolocusContext {
     return this._region
   }
 
-  getGirdSize() {
-    return this._girdSize
-  }
-
-  setScale(value: number): void {
-    this._scale = value
-  }
-
-  getScale(): number {
-    return this._scale
-  }
-
-  setDistanceDelta(value: number): void {
-    this._distanceDelta = value
-  }
-
-  getDistanceDelta(): number {
-    return this._distanceDelta
-  }
-
-  setSemanticDistanceThreshold(value: [number, number, number, number]): void {
-    this._semanticDistanceThreshold = [0, ...value, GEO_MAX_VALUE / this._scale]
-  }
-
-  getSemanticDistanceThreshold() {
-    return this._semanticDistanceThreshold
+  getResultGirdNum() {
+    return this._resultGirdNum
   }
 
   setDirectionDelta(value: number): void
@@ -133,5 +107,29 @@ export class GeolocusContext {
 
   getDirectionDelta() {
     return this._directionDelta
+  }
+
+  setDistanceDelta(value: number): void {
+    this._distanceDelta = value
+  }
+
+  getDistanceDelta(): number {
+    return this._distanceDelta
+  }
+
+  setSemanticDistanceThreshold(
+    value: [
+      EuclideanDistanceRange,
+      EuclideanDistanceRange,
+      EuclideanDistanceRange,
+      EuclideanDistanceRange,
+      EuclideanDistanceRange,
+    ],
+  ): void {
+    this._semanticDistanceThreshold = value
+  }
+
+  getSemanticDistanceThreshold() {
+    return this._semanticDistanceThreshold
   }
 }

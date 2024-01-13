@@ -1,11 +1,11 @@
-import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '../object'
+import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '@/object'
 import {
   GeolocusBBox,
   GeolocusGird,
   GeolocusObject,
   IGeoRelation,
   Position2,
-} from '../type'
+} from '@/type'
 
 export type IRegionRegion = GeolocusPolygonObject | GeolocusMultiPolygonObject
 
