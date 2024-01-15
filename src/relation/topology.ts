@@ -54,7 +54,7 @@ export class Topology {
 
     const type = maskResult.getGeometryType()
     const bbox = GeolocusGeometryMeta.getBBox(maskResult)
-    const center = GeolocusGeometryMeta.getCenter(maskResult, bbox)
+    const center = GeolocusGeometryMeta.getCenter(maskResult)
     if (type === 'Polygon') {
       const polygon = new GeolocusPolygonObject([[[0, 0]]], {
         type,
@@ -85,11 +85,11 @@ export class Topology {
     const intersection = geometry0.intersection(geometry1)
 
     const type = intersection.getGeometryType()
-    const bbox = GeolocusGeometryMeta.getBBox(intersection)
-    const center = GeolocusGeometryMeta.getCenter(intersection, bbox)
     if (intersection.isEmpty()) {
       return null
     } else if (type === 'Polygon') {
+      const bbox = GeolocusGeometryMeta.getBBox(intersection)
+      const center = GeolocusGeometryMeta.getCenter(intersection)
       const polygon = new GeolocusPolygonObject([[[0, 0]]], {
         type,
         bbox,
@@ -99,6 +99,8 @@ export class Topology {
       })
       return polygon
     } else {
+      const bbox = GeolocusGeometryMeta.getBBox(intersection)
+      const center = GeolocusGeometryMeta.getCenter(intersection)
       const multiPolygon = new GeolocusMultiPolygonObject([[[[0, 0]]]], {
         type: 'MultiPolygon',
         bbox,
@@ -120,7 +122,7 @@ export class Topology {
 
     const type = union.getGeometryType()
     const bbox = GeolocusGeometryMeta.getBBox(union)
-    const center = GeolocusGeometryMeta.getCenter(union, bbox)
+    const center = GeolocusGeometryMeta.getCenter(union)
     if (type === 'Polygon') {
       const polygon = new GeolocusPolygonObject([[[0, 0]]], {
         type,
@@ -158,7 +160,7 @@ export class Topology {
     const buffer = this.buffer(geometry, distance)
 
     const bbox = GeolocusGeometryMeta.getBBox(buffer)
-    const center = GeolocusGeometryMeta.getCenter(buffer, bbox)
+    const center = GeolocusGeometryMeta.getCenter(buffer)
     const polygon = new GeolocusPolygonObject([[[0, 0]]], {
       type: 'Polygon',
       bbox,
@@ -185,7 +187,7 @@ export class Topology {
       const difference = buffer1.difference(buffer0)
       if (!difference.isEmpty()) {
         const bbox = GeolocusGeometryMeta.getBBox(difference)
-        const center = GeolocusGeometryMeta.getCenter(difference, bbox)
+        const center = GeolocusGeometryMeta.getCenter(difference)
         result = new GeolocusPolygonObject([[[0, 0]]], {
           type: 'Polygon',
           bbox,

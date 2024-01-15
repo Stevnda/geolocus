@@ -138,7 +138,8 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
@@ -149,7 +150,8 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
@@ -160,7 +162,8 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
@@ -173,7 +176,8 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
@@ -184,7 +188,8 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
@@ -195,7 +200,8 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
@@ -206,7 +212,8 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
@@ -217,22 +224,24 @@ describe('Test GeolocusPolygonObject', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
-    expect(Polygon.getBBox()).toEqual([0, 0, 0, 0])
+    expect(Polygon.getBBox()).toEqual([0, 0, 3, 3])
   })
 
   test('Get center', () => {
     const Polygon = new GeolocusPolygonObject([
       [
         [0, 0],
-        [0, 0],
+        [3, 0],
+        [0, 3],
         [0, 0],
       ],
     ])
-    expect(Polygon.getCenter()).toEqual([0, 0])
+    expect(Polygon.getCenter()).toEqual([1, 1])
   })
 })
 
@@ -423,7 +432,8 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
@@ -436,7 +446,8 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
@@ -449,7 +460,8 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
@@ -464,7 +476,8 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
@@ -477,7 +490,8 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
@@ -490,7 +504,8 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
@@ -503,7 +518,8 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
@@ -516,12 +532,13 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
     ])
-    expect(MultiPolygon.getBBox()).toEqual([0, 0, 0, 0])
+    expect(MultiPolygon.getBBox()).toEqual([0, 0, 3, 3])
   })
 
   test('Get center', () => {
@@ -529,11 +546,12 @@ describe('Test GeolocusMultiPolygonObject', () => {
       [
         [
           [0, 0],
-          [0, 0],
+          [3, 0],
+          [0, 3],
           [0, 0],
         ],
       ],
     ])
-    expect(MultiPolygon.getCenter()).toEqual([0, 0])
+    expect(MultiPolygon.getCenter()).toEqual([1, 1])
   })
 })

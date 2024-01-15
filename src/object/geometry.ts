@@ -62,12 +62,8 @@ export class GeolocusGeometryMeta {
     return [minX, minY, maxX, maxY]
   }
 
-  static getCenter(geometry: GeolocusGeometry, bbox?: GeolocusBBox): Position2 {
-    const tempBBox = bbox || this.getBBox(geometry)
-    const center: Position2 = [
-      (tempBBox[0] + tempBBox[2]) / 2,
-      (tempBBox[1] + tempBBox[3]) / 2,
-    ]
-    return center
+  static getCenter(geometry: GeolocusGeometry): Position2 {
+    const center = geometry.getCentroid().getCoordinate()
+    return [center.x, center.y]
   }
 }

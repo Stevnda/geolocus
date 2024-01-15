@@ -15,7 +15,7 @@ export class Transformation {
     const geometry = affineTransformation.transform(object.getGeometry())
 
     const bbox = GeolocusGeometryMeta.getBBox(geometry)
-    const center = GeolocusGeometryMeta.getCenter(geometry, bbox)
+    const center = GeolocusGeometryMeta.getCenter(geometry)
     const type = object.getType()
     const ObjectFactory = geolocusObjectMapping[type]
     const objectTranslated = new ObjectFactory([0, 0] as any, {

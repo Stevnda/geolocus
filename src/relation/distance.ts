@@ -1,6 +1,9 @@
 import { GeolocusContext } from '@/context'
-import { EuclideanDistanceRange, SemanticDistance } from '@/type'
-import { MathUtil, Vector2 } from '@/util'
+import {
+  EuclideanDistanceRange,
+  GeolocusObject,
+  SemanticDistance,
+} from '@/type'
 
 export class Distance {
   static SEMANTIC_MAP: {
@@ -23,16 +26,10 @@ export class Distance {
     return range
   }
 
-  static distanceToBBox(
-    x: number,
-    y: number,
-    minX: number,
-    minY: number,
-    maxX: number,
-    maxY: number,
-  ) {
-    const clampX = MathUtil.clamp(x, minX, maxX)
-    const clampY = MathUtil.clamp(y, minY, maxY)
-    return Vector2.distanceTo([clampX, clampY], [x, y])
+  static distance(object0: GeolocusObject, object1: GeolocusObject) {
+    const geom0 = object0.getGeometry()
+    const geom1 = object1.getGeometry()
+    const distance = geom0.distance(geom1)
+    return distance
   }
 }

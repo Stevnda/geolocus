@@ -4,7 +4,7 @@ import {
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from './object'
-import { IGeoRelationWithSemantic } from './relation/type'
+import { IGeoRelationWithSemantic, SemanticRelation } from './relation'
 import { GeolocusObject, GeolocusObjectStatus, Position2 } from './type'
 
 interface IGeolocusObjectInit {
@@ -40,6 +40,11 @@ class Geolocus {
       name: option?.name || '',
       status: option?.status || 'precise',
     })
+  }
+
+  defineSemanticRelation(name: string, relation: SemanticRelation) {
+    const relationFactory = this._context.getRelation()
+    relationFactory.defineSemanticRelation(name, relation)
   }
 
   defineRelation(

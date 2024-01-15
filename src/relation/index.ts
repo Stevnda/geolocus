@@ -1,4 +1,6 @@
 export { Direction } from './direction'
 export { Distance } from './distance'
 export { Relation } from './relation'
+export { Semantic } from './semantic'
 export { Topology } from './topology'
+export { IGeoRelationWithSemantic, SemanticRelation } from './type'

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { computeGeolocusObjectMaskGrid } from '@/object'
+import { GeolocusPointObject, computeGeolocusObjectMaskGrid } from '@/object'
 import { Distance } from '@/relation'
-import { GeolocusBBox, GeolocusGird, Position2 } from '@/type'
+import { GeolocusGird, GeolocusObject, Position2 } from '@/type'
 import { Gird, Vector2 } from '@/util'
 import { IRegionPDF } from './type'
 
@@ -43,24 +43,24 @@ export class RegionPDF {
   }
 
   private static distance(
-    bbox: GeolocusBBox,
-    target: Position2,
+    origin: GeolocusObject,
+    target: GeolocusPointObject,
     distance: number,
     delta: number,
   ) {
-    const x = Distance.distanceToBBox(...target, ...bbox)
+    const x = Distance.distance(origin, target)
 
     return this.computeNormalDistributionValue(x, distance, delta / 2)
   }
 
   private static angle(
-    origin: Position2,
-    target: Position2,
+    origin: GeolocusObject,
+    target: GeolocusPointObject,
     azimuth: number,
     delta: number,
   ) {
     const radiansTransform = -azimuth + Math.PI / 2
-    const v1 = Vector2.sub(target, origin)
+    const v1 = Vector2.sub(target.getCenter(), origin.getCenter())
     const v2: Position2 = [
       Math.cos(radiansTransform),
       Math.sin(radiansTransform),
@@ -71,18 +71,17 @@ export class RegionPDF {
   }
 
   private static distanceAndAngle(
-    origin: Position2,
-    bbox: GeolocusBBox,
-    target: Position2,
+    origin: GeolocusObject,
+    target: GeolocusPointObject,
     distance: number,
     deltaDistance: number,
     azimuth: number,
     deltaAzimuth: number,
   ) {
-    const x = Distance.distanceToBBox(...target, ...bbox)
+    const x = Distance.distance(target, origin)
 
     const radiansTransform = -azimuth + Math.PI / 2
-    const v1 = Vector2.sub(target, origin)
+    const v1 = Vector2.sub(target.getCenter(), origin.getCenter())
     const v2: Position2 = [
       Math.cos(radiansTransform),
       Math.sin(radiansTransform),
@@ -188,29 +187,27 @@ export class RegionPDF {
   ): number | GeolocusGird {
     const type = pdf.type
     const origin = pdf.origin
-    const center = origin.getCenter()
-    const bbox = origin.getBBox()
+    const targetPoint = target && new GeolocusPointObject(target)
     const map = {
       0: () => this.constant(),
       1: () =>
         this.distance(
-          bbox,
-          target as Position2,
+          origin,
+          targetPoint as GeolocusPointObject,
           pdf.gdf.distance as number,
           pdf.gdf.distanceDelta as number,
         ),
       2: () =>
         this.angle(
-          center,
-          target as Position2,
+          origin,
+          targetPoint as GeolocusPointObject,
           pdf.gdf.azimuth as number,
           pdf.gdf.azimuthDelta as number,
         ),
       3: () =>
         this.distanceAndAngle(
-          center,
-          bbox,
-          target as Position2,
+          origin,
+          targetPoint as GeolocusPointObject,
           pdf.gdf.distance as number,
           pdf.gdf.distanceDelta as number,
           pdf.gdf.azimuth as number,
