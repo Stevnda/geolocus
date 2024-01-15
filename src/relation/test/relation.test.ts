@@ -1,13 +1,17 @@
-import { GeolocusContext } from '../../context'
-import { GeolocusPointObject } from '../../object'
+import { GeolocusContext } from '@/context'
+import { GeolocusPointObject } from '@/object'
+import { describe, expect, test } from 'vitest'
 
 describe('Test Relation class', () => {
   test('Define the relation', () => {
-    const context = new GeolocusContext('test')
-    const origin0 = new GeolocusPointObject([0, 0], context)
-    const origin1 = new GeolocusPointObject([10, 0], context)
-    const target0 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const target1 = new GeolocusPointObject([0, 0], null, { fuzzy: true })
+    const context = new GeolocusContext()
+    const origin0 = new GeolocusPointObject([0, 0], { context })
+    const origin1 = new GeolocusPointObject([10, 0], { context })
+    const target0 = new GeolocusPointObject([0, 0], {
+      context,
+      status: 'fuzzy',
+    })
+    const target1 = new GeolocusPointObject([0, 0], { status: 'fuzzy' })
 
     const relation = context.getRelation()
     relation.define(target0, origin0, {

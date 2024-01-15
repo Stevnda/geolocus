@@ -89,7 +89,7 @@ export class Route {
     if (!(this._context.getObjectByUUID(uuid)?.getStatus() === 'fuzzy')) {
       return false
     }
-    const objectMap = this._context.getAllObject()
+    const objectMap = this._context.getObjectMap()
     const fuzzyObject: Set<string> = new Set()
     objectMap.forEach((value, key) => {
       if (value.getStatus() === 'fuzzy') {

@@ -1,4 +1,4 @@
-import { GeolocusContext } from './context'
+import { GeolocusContext, IGeolocusContextInit } from './context'
 import {
   GeolocusLineStringObject,
   GeolocusPointObject,
@@ -14,8 +14,8 @@ interface IGeolocusObjectInit {
 
 class Geolocus {
   private _context: GeolocusContext
-  constructor(name: string) {
-    this._context = new GeolocusContext(name)
+  constructor(init?: IGeolocusContextInit) {
+    this._context = new GeolocusContext(init)
   }
 
   point(position: Position2, option?: IGeolocusObjectInit) {
@@ -67,7 +67,7 @@ class Geolocus {
   }
 }
 
-const createContext = (name: string) => new Geolocus(name)
+const createContext = (init?: IGeolocusContextInit) => new Geolocus(init)
 
 export const geolocus = {
   createContext,

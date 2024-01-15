@@ -1,4 +1,5 @@
-import { Position2 } from '../../type'
+import { Position2 } from '@/type'
+import { describe, expect, test } from 'vitest'
 import { Compare } from '../mathUtil'
 import { Vector2 } from '../vector'
 

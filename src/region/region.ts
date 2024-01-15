@@ -5,9 +5,9 @@ import {
   GeolocusMultiPolygonObject,
   GeolocusPolygonObject,
   Transformation,
+  computeGeolocusObjectMaskGrid,
   createPolygonFromBBox,
   geolocusObjectMapping,
-  getGeolocusObjectMaskGrid,
 } from '@/object'
 import { Topology } from '@/relation'
 import {
@@ -50,7 +50,7 @@ export class Region {
     this._context = context
   }
 
-  private getRegionAndPdf(
+  private computeRegionAndPdf(
     uuid: string,
     context: GeolocusContext,
     strategy: 'intersection' | 'union',
@@ -109,7 +109,7 @@ export class Region {
     return { resultPdf, resultRegion }
   }
 
-  private getPdfGird(
+  private computePdfGird(
     mask: GeolocusGird,
     pdfArray: IRegionPDF[],
     region: GeolocusMultiPolygonObject,
@@ -225,24 +225,26 @@ export class Region {
       }
       this._resultMap.set(currentUUID, result)
 
-      const { resultPdf, resultRegion } = this.getRegionAndPdf(
+      console.timeLog('default', 'compute region and pdf start')
+      const { resultPdf, resultRegion } = this.computeRegionAndPdf(
         currentUUID,
         context,
         strategy,
       )
       result.pdf = resultPdf
       result.region = resultRegion
+      console.timeLog('default', 'compute region and pdf end')
 
-      console.timeLog()
+      console.timeLog('default', 'compute gird start')
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      result.regionMask = getGeolocusObjectMaskGrid(
+      result.regionMask = computeGeolocusObjectMaskGrid(
         result.region!,
         context.getResultGirdNum(),
       )
-      result.resultGird = this.getRegionGrid(currentUUID, strategy)
+      result.resultGird = this.computeRegionGrid(currentUUID, strategy)
       const { coord } = this.getCoordOfMaximum(currentUUID)
       result.coord = coord
-      console.timeLog()
+      console.timeLog('default', 'compute gird end')
 
       const object = context.getObjectByUUID(currentUUID) as GeolocusObject
       const center = object.getCenter()
@@ -266,7 +268,7 @@ export class Region {
     return uuidArray
   }
 
-  getRegionGrid(uuid: string, strategy: 'intersection' | 'union') {
+  computeRegionGrid(uuid: string, strategy: 'intersection' | 'union') {
     const result = this.getResultByUUID(uuid)
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
@@ -281,7 +283,7 @@ export class Region {
 
     const region = result.region as GeolocusMultiPolygonObject
     const bbox = region.getBBox()
-    result.pdfGird = this.getPdfGird(mask, result.pdf, region)
+    result.pdfGird = this.computePdfGird(mask, result.pdf, region)
     result.pdfGird.forEach((pdfGird) => {
       const tempGird = pdfGird.gird as GeolocusGird
       const weight = pdfGird.weight

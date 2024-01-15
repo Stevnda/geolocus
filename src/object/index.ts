@@ -18,7 +18,7 @@ export {
   GeolocusPolygonObject,
 } from './object'
 export { Transformation } from './transformation'
-export { createPolygonFromBBox, getGeolocusObjectMaskGrid } from './util'
+export { computeGeolocusObjectMaskGrid, createPolygonFromBBox } from './util'
 export const geolocusObjectMapping = {
   Point: GeolocusPointObject,
   LineString: GeolocusLineStringObject,

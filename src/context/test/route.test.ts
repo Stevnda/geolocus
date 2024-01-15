@@ -1,9 +1,10 @@
+import { GeolocusPointObject } from '@/object'
+import { describe, expect, test } from 'vitest'
 import { GeolocusContext } from '..'
-import { GeolocusPointObject } from '../../object'
 
 describe('Test the Route class', () => {
   test('return the graph of Route', () => {
-    const context = new GeolocusContext('test')
+    const context = new GeolocusContext()
     const route = context.getRoute()
 
     expect(route.getChildrenGraph()).toEqual(new Map())
@@ -11,7 +12,7 @@ describe('Test the Route class', () => {
   })
 
   test('return the count of graph', () => {
-    const context = new GeolocusContext('test')
+    const context = new GeolocusContext()
     const route = context.getRoute()
     expect(route.getVertexCount()).toBe(0)
     route.addEdge('1', '2')
@@ -19,7 +20,7 @@ describe('Test the Route class', () => {
   })
 
   test('add the vertex', () => {
-    const context = new GeolocusContext('test')
+    const context = new GeolocusContext()
     const route = context.getRoute()
     route.addVertex('2')
 
@@ -29,7 +30,7 @@ describe('Test the Route class', () => {
   })
 
   test('add the edge', () => {
-    const context = new GeolocusContext('test')
+    const context = new GeolocusContext()
     const route = context.getRoute()
     route.addEdge('1', '2')
     route.addEdge('3', '2')
@@ -49,7 +50,7 @@ describe('Test the Route class', () => {
   })
 
   test('remove the edge', () => {
-    const context = new GeolocusContext('test')
+    const context = new GeolocusContext()
     const route = context.getRoute()
     route.addEdge('1', '2')
     route.addEdge('3', '2')
@@ -70,7 +71,7 @@ describe('Test the Route class', () => {
   })
 
   test('topological sort', () => {
-    const context = new GeolocusContext('test')
+    const context = new GeolocusContext()
     const route = context.getRoute()
     route.addEdge('5', '2')
     route.addEdge('5', '0')
@@ -83,14 +84,14 @@ describe('Test the Route class', () => {
   })
 
   test('To Check whether fuzzyObject can computed', () => {
-    const context = new GeolocusContext('test')
+    const context = new GeolocusContext()
 
     const point5 = new GeolocusPointObject([0, 0])
-    const point0 = new GeolocusPointObject([0, 0], context)
-    const point1 = new GeolocusPointObject([0, 0], context)
-    const point2 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const point3 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const point4 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const point0 = new GeolocusPointObject([0, 0], { context })
+    const point1 = new GeolocusPointObject([0, 0], { context })
+    const point2 = new GeolocusPointObject([0, 0], { context, status: 'fuzzy' })
+    const point3 = new GeolocusPointObject([0, 0], { context, status: 'fuzzy' })
+    const point4 = new GeolocusPointObject([0, 0], { context, status: 'fuzzy' })
 
     const route = context.getRoute()
     expect(route.validateFuzzy('kxh')).toBeFalsy()

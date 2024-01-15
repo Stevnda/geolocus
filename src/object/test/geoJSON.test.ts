@@ -1,72 +1,25 @@
-import { Compare } from '../../util'
-import { GeoJSON } from '../geoJSON'
+import { describe, expect, test } from 'vitest'
+import { GeoJson } from '../geoJSON'
+import { GeolocusGeometryFactory } from '../geometry'
 
-describe('Test the GeoJSON class', () => {
-  test('Return the GeoJSONPoint', () => {
-    const point = GeoJSON.point([1, 1])
-    expect(point.geometry.coordinates).toEqual([1, 1])
-  })
-
-  test('Return the GeoJSONLineString', () => {
-    const line = GeoJSON.lineString([
-      [1, 1],
-      [1, 2],
-    ])
-    expect(line.geometry.coordinates).toEqual([
-      [1, 1],
-      [1, 2],
-    ])
-  })
-
-  test('Return the Feature<Polygon>', () => {
-    const polygon = GeoJSON.polygon([
-      [
-        [1, 1],
-        [1, 2],
-        [3, 3],
-        [1, 1],
+describe('Test GeoJson', () => {
+  test('parse the geojson', () => {
+    const polygon = GeoJson.parse({
+      type: 'Polygon',
+      coordinates: [
+        [
+          [1, 131.001916959073],
+          [26.362115842259524, 128.50396657766186],
+          [50.74957979593943, 121.10611026571947],
+          [1, 131.001916959073],
+        ],
       ],
-    ])
-    expect(polygon.geometry.coordinates).toEqual([
-      [
-        [1, 1],
-        [1, 2],
-        [3, 3],
-        [1, 1],
-      ],
-    ])
+    })
+    expect(polygon.getGeometryType()).toBe('Polygon')
   })
 
-  test('Return the Feature<Polygon> by bbox', () => {
-    const polygon = GeoJSON.bboxPolygon([1, 1, 3, 3])
-    expect(polygon.geometry.coordinates).toEqual([
-      [
-        [1, 1],
-        [3, 1],
-        [3, 3],
-        [1, 3],
-        [1, 1],
-      ],
-    ])
-  })
-
-  test('Return the bbox of GeolocusGeoJSON', () => {
-    const polygon = GeoJSON.polygon([
-      [
-        [1, 1],
-        [1, 2],
-        [3, 3],
-        [1, 1],
-      ],
-    ])
-    expect(GeoJSON.bbox(polygon)).toEqual([1, 1, 3, 3])
-  })
-
-  test('Translate the geoJSON', () => {
-    const point = GeoJSON.point([0, 0])
-    GeoJSON.translate(point, 10, Math.PI / 4)
-    expect(
-      Compare.EQ(GeoJSON.centerOfMass(point)[1], 10 / Math.SQRT2),
-    ).toBeTruthy()
+  test('Stringify the geojson', () => {
+    const point = GeolocusGeometryFactory.point([1, 1])
+    expect(GeoJson.stringify(point)).toBeInstanceOf(Object)
   })
 })

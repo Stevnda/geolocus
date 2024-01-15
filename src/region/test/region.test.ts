@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext } from '../../context'
-import { GeolocusPointObject, GeolocusPolygonObject } from '../../object'
+import { GeolocusContext } from '@/context'
+import { GeolocusPointObject, createPolygonFromBBox } from '@/object'
+import { describe, expect, test } from 'vitest'
 
 describe('Test the Region class', () => {
   test('Return the result by uuid', () => {
-    const context = new GeolocusContext('test')
-    const origin0 = new GeolocusPointObject([0, 0], context)
-    const target0 = new GeolocusPointObject([0, 0], context, {
-      fuzzy: true,
+    const context = new GeolocusContext()
+    const origin0 = new GeolocusPointObject([0, 0], { context })
+    const target0 = new GeolocusPointObject([0, 0], {
+      context,
+      status: 'fuzzy',
     })
 
     const region = context.getRegion()
@@ -23,16 +25,21 @@ describe('Test the Region class', () => {
   })
 
   test('Compute the result property of Region class', () => {
-    const context = new GeolocusContext('test')
-    const origin0 = new GeolocusPointObject([0, 0], context)
-    const origin1 = GeolocusPolygonObject.fromBBox([1, 1, 2, 2], context)
-    const target0 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const target1 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const target2 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const target3 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const target4 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const target5 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
-    const target6 = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const context = new GeolocusContext()
+    const origin0 = new GeolocusPointObject([0, 0], { context })
+    const origin1 = createPolygonFromBBox([1, 1, 2, 2], { context })
+    const init = {
+      context,
+      status: 'fuzzy',
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
+    const target0 = new GeolocusPointObject([0, 0], init)
+    const target1 = new GeolocusPointObject([0, 0], init)
+    const target2 = new GeolocusPointObject([0, 0], init)
+    const target3 = new GeolocusPointObject([0, 0], init)
+    const target4 = new GeolocusPointObject([0, 0], init)
+    const target5 = new GeolocusPointObject([0, 0], init)
+    const target6 = new GeolocusPointObject([0, 0], init)
 
     const region = context.getRegion()
     const relation = context.getRelation()
@@ -103,18 +110,24 @@ describe('Test the Region class', () => {
   })
 
   test('Get the gird of Region', () => {
-    const context = new GeolocusContext('test')
-    const target = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const context = new GeolocusContext()
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      status: 'fuzzy',
+    })
 
     const region = context.getRegion()
     expect(() =>
-      region.getRegionGrid(target.getUUID(), 'intersection'),
+      region.computeRegionGrid(target.getUUID(), 'intersection'),
     ).toThrow()
   })
 
   test('Get the coordinates of the maximum value.', () => {
-    const context = new GeolocusContext('test')
-    const target = new GeolocusPointObject([0, 0], context, { fuzzy: true })
+    const context = new GeolocusContext()
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      status: 'fuzzy',
+    })
 
     const region = context.getRegion()
     expect(() => region.getCoordOfMaximum(target.getUUID())).toThrow()

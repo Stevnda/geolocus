@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { getGeolocusObjectMaskGrid } from '@/object'
+import { computeGeolocusObjectMaskGrid } from '@/object'
 import { Distance } from '@/relation'
 import { GeolocusBBox, GeolocusGird, Position2 } from '@/type'
 import { Gird, Vector2 } from '@/util'
 import { IRegionPDF } from './type'
 
 export class RegionPDF {
-  private static calculateNormalDistributionValue(
+  private static computeNormalDistributionValue(
     x: number,
     mean: number,
     std: number,
@@ -19,7 +19,7 @@ export class RegionPDF {
     return result
   }
 
-  private static calculateBivariateNormalDistributionValue(
+  private static computeBivariateNormalDistributionValue(
     x: number,
     meanX: number,
     stdX: number,
@@ -50,7 +50,7 @@ export class RegionPDF {
   ) {
     const x = Distance.distanceToBBox(...target, ...bbox)
 
-    return this.calculateNormalDistributionValue(x, distance, delta / 2)
+    return this.computeNormalDistributionValue(x, distance, delta / 2)
   }
 
   private static angle(
@@ -67,7 +67,7 @@ export class RegionPDF {
     ]
     const radians = Vector2.angleTo(v1, v2)
 
-    return this.calculateNormalDistributionValue(radians, 0, delta / 2)
+    return this.computeNormalDistributionValue(radians, 0, delta / 2)
   }
 
   private static distanceAndAngle(
@@ -89,7 +89,7 @@ export class RegionPDF {
     ]
     const radians = Vector2.angleTo(v1, v2)
 
-    return this.calculateBivariateNormalDistributionValue(
+    return this.computeBivariateNormalDistributionValue(
       x,
       distance,
       deltaDistance / 2,
@@ -124,7 +124,7 @@ export class RegionPDF {
 
   private static getUnsignedInternalDistanceField(pdf: IRegionPDF) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const mask = getGeolocusObjectMaskGrid(
+    const mask = computeGeolocusObjectMaskGrid(
       pdf.sdf.girdRegion!,
       pdf.sdf.girdNum!,
     )

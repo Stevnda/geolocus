@@ -6,7 +6,7 @@ import { IGeolocusObjectInit } from './type'
 
 export const createPolygonFromBBox = (
   bbox: GeolocusBBox,
-  option?: Omit<IGeolocusObjectInit, 'type'> & { type: 'Polygon' },
+  option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'Polygon' },
 ): GeolocusPolygonObject => {
   const leftDown: Position2 = [bbox[0], bbox[1]]
   const rightDown: Position2 = [bbox[2], bbox[1]]
@@ -21,7 +21,7 @@ export const createPolygonFromBBox = (
   return polygon
 }
 
-export const getGeolocusObjectMaskGrid = (
+export const computeGeolocusObjectMaskGrid = (
   object: GeolocusObject,
   girdNum: number,
 ): GeolocusGird => {

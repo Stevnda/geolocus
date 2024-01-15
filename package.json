@@ -14,7 +14,7 @@
     "prettier": "prettier src/**/*  --write",
     "format": "pnpm prettier && pnpm lint",
     "test": "vitest --config ./vitest.config.ts",
-    "test:coverage": "vitest --config ./vitest.config.ts --coverage"
+    "test:coverage": "vitest run --config ./vitest.config.ts --coverage"
   },
   "lint-staged": {
     "**/*.{ts}": [
