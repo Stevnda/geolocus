@@ -12,6 +12,20 @@ export class Direction {
   }
 
   static computeRegion = (object: GeolocusObject, direction: string) => {
+    const lower = direction.toLowerCase()
+    // if(lower.length<=2){
+    //   const region = this.computeAbsoluteDirection(object, lower)
+    // }else{
+    //   const region = this.computeRelativeDirection(object, lower)
+    // }
+    const region = this.computeAbsoluteDirection(object, lower)
+    return region
+  }
+
+  private static computeAbsoluteDirection(
+    object: GeolocusObject,
+    direction: string,
+  ) {
     const map = new Map([
       ['n', this.north],
       ['s', this.south],
@@ -33,9 +47,8 @@ export class Direction {
       GEO_MAX_VALUE,
       GEO_MAX_VALUE,
     ]
-    const lower = direction.toLowerCase()
     map.forEach((value, key) => {
-      if (lower.includes(key)) {
+      if (direction.includes(key)) {
         value(source, target, tag)
       }
     })
