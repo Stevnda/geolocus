@@ -1,11 +1,10 @@
+import { GeolocusObject } from '@/object'
 import { Region } from '@/region'
-import { Relation } from '@/relation'
-import {
-  AbsoluteDirection,
-  EuclideanDistanceRange,
-  GeolocusObject,
-} from '@/type'
+import { AbsoluteDirection, EuclideanDistanceRange, Relation } from '@/relation'
 import { Route } from '../route'
+
+export type Position2 = [number, number]
+export type Position3 = [number, number, number]
 
 export type DirectionDelta = {
   [props in AbsoluteDirection]: [number, number]

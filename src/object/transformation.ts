@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { GeolocusObject } from '@/type'
 import * as jsts from 'jsts'
-import { geolocusObjectMapping } from '.'
+import { GeolocusObject, geolocusObjectMapping } from '.'
 import { GeolocusGeometryMeta } from './geometry'
 
 export class Transformation {

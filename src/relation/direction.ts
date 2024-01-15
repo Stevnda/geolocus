@@ -1,5 +1,5 @@
-import { createPolygonFromBBox } from '@/object'
-import { GeolocusBBox, GeolocusObject, Position2 } from '@/type'
+import { Position2 } from '@/context'
+import { GeolocusBBox, GeolocusObject, createPolygonFromBBox } from '@/object'
 import { GEO_MAX_VALUE } from '@/util'
 
 export class Direction {

@@ -2,18 +2,19 @@
 import { GeolocusContext } from '@/context'
 import {
   GeolocusMultiPolygonObject,
+  GeolocusObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
   createPolygonFromBBox,
 } from '@/object'
-import { Direction, Topology } from '@/relation'
 import {
   AbsoluteDirection,
+  Direction,
   EuclideanDistance,
-  GeolocusObject,
   IGeoRelation,
+  Topology,
   TopologyRelation,
-} from '@/type'
+} from '@/relation'
 import { Compare, GEO_MAX_VALUE, Vector2 } from '@/util'
 import { IRegionPDF, IRegionResultHandler } from './type'
 

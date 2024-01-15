@@ -1,11 +1,12 @@
-import { GeolocusContext, IGeolocusContextInit } from './context'
+import { GeolocusContext, IGeolocusContextInit, Position2 } from './context'
 import {
   GeolocusLineStringObject,
+  GeolocusObject,
+  GeolocusObjectStatus,
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from './object'
 import { IGeoRelationWithSemantic, SemanticRelation } from './relation'
-import { GeolocusObject, GeolocusObjectStatus, Position2 } from './type'
 
 interface IGeolocusObjectInit {
   name?: string

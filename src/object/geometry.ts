@@ -1,6 +1,7 @@
-import { GeolocusBBox, Position2 } from '@/type'
+import { Position2 } from '@/context'
 import * as jsts from 'jsts'
 import {
+  GeolocusBBox,
   GeolocusGeometry,
   GeolocusLineStringGeometry,
   GeolocusMultiLineStringGeometry,

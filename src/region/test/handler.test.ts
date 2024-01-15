@@ -1,8 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext } from '@/context'
-import { GeolocusPointObject, createPolygonFromBBox } from '@/object'
-import { Direction } from '@/relation'
-import { GeolocusBBox, IGeoRelation, Position2 } from '@/type'
+import { GeolocusContext, Position2 } from '@/context'
+import {
+  GeolocusBBox,
+  GeolocusPointObject,
+  createPolygonFromBBox,
+} from '@/object'
+import { Direction, IGeoRelation } from '@/relation'
 import { Compare } from '@/util'
 import { describe, expect, test } from 'vitest'
 import { RegionResultHandler } from '../handler'

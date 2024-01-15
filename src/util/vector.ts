@@ -1,4 +1,4 @@
-import { Position2 } from '@/type'
+import { Position2 } from '@/context'
 import { Compare, MathUtil } from './mathUtil'
 
 export class Vector2 {

@@ -1,11 +1,11 @@
-import { GeolocusGeometryMeta, GeolocusPolygonObject } from '@/object'
-import { GeolocusMultiPolygonObject } from '@/object/object'
-import { GeolocusGeometry } from '@/object/type'
 import {
-  EuclideanDistance,
-  EuclideanDistanceRange,
+  GeolocusGeometry,
+  GeolocusGeometryMeta,
+  GeolocusMultiPolygonObject,
   GeolocusObject,
-} from '@/type'
+  GeolocusPolygonObject,
+} from '@/object'
+import { EuclideanDistance, EuclideanDistanceRange } from './type'
 
 export class Topology {
   // static isEqual = (origin: GeolocusObject, target: GeolocusObject) => {

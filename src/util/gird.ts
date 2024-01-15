@@ -1,5 +1,4 @@
-import { GeolocusGird } from '@/type'
-import { GEO_MAX_VALUE } from '.'
+import { GEO_MAX_VALUE, GeolocusGird } from '.'
 
 export class Gird {
   static createGirdWithValue(row: number, col: number, fillValue: number) {

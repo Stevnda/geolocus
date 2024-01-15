@@ -1,6 +1,6 @@
+import { GeolocusObject } from '@/object'
 import { Region } from '@/region'
 import { Relation } from '@/relation'
-import { GeolocusObject } from '@/type'
 import { GEO_MAX_VALUE } from '@/util'
 import { Route } from './route'
 import {

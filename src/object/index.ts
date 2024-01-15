@@ -18,6 +18,12 @@ export {
   GeolocusPolygonObject,
 } from './object'
 export { Transformation } from './transformation'
+export {
+  GeolocusBBox,
+  GeolocusGeometry,
+  GeolocusObject,
+  GeolocusObjectStatus,
+} from './type'
 export { computeGeolocusObjectMaskGrid, createPolygonFromBBox } from './util'
 export const geolocusObjectMapping = {
   Point: GeolocusPointObject,

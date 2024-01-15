@@ -1,14 +1,14 @@
-import { GeolocusContext } from '@/context'
-import { GeolocusBBox, Position2 } from '@/type'
-import { GeolocusObjectStatus } from '@/type/object'
+import { GeolocusContext, Position2 } from '@/context'
 import crypto from 'crypto'
 import { GeolocusGeometryFactory, GeolocusGeometryMeta } from './geometry'
 import {
+  GeolocusBBox,
   GeolocusGeometry,
   GeolocusLineStringGeometry,
   GeolocusMultiLineStringGeometry,
   GeolocusMultiPointGeometry,
   GeolocusMultiPolygonGeometry,
+  GeolocusObjectStatus,
   GeolocusPointGeometry,
   GeolocusPolygonGeometry,
   IGeolocusObject,

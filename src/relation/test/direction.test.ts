@@ -1,5 +1,5 @@
+import { Position2 } from '@/context'
 import { createPolygonFromBBox } from '@/object'
-import { Position2 } from '@/type'
 import { Compare, GEO_MAX_VALUE } from '@/util'
 import { describe, expect, test } from 'vitest'
 import { Direction } from '../direction'

@@ -1,27 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext } from '@/context'
+import { GeolocusContext, Position2 } from '@/context'
 import {
+  GeolocusBBox,
   GeolocusMultiPolygonObject,
+  GeolocusObject,
   GeolocusPolygonObject,
   Transformation,
   computeGeolocusObjectMaskGrid,
   createPolygonFromBBox,
   geolocusObjectMapping,
 } from '@/object'
-import { Topology } from '@/relation'
-import {
-  EuclideanDistanceRange,
-  GeolocusBBox,
-  GeolocusGird,
-  GeolocusObject,
-  IGeoTriple,
-  Position2,
-} from '@/type'
-import { Compare, GEO_MAX_VALUE, Gird, Vector2 } from '@/util'
+import { EuclideanDistanceRange, Topology } from '@/relation'
+import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, Vector2 } from '@/util'
 import { RegionResultHandler } from './handler'
 import { RegionPDF } from './pdf'
 import {
+  IGeoTriple,
   IRegionPDF,
   IRegionRegion,
   IRegionResult,

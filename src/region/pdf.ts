@@ -1,8 +1,12 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusPointObject, computeGeolocusObjectMaskGrid } from '@/object'
+import { Position2 } from '@/context'
+import {
+  GeolocusObject,
+  GeolocusPointObject,
+  computeGeolocusObjectMaskGrid,
+} from '@/object'
 import { Distance } from '@/relation'
-import { GeolocusGird, GeolocusObject, Position2 } from '@/type'
-import { Gird, Vector2 } from '@/util'
+import { GeolocusGird, Gird, Vector2 } from '@/util'
 import { IRegionPDF } from './type'
 
 export class RegionPDF {

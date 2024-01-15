@@ -1,11 +1,4 @@
 import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '@/object'
-import {
-  GeolocusBBox,
-  GeolocusGird,
-  GeolocusObject,
-  IGeoRelation,
-  Position2,
-} from '@/type'
 
 export type IRegionRegion = GeolocusPolygonObject | GeolocusMultiPolygonObject
 
@@ -51,4 +44,10 @@ export interface IRegionResult {
   pdfGird: IRegionResultPdfGird[]
   resultGird: GeolocusGird | null
   regionMask: GeolocusGird | null
+}
+
+export interface IGeoTriple {
+  origin: string
+  relation: IGeoRelation
+  target: string
 }

@@ -1,8 +1,8 @@
-import { GeolocusBBox, GeolocusGird, GeolocusObject, Position2 } from '@/type'
-import { Gird } from '@/util'
+import { Position2 } from '@/context'
+import { GeolocusGird, Gird } from '@/util'
 import { GeolocusGeometryFactory } from './geometry'
 import { GeolocusPolygonObject } from './object'
-import { IGeolocusObjectInit } from './type'
+import { GeolocusBBox, GeolocusObject, IGeolocusObjectInit } from './type'
 
 export const createPolygonFromBBox = (
   bbox: GeolocusBBox,

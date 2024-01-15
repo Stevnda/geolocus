@@ -1,9 +1,6 @@
 import { GeolocusContext } from '@/context'
-import {
-  EuclideanDistanceRange,
-  GeolocusObject,
-  SemanticDistance,
-} from '@/type'
+import { EuclideanDistanceRange, SemanticDistance } from './type'
+import { GeolocusObject } from '@/object'
 
 export class Distance {
   static SEMANTIC_MAP: {

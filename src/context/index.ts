@@ -1,3 +1,3 @@
 export { GeolocusContext } from './context'
 export { Route } from './route'
-export { IGeolocusContextInit } from './type'
+export { IGeolocusContextInit, Position2, Position3 } from './type'

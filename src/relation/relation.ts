@@ -1,7 +1,13 @@
 import { GeolocusContext } from '@/context'
-import { GeolocusObject, IGeoRelation, IGeoTriple } from '@/type'
+import { GeolocusObject } from '@/object'
+import { IGeoTriple } from '@/region'
 import { Semantic } from './semantic'
-import { IGeoRelationWithSemantic, SemanticMap, SemanticRelation } from './type'
+import {
+  IGeoRelation,
+  IGeoRelationWithSemantic,
+  SemanticMap,
+  SemanticRelation,
+} from './type'
 
 export class Relation {
   private _graph: Map<string, Set<IGeoTriple>>

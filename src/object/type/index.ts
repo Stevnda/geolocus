@@ -1,6 +1,13 @@
-import { GeolocusContext } from '@/context'
-import { GeolocusBBox, GeolocusObjectStatus, Position2 } from '@/type'
+import { GeolocusContext, Position2 } from '@/context'
 import * as jsts from 'jsts'
+import {
+  GeolocusLineStringObject,
+  GeolocusMultiLineStringObject,
+  GeolocusMultiPointObject,
+  GeolocusMultiPolygonObject,
+  GeolocusPointObject,
+  GeolocusPolygonObject,
+} from '../object'
 
 export type GeolocusGeometryType =
   | 'Point'
@@ -17,6 +24,8 @@ export type GeolocusMultiPointGeometry = jsts.geom.MultiPoint
 export type GeolocusMultiLineStringGeometry = jsts.geom.MultiLineString
 export type GeolocusMultiPolygonGeometry = jsts.geom.MultiPolygon
 export type GeolocusGeometry = jsts.geom.Geometry
+
+export type GeolocusBBox = [number, number, number, number]
 
 export interface IGeolocusObject {
   getContext(): GeolocusContext | null
@@ -39,3 +48,13 @@ export interface IGeolocusObjectInit {
   bbox?: GeolocusBBox
   center?: Position2
 }
+
+export type GeolocusObject =
+  | GeolocusPointObject
+  | GeolocusLineStringObject
+  | GeolocusPolygonObject
+  | GeolocusMultiLineStringObject
+  | GeolocusMultiPointObject
+  | GeolocusMultiPolygonObject
+
+export type GeolocusObjectStatus = 'fuzzy' | 'precise' | 'computed'
