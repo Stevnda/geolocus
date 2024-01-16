@@ -1,10 +1,15 @@
 import {
   GeolocusGeometry,
   GeolocusGeometryMeta,
+  GeolocusLineStringObject,
+  GeolocusMultiLineStringObject,
+  GeolocusMultiPointObject,
   GeolocusMultiPolygonObject,
   GeolocusObject,
+  GeolocusPointObject,
   GeolocusPolygonObject,
 } from '@/object'
+import { GeolocusGeometryType } from '@/object/type'
 import { EuclideanDistance, EuclideanDistanceRange } from './type'
 
 export class Topology {
@@ -44,104 +49,79 @@ export class Topology {
   //   return targetGeometry.touches(originGeometry)
   // }
 
-  static mask = (
-    object: GeolocusPolygonObject,
-    mask: GeolocusPolygonObject,
-  ) => {
-    const objectGeometry = object.getGeometry()
-    const maskGeometry = mask.getGeometry()
-    const maskResult = objectGeometry.difference(maskGeometry)
+  private static _objectFactoryMap = {
+    Point: GeolocusPointObject,
+    LineString: GeolocusLineStringObject,
+    Polygon: GeolocusPolygonObject,
+    MultiPoint: GeolocusMultiPointObject,
+    MultiLineString: GeolocusMultiLineStringObject,
+    MultiPolygon: GeolocusMultiPolygonObject,
+  }
 
-    const type = maskResult.getGeometryType()
-    const bbox = GeolocusGeometryMeta.getBBox(maskResult)
-    const center = GeolocusGeometryMeta.getCenter(maskResult)
-    if (type === 'Polygon') {
-      const polygon = new GeolocusPolygonObject([[[0, 0]]], {
-        type,
-        bbox,
-        center,
-        context: object.getContext(),
-        geometry: maskResult,
-      })
-      return polygon
-    } else {
-      const multiPolygon = new GeolocusMultiPolygonObject([[[[0, 0]]]], {
-        type: 'MultiPolygon',
-        bbox,
-        center,
-        context: object.getContext(),
-        geometry: maskResult,
-      })
-      return multiPolygon
+  static difference = (origin: GeolocusObject, target: GeolocusObject) => {
+    const originGeometry = origin.getGeometry()
+    const targetGeometry = target.getGeometry()
+    const result = originGeometry.difference(targetGeometry)
+
+    if (result.isEmpty()) {
+      return null
     }
+    const type = result.getGeometryType() as GeolocusGeometryType
+    const bbox = GeolocusGeometryMeta.getBBox(result)
+    const center = GeolocusGeometryMeta.getCenter(result)
+    const Factory = this._objectFactoryMap[type]
+    const object = new Factory(null as never, {
+      type: type as never,
+      bbox,
+      center,
+      context: origin.getContext(),
+      geometry: result,
+    })
+    return object
   }
 
   static intersection = (
-    polygon0: GeolocusPolygonObject | GeolocusMultiPolygonObject,
-    polygon1: GeolocusPolygonObject | GeolocusMultiPolygonObject,
+    polygon0: GeolocusObject,
+    polygon1: GeolocusObject,
   ) => {
     const geometry0 = polygon0.getGeometry()
     const geometry1 = polygon1.getGeometry()
     const intersection = geometry0.intersection(geometry1)
 
-    const type = intersection.getGeometryType()
     if (intersection.isEmpty()) {
       return null
-    } else if (type === 'Polygon') {
-      const bbox = GeolocusGeometryMeta.getBBox(intersection)
-      const center = GeolocusGeometryMeta.getCenter(intersection)
-      const polygon = new GeolocusPolygonObject([[[0, 0]]], {
-        type,
-        bbox,
-        center,
-        context: polygon0.getContext(),
-        geometry: intersection,
-      })
-      return polygon
-    } else {
-      const bbox = GeolocusGeometryMeta.getBBox(intersection)
-      const center = GeolocusGeometryMeta.getCenter(intersection)
-      const multiPolygon = new GeolocusMultiPolygonObject([[[[0, 0]]]], {
-        type: 'MultiPolygon',
-        bbox,
-        center,
-        context: polygon0.getContext(),
-        geometry: intersection,
-      })
-      return multiPolygon
     }
+    const type = intersection.getGeometryType() as GeolocusGeometryType
+    const bbox = GeolocusGeometryMeta.getBBox(intersection)
+    const center = GeolocusGeometryMeta.getCenter(intersection)
+    const Factory = this._objectFactoryMap[type]
+    const object = new Factory(null as never, {
+      type: type as never,
+      bbox,
+      center,
+      context: polygon0.getContext(),
+      geometry: intersection,
+    })
+    return object
   }
 
-  static union = (
-    polygon0: GeolocusPolygonObject | GeolocusMultiPolygonObject,
-    polygon1: GeolocusPolygonObject | GeolocusMultiPolygonObject,
-  ) => {
+  static union = (polygon0: GeolocusObject, polygon1: GeolocusObject) => {
     const geometry0 = polygon0.getGeometry()
     const geometry1 = polygon1.getGeometry()
     const union = geometry0.union(geometry1)
 
-    const type = union.getGeometryType()
+    const type = union.getGeometryType() as GeolocusGeometryType
     const bbox = GeolocusGeometryMeta.getBBox(union)
     const center = GeolocusGeometryMeta.getCenter(union)
-    if (type === 'Polygon') {
-      const polygon = new GeolocusPolygonObject([[[0, 0]]], {
-        type,
-        bbox,
-        center,
-        context: polygon0.getContext(),
-        geometry: union,
-      })
-      return polygon
-    } else {
-      const multiPolygon = new GeolocusMultiPolygonObject([[[[0, 0]]]], {
-        type: 'MultiPolygon',
-        bbox,
-        center,
-        context: polygon0.getContext(),
-        geometry: union,
-      })
-      return multiPolygon
-    }
+    const Factory = this._objectFactoryMap[type]
+    const object = new Factory(null as never, {
+      type: type as never,
+      bbox,
+      center,
+      context: polygon0.getContext(),
+      geometry: union,
+    })
+    return object
   }
 
   private static buffer = (
@@ -159,10 +139,15 @@ export class Topology {
     const geometry = object.getGeometry()
     const buffer = this.buffer(geometry, distance)
 
+    if (buffer.isEmpty()) {
+      return null
+    }
+    const type = buffer.getGeometryType() as 'Polygon' | 'MultiPolygon'
     const bbox = GeolocusGeometryMeta.getBBox(buffer)
     const center = GeolocusGeometryMeta.getCenter(buffer)
-    const polygon = new GeolocusPolygonObject([[[0, 0]]], {
-      type: 'Polygon',
+    const Factory = this._objectFactoryMap[type]
+    const polygon = new Factory([] as never, {
+      type: type as never,
       bbox,
       center,
       context: object.getContext(),
@@ -175,36 +160,28 @@ export class Topology {
     object: GeolocusObject,
     range: EuclideanDistanceRange,
   ) => {
-    let min = Math.min(...range)
+    const min = Math.min(...range)
     const max = Math.max(...range)
+
     const geometry = object.getGeometry()
-    let result: null | GeolocusPolygonObject = null
+    const buffer0 = this.buffer(geometry, min)
+    const buffer1 = this.buffer(geometry, max)
+    const difference = buffer1.difference(buffer0)
 
-    let count = 0
-    while (count <= 3) {
-      const buffer0 = this.buffer(geometry, min)
-      const buffer1 = this.buffer(geometry, max)
-      const difference = buffer1.difference(buffer0)
-      if (!difference.isEmpty()) {
-        const bbox = GeolocusGeometryMeta.getBBox(difference)
-        const center = GeolocusGeometryMeta.getCenter(difference)
-        result = new GeolocusPolygonObject([[[0, 0]]], {
-          type: 'Polygon',
-          bbox,
-          center,
-          context: object.getContext(),
-          geometry: difference,
-        })
-        break
-      }
-      min /= 2
-      count += 1
+    if (difference.isEmpty()) {
+      return null
     }
-
-    if (!result) {
-      result = this.bufferOfDistance(object, max)
-    }
-
-    return result
+    const type = difference.getGeometryType() as 'Polygon' | 'MultiPolygon'
+    const bbox = GeolocusGeometryMeta.getBBox(difference)
+    const center = GeolocusGeometryMeta.getCenter(difference)
+    const Factory = this._objectFactoryMap[type]
+    const polygon = new Factory([] as never, {
+      type: type as never,
+      bbox,
+      center,
+      context: object.getContext(),
+      geometry: difference,
+    })
+    return polygon
   }
 }

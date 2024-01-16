@@ -1,8 +1,49 @@
 import { Position2 } from '@/context'
 import { GeolocusGird, Gird } from '@/util'
 import { GeolocusGeometryFactory } from './geometry'
-import { GeolocusPolygonObject } from './object'
-import { GeolocusBBox, GeolocusObject, IGeolocusObjectInit } from './type'
+import {
+  GeolocusLineStringObject,
+  GeolocusMultiLineStringObject,
+  GeolocusMultiPointObject,
+  GeolocusMultiPolygonObject,
+  GeolocusPointObject,
+  GeolocusPolygonObject,
+} from './object'
+import {
+  GeolocusBBox,
+  GeolocusGeometryType,
+  GeolocusObject,
+  IGeolocusObjectInit,
+} from './type'
+
+interface ICreateEmptyGeolocusObject {
+  (type: 'Point'): GeolocusPointObject
+  (type: 'LineString'): GeolocusLineStringObject
+  (type: 'Polygon'): GeolocusPolygonObject
+  (type: 'MultiPoint'): GeolocusMultiPointObject
+  (type: 'MultiLineString'): GeolocusMultiLineStringObject
+  (type: 'MultiPolygon'): GeolocusMultiPolygonObject
+}
+
+export const createEmptyGeolocusObject = ((type: GeolocusGeometryType) => {
+  const objectFactoryMap = {
+    Point: GeolocusPointObject,
+    LineString: GeolocusLineStringObject,
+    Polygon: GeolocusPolygonObject,
+    MultiPoint: GeolocusMultiPointObject,
+    MultiLineString: GeolocusMultiLineStringObject,
+    MultiPolygon: GeolocusMultiPolygonObject,
+  }
+
+  const Factory = objectFactoryMap[type]
+  const object = new Factory([] as never, {
+    geometry: GeolocusGeometryFactory.empty(type),
+    bbox: [0, 0, 0, 0],
+    center: [0, 0],
+  })
+
+  return object
+}) as ICreateEmptyGeolocusObject
 
 export const createPolygonFromBBox = (
   bbox: GeolocusBBox,

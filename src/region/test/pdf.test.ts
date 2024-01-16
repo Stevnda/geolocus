@@ -7,7 +7,7 @@ import { IRegionPDF } from '../type'
 describe('Test the RegionPDF class', () => {
   test('Test the constant PDF', () => {
     const pdf = {
-      type: 0,
+      type: 'constant',
       origin: new GeolocusPointObject([0, 0]),
       gdf: {
         distance: null,
@@ -22,7 +22,7 @@ describe('Test the RegionPDF class', () => {
 
   test('Test the distance PDF', () => {
     const pdf = {
-      type: 1,
+      type: 'distance',
       origin: new GeolocusPointObject([0, 0]),
       gdf: {
         distance: 100,
@@ -37,7 +37,7 @@ describe('Test the RegionPDF class', () => {
 
   test('Test the angle PDF', () => {
     const pdf = {
-      type: 2,
+      type: 'angle',
       origin: new GeolocusPointObject([0, 0]),
       gdf: {
         distance: null,
@@ -52,7 +52,7 @@ describe('Test the RegionPDF class', () => {
 
   test('Test the distanceAndAngle PDF', () => {
     const pdf = {
-      type: 3,
+      type: 'distanceAndAngle',
       origin: new GeolocusPointObject([0, 0]),
       gdf: {
         distance: 100,
@@ -72,7 +72,7 @@ describe('Test the RegionPDF class', () => {
 
   test('Test the getUnsignedInternalDistanceField', () => {
     const pdf = {
-      type: 4,
+      type: 'sdf',
       origin: new GeolocusPointObject([0, 0]),
       sdf: {
         girdRegion: new GeolocusPolygonObject([

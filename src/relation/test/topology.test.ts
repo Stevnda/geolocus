@@ -211,8 +211,10 @@ describe('Test the Topology class', () => {
     const buffer2 = Topology.bufferOfRange(point1, [8, 15])
     const buffer3 = Topology.bufferOfRange(point2, [1, 2])
 
-    expect(Topology.intersection(buffer1, buffer2)).toBeTruthy()
-    expect(Topology.intersection(buffer1, buffer3)).toBeNull()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(Topology.intersection(buffer1!, buffer2!)).toBeTruthy()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(Topology.intersection(buffer1!, buffer3!)).toBeNull()
   })
 
   test('Return the buffer area of specified distance', () => {

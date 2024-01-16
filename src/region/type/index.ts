@@ -1,21 +1,23 @@
-import { GeolocusMultiPolygonObject, GeolocusPolygonObject } from '@/object'
+import { Position2 } from '@/context'
+import {
+  GeolocusBBox,
+  GeolocusMultiPolygonObject,
+  GeolocusObject,
+  GeolocusPolygonObject,
+} from '@/object'
+import { IGeoRelation } from '@/relation'
+import { GeolocusGird } from '@/util'
 
 export type IRegionRegion = GeolocusPolygonObject | GeolocusMultiPolygonObject
 
-export interface IRegionResultHandler {
-  (
-    origin: GeolocusObject,
-    relation: IGeoRelation,
-    target: GeolocusObject,
-  ): {
-    region: GeolocusMultiPolygonObject | GeolocusPolygonObject
-    pdf: IRegionPDF
-    boundless: boolean
-  }
+export interface IRegionHandlerResult {
+  region: GeolocusMultiPolygonObject | GeolocusPolygonObject
+  pdf: IRegionPDF
+  boundless: boolean
 }
 
 export interface IRegionPDF {
-  type: 0 | 1 | 2 | 3 | 4
+  type: 'constant' | 'distance' | 'angle' | 'distanceAndAngle' | 'sdf'
   origin: GeolocusObject
   gdf: {
     distance: number | null

@@ -27,13 +27,7 @@ export type RelativeDirection =
   | 'L'
   | 'FL'
 
-export type TopologyRelation =
-  | 'equal'
-  | 'intersect'
-  | 'disjoint'
-  | 'contain'
-  // | 'within'
-  | 'touch'
+export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
 
 export interface IGeoRelation {
   topology: TopologyRelation | null
@@ -41,3 +35,5 @@ export interface IGeoRelation {
   distance: EuclideanDistance | EuclideanDistanceRange | null
   weight: number
 }
+
+export type DirectionAndDistanceTag = 'inside' | 'outside' | 'both'

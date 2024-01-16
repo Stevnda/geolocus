@@ -5,6 +5,7 @@ export { Semantic } from './semantic'
 export { Topology } from './topology'
 export {
   AbsoluteDirection,
+  DirectionAndDistanceTag,
   EuclideanDistance,
   EuclideanDistanceRange,
   IGeoRelation,

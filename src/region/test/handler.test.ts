@@ -22,7 +22,6 @@ describe('Test some handler functions of Region', () => {
       'equal',
       'contain',
       'intersect',
-      'touch',
       'disjoint',
     ].map((value) => {
       return {
@@ -71,29 +70,10 @@ describe('Test some handler functions of Region', () => {
     expect(
       (() => Compare.GT(bbox[0], -1.15) && Compare.LT(bbox[2], 1.15))(),
     ).toBeTruthy()
-    // touch
-    topologyRegion = RegionResultHandler.topology(
-      origin,
-      relation[3],
-      target,
-    ).region
-    bbox = topologyRegion?.getBBox() as GeolocusBBox
-    expect(
-      (() => Compare.GT(bbox[0], -0.0051) && Compare.LT(bbox[2], 0.0051))(),
-    ).toBeTruthy()
-    topologyRegion = RegionResultHandler.topology(
-      origin1,
-      relation[3],
-      target,
-    ).region
-    bbox = topologyRegion?.getBBox() as GeolocusBBox
-    expect(
-      (() => Compare.GT(bbox[0], -1.15) && Compare.LT(bbox[2], 1.15))(),
-    ).toBeTruthy()
     // disjoint
     topologyRegion = RegionResultHandler.topology(
       origin,
-      relation[4],
+      relation[3],
       target,
     ).region
     bbox = topologyRegion?.getBBox() as GeolocusBBox
@@ -136,13 +116,56 @@ describe('Test some handler functions of Region', () => {
       weight: 1,
     }
 
-    const fuzzyRegion = Direction.computeRegion(origin, 'N')
+    const fuzzyRegion = Direction.computeRegion(origin, 'N', 'outside')
     const topologyRegion = RegionResultHandler.direction(
       origin,
       relation,
       target,
     ).region
     expect(topologyRegion?.getBBox()).toEqual(fuzzyRegion.getBBox())
+  })
+
+  test('Test the regionHandlerOfDirectionAndDistance function', () => {
+    const context = new GeolocusContext()
+    const origin = new GeolocusPointObject([0, 0], { context })
+
+    const relation: IGeoRelation = {
+      topology: null,
+      direction: 'N',
+      distance: 100,
+      weight: 1,
+    }
+
+    const pdf = RegionResultHandler.directionAndDistance(origin, relation).pdf
+    expect(
+      (() =>
+        pdf.gdf.distanceDelta ===
+        100 * origin.getContext()!.getDistanceDelta())(),
+    ).toBeTruthy()
+  })
+
+  test('Test the RegionResultHandler.topologyAndDistance function', () => {
+    const context = new GeolocusContext()
+    const origin = new GeolocusPointObject([0, 0], { context })
+    const target = new GeolocusPointObject([0, 0], { context })
+
+    const relation: IGeoRelation = {
+      topology: 'disjoint',
+      direction: null,
+      distance: 100,
+      weight: 1,
+    }
+
+    const pdf = RegionResultHandler.topologyAndDistance(
+      origin,
+      relation,
+      target,
+    ).pdf
+    expect(
+      (() =>
+        pdf.gdf.distanceDelta ===
+        100 * origin.getContext()!.getDistanceDelta())(),
+    ).toBeTruthy()
   })
 
   test('Test the topologyAndDirection function', () => {
@@ -154,7 +177,6 @@ describe('Test some handler functions of Region', () => {
       'equal',
       'contain',
       'intersect',
-      'touch',
       'disjoint',
     ].map((value) => {
       return {
@@ -194,72 +216,14 @@ describe('Test some handler functions of Region', () => {
     expect(
       (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
     ).toBeTruthy()
-    // touch
+    // disjoint
     topologyRegion = RegionResultHandler.topologyAndDirection(
       origin,
       relation[3],
       target,
     ).region
-    center = topologyRegion?.getCenter() as Position2
-    expect(
-      (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
-    ).toBeTruthy()
-    // disjoint
-    topologyRegion = RegionResultHandler.topologyAndDirection(
-      origin,
-      relation[4],
-      target,
-    ).region
     bbox = topologyRegion?.getBBox() as GeolocusBBox
     expect((() => Compare.EQ(bbox[1], 0))()).toBeTruthy()
-  })
-
-  test('Test the RegionResultHandler.topologyAndDistance function', () => {
-    const context = new GeolocusContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
-    const target = new GeolocusPointObject([0, 0], { context })
-
-    const relation: IGeoRelation = {
-      topology: null,
-      direction: null,
-      distance: 100,
-      weight: 1,
-    }
-
-    const pdf = RegionResultHandler.topologyAndDistance(
-      origin,
-      relation,
-      target,
-    ).pdf
-    expect(
-      (() =>
-        pdf.gdf.distanceDelta ===
-        100 * origin.getContext()!.getDistanceDelta())(),
-    ).toBeTruthy()
-  })
-
-  test('Test the regionHandlerOfDirectionAndDistance function', () => {
-    const context = new GeolocusContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
-    const target = new GeolocusPointObject([0, 0], { context })
-
-    const relation: IGeoRelation = {
-      topology: null,
-      direction: 'N',
-      distance: 100,
-      weight: 1,
-    }
-
-    const pdf = RegionResultHandler.directionAndDistance(
-      origin,
-      relation,
-      target,
-    ).pdf
-    expect(
-      (() =>
-        pdf.gdf.distanceDelta ===
-        100 * origin.getContext()!.getDistanceDelta())(),
-    ).toBeTruthy()
   })
 
   test('Test the regionHandlerOfAll function', () => {
@@ -268,7 +232,7 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], { context })
 
     const relation: IGeoRelation = {
-      topology: null,
+      topology: 'disjoint',
       direction: 'N',
       distance: 100,
       weight: 1,

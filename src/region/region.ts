@@ -22,23 +22,21 @@ import {
   IRegionResult,
   IRegionResultPdfGird,
 } from './type'
-
-const map = {
-  0: () => {
-    throw new Error('The geoRelation is null.')
-  },
-  1: RegionResultHandler.topology,
-  3: RegionResultHandler.direction,
-  7: RegionResultHandler.distance,
-  4: RegionResultHandler.topologyAndDirection,
-  8: RegionResultHandler.topologyAndDistance,
-  10: RegionResultHandler.directionAndDistance,
-  11: RegionResultHandler.all,
-}
-
 export class Region {
   private _resultMap: Map<string, IRegionResult>
   private _context: GeolocusContext
+  private _regionHandlerMap = {
+    0: () => {
+      throw new Error('The geoRelation is null.')
+    },
+    1: RegionResultHandler.topology,
+    3: RegionResultHandler.direction,
+    7: RegionResultHandler.distance,
+    4: RegionResultHandler.topologyAndDirection,
+    8: RegionResultHandler.topologyAndDistance,
+    10: RegionResultHandler.directionAndDistance,
+    11: RegionResultHandler.all,
+  }
 
   constructor(context: GeolocusContext) {
     this._resultMap = new Map()
@@ -63,8 +61,14 @@ export class Region {
       const topologyTag = relation.topology ? 1 : 0
       const directionTag = relation.direction ? 3 : 0
       const distanceTag = relation.distance ? 7 : 0
-      const tag = (topologyTag + directionTag + distanceTag) as keyof typeof map
-      const { region, pdf, boundless } = map[tag](origin, relation, target)
+      const tag = (topologyTag +
+        directionTag +
+        distanceTag) as keyof typeof this._regionHandlerMap
+      const { region, pdf, boundless } = this._regionHandlerMap[tag](
+        origin,
+        relation,
+        target,
+      )
       resultPdf.push(pdf)
       boundless
         ? unboundedRegionArray.push(region)
@@ -81,20 +85,22 @@ export class Region {
           ])
         : (boundedRegionArray.shift() as IRegionRegion)
     for (const currentRegion of boundedRegionArray) {
-      const tempRegion =
+      const tempRegion = (
         strategy === 'intersection'
           ? Topology.intersection(resultRegion, currentRegion)
           : Topology.union(resultRegion, currentRegion)
+      ) as IRegionRegion
       if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
       }
       resultRegion = tempRegion
     }
     for (const currentRegion of unboundedRegionArray) {
-      const tempRegion =
+      const tempRegion = (
         strategy === 'intersection'
           ? Topology.intersection(resultRegion, currentRegion)
           : resultRegion
+      ) as IRegionRegion
       if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
       }
@@ -123,7 +129,7 @@ export class Region {
     const colCount = Math.ceil(dx / girdSize)
 
     pdfArray.forEach((pdf) => {
-      if (pdf.type === 4) {
+      if (pdf.type === 'sdf') {
         pdfGirdArray.push({
           type: 'sdf',
           gird: RegionPDF.computePDF(pdf),

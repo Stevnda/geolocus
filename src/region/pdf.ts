@@ -193,22 +193,22 @@ export class RegionPDF {
     const origin = pdf.origin
     const targetPoint = target && new GeolocusPointObject(target)
     const map = {
-      0: () => this.constant(),
-      1: () =>
+      constant: () => this.constant(),
+      distance: () =>
         this.distance(
           origin,
           targetPoint as GeolocusPointObject,
           pdf.gdf.distance as number,
           pdf.gdf.distanceDelta as number,
         ),
-      2: () =>
+      angle: () =>
         this.angle(
           origin,
           targetPoint as GeolocusPointObject,
           pdf.gdf.azimuth as number,
           pdf.gdf.azimuthDelta as number,
         ),
-      3: () =>
+      distanceAndAngle: () =>
         this.distanceAndAngle(
           origin,
           targetPoint as GeolocusPointObject,
@@ -217,7 +217,7 @@ export class RegionPDF {
           pdf.gdf.azimuth as number,
           pdf.gdf.azimuthDelta as number,
         ),
-      4: () => this.getUnsignedInternalDistanceField(pdf),
+      sdf: () => this.getUnsignedInternalDistanceField(pdf),
     }
 
     return map[type]()

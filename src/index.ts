@@ -15,6 +15,7 @@ interface IGeolocusObjectInit {
 
 class Geolocus {
   private _context: GeolocusContext
+
   constructor(init?: IGeolocusContextInit) {
     this._context = new GeolocusContext(init)
   }

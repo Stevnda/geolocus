@@ -3,6 +3,7 @@ import * as jsts from 'jsts'
 import {
   GeolocusBBox,
   GeolocusGeometry,
+  GeolocusGeometryType,
   GeolocusLineStringGeometry,
   GeolocusMultiLineStringGeometry,
   GeolocusMultiPointGeometry,
@@ -49,6 +50,20 @@ export class GeolocusGeometryFactory {
   ): GeolocusMultiPolygonGeometry => {
     const polygonArray = position.map((value) => this.polygon(value))
     return this._geometryFactory.createMultiPolygon(polygonArray)
+  }
+
+  static empty(type: GeolocusGeometryType) {
+    const map = {
+      Point: this._geometryFactory.createPoint(),
+      LineString: this._geometryFactory.createLineString(),
+      Polygon: this._geometryFactory.createPolygon(),
+      MultiPoint: this._geometryFactory.createMultiPoint(),
+      MultiLineString: this._geometryFactory.createMultiLineString(),
+      MultiPolygon: this._geometryFactory.createMultiPolygon(),
+    }
+
+    const factory = map[type]
+    return factory
   }
 }
 
