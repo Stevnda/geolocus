@@ -13,7 +13,7 @@ describe('Test Relation class', () => {
     })
     const target1 = new GeolocusPointObject([0, 0], { status: 'fuzzy' })
 
-    const relation = context.getRelation()
+    const relation = context.getRelationMap()
     relation.define(target0, origin0, {
       direction: 'W',
       distance: 100,
@@ -24,7 +24,9 @@ describe('Test Relation class', () => {
       distance: 100,
       topology: 'disjoint',
     })
-    expect(relation.getGeoTripleByUUID(target0.getUUID())?.size).toBe(2)
+    expect(
+      relation.getRelationMapOfObjectByObjectUUID(target0.getUUID())?.size,
+    ).toBe(2)
     expect(() => {
       relation.define(origin0, target0, {
         direction: 'E',

@@ -41,7 +41,7 @@ export interface IRegionResultPdfGird {
 
 export interface IRegionResult {
   region: IRegionRegion | null
-  pdf: IRegionPDF[]
+  pdf: Map<string, IRegionPDF>
   coord: Position2 | null
   pdfGird: IRegionResultPdfGird[]
   resultGird: GeolocusGird | null
@@ -52,4 +52,9 @@ export interface IGeoTriple {
   origin: string
   relation: IGeoRelation
   target: string
+}
+
+export type RegionStrategy = {
+  region: 'intersection' | 'union'
+  gird: 'add' | 'multiply'
 }

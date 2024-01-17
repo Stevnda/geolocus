@@ -6,6 +6,7 @@ import {
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from './object'
+import { RegionStrategy } from './region'
 import { IGeoRelationWithSemantic, SemanticRelation } from './relation'
 
 interface IGeolocusObjectInit {
@@ -45,7 +46,7 @@ class Geolocus {
   }
 
   defineSemanticRelation(name: string, relation: SemanticRelation) {
-    const relationFactory = this._context.getRelation()
+    const relationFactory = this._context.getRelationMap()
     relationFactory.defineSemanticRelation(name, relation)
   }
 
@@ -54,23 +55,22 @@ class Geolocus {
     origin: GeolocusObject,
     relation: Partial<IGeoRelationWithSemantic>,
   ) {
-    this._context.getRelation().define(target, origin, relation)
+    this._context.getRelationMap().define(target, origin, relation)
   }
 
-  computeFuzzyObject(
-    object: GeolocusObject,
-    strategy: 'intersection' | 'union' = 'intersection',
-  ) {
+  computeFuzzyObject(object: GeolocusObject, strategy: RegionStrategy) {
     const uuid = this._context
       .getRegion()
       .computeFuzzyObject(object.getUUID(), strategy)
     return uuid.map(
-      (uuid) => this._context.getObjectByUUID(uuid) as GeolocusObject,
+      (uuid) => this._context.getObjectByObjectUUID(uuid) as GeolocusObject,
     )
   }
 
   getComputeResult(object: GeolocusObject) {
-    return this._context.getRegion().getResultByUUID(object.getUUID())
+    return this._context
+      .getRegion()
+      .getRegionResultByObjectUUID(object.getUUID())
   }
 }
 

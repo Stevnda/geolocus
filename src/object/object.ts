@@ -39,7 +39,7 @@ export class GeolocusPointObject implements IGeolocusObject {
     this._center =
       option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
 
-    this._context && this._context.addObject(this._uuid, this)
+    this._context && this._context.getObjectMap().set(this._uuid, this)
   }
 
   getContext(): GeolocusContext | null {
@@ -100,7 +100,7 @@ export class GeolocusLineStringObject implements IGeolocusObject {
     this._center =
       option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
 
-    this._context && this._context.addObject(this._uuid, this)
+    this._context && this._context.getObjectMap().set(this._uuid, this)
   }
 
   getContext(): GeolocusContext | null {
@@ -161,7 +161,7 @@ export class GeolocusPolygonObject implements IGeolocusObject {
     this._center =
       option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
 
-    this._context && this._context.addObject(this._uuid, this)
+    this._context && this._context.getObjectMap().set(this._uuid, this)
   }
 
   getContext(): GeolocusContext | null {
@@ -222,7 +222,7 @@ export class GeolocusMultiPointObject implements IGeolocusObject {
     this._center =
       option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
 
-    this._context && this._context.addObject(this._uuid, this)
+    this._context && this._context.getObjectMap().set(this._uuid, this)
   }
 
   getContext(): GeolocusContext | null {
@@ -283,7 +283,7 @@ export class GeolocusMultiLineStringObject implements IGeolocusObject {
     this._center =
       option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
 
-    this._context && this._context.addObject(this._uuid, this)
+    this._context && this._context.getObjectMap().set(this._uuid, this)
   }
 
   getContext(): GeolocusContext | null {
@@ -344,7 +344,7 @@ export class GeolocusMultiPolygonObject implements IGeolocusObject {
     this._center =
       option?.center || GeolocusGeometryMeta.getCenter(this._geometry)
 
-    this._context && this._context.addObject(this._uuid, this)
+    this._context && this._context.getObjectMap().set(this._uuid, this)
   }
 
   getContext(): GeolocusContext | null {

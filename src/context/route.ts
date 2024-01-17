@@ -1,6 +1,8 @@
 import { GeolocusContext } from '.'
+import { IRouteNode } from './type'
 
 export class Route {
+  // the uuid of node is the same as geolocusObject
   private _children: Map<string, Set<string>> // the child nodes of node
   private _parent: Map<string, Set<string>> // the parent nodes of node
   private _context: GeolocusContext
@@ -11,19 +13,25 @@ export class Route {
     this._context = context
   }
 
-  getChildrenGraph() {
+  getChildrenGraph = () => {
     return this._children
   }
 
-  getParentGraph() {
+  getParentGraph = () => {
     return this._parent
   }
 
-  getVertexCount() {
+  getGraphNode = (uuid: string): IRouteNode => {
+    const parent = this._parent.get(uuid)
+    const children = this._children.get(uuid)
+    return { parent, children }
+  }
+
+  getVertexCount = () => {
     return this._children.size || 0
   }
 
-  addVertex(uuid: string) {
+  addVertex = (uuid: string) => {
     const children = this._children.get(uuid)
     if (!children) {
       this._children.set(uuid, new Set())
@@ -31,7 +39,7 @@ export class Route {
     }
   }
 
-  addEdge(parent: string, child: string) {
+  addEdge = (parent: string, child: string) => {
     this.addVertex(parent)
     this.addVertex(child)
     const childrenSet = this._children.get(parent) as Set<string>
@@ -40,7 +48,7 @@ export class Route {
     parentSet.add(parent)
   }
 
-  removeEdge(parent: string, child: string) {
+  removeEdge = (parent: string, child: string) => {
     const childrenSet = this._children.get(parent)
     const parentSet = this._parent.get(child)
     if (childrenSet) {
@@ -51,7 +59,7 @@ export class Route {
     }
   }
 
-  topologicalSort() {
+  topologicalSort = () => {
     // generate inDegree of graph
     const inDegree: Record<string, number> = {}
     for (const key of this._children.keys()) {
@@ -85,8 +93,8 @@ export class Route {
     return result
   }
 
-  validateFuzzy(uuid: string) {
-    if (!(this._context.getObjectByUUID(uuid)?.getStatus() === 'fuzzy')) {
+  validateFuzzy = (uuid: string) => {
+    if (!(this._context.getObjectByObjectUUID(uuid)?.getStatus() === 'fuzzy')) {
       return false
     }
     const objectMap = this._context.getObjectMap()

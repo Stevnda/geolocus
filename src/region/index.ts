@@ -1,2 +1,8 @@
 export { Region } from './region'
-export { IGeoTriple } from './type'
+export {
+  IGeoTriple,
+  IRegionPDF,
+  IRegionRegion,
+  IRegionResult,
+  RegionStrategy,
+} from './type'

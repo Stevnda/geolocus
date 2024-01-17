@@ -11,19 +11,19 @@ describe('Test GeolocusContext', () => {
     const context = new GeolocusContext()
     const uuid = randomUUID()
     const point = new GeolocusPointObject([1, 1])
-    context.addObject(uuid, point)
+    context.getObjectMap().set(uuid, point)
     expect(context.getObjectMap()).toBeInstanceOf(Map)
-    expect(context.getObjectByUUID(uuid)?.getType()).toBe('Point')
+    expect(context.getObjectByObjectUUID(uuid)?.getType()).toBe('Point')
   })
 
   test('Get route', () => {
     const context = new GeolocusContext()
-    expect(context.getRoute()).toBeInstanceOf(Route)
+    expect(context.getRouteMap()).toBeInstanceOf(Route)
   })
 
   test('Get relation', () => {
     const context = new GeolocusContext()
-    expect(context.getRelation()).toBeInstanceOf(Relation)
+    expect(context.getRelationMap()).toBeInstanceOf(Relation)
   })
 
   test('Get region', () => {
