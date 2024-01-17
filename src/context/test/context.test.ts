@@ -18,12 +18,12 @@ describe('Test GeolocusContext', () => {
 
   test('Get route', () => {
     const context = new GeolocusContext()
-    expect(context.getRouteMap()).toBeInstanceOf(Route)
+    expect(context.getRoute()).toBeInstanceOf(Route)
   })
 
   test('Get relation', () => {
     const context = new GeolocusContext()
-    expect(context.getRelationMap()).toBeInstanceOf(Relation)
+    expect(context.getRelation()).toBeInstanceOf(Relation)
   })
 
   test('Get region', () => {

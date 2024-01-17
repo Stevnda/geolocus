@@ -39,6 +39,7 @@ export interface IRegionResultPdfGird {
   weight: number
 }
 
+// the uuid of IRegionPDF is the same as its corresponding triple
 export interface IRegionResult {
   region: IRegionRegion | null
   pdf: Map<string, IRegionPDF>

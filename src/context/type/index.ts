@@ -1,5 +1,5 @@
 import { GeolocusObject } from '@/object'
-import { IGeoTriple, IRegionPDF, IRegionResult, Region } from '@/region'
+import { Region } from '@/region'
 import { AbsoluteDirection, EuclideanDistanceRange, Relation } from '@/relation'
 import { Route } from '../route'
 
@@ -29,15 +29,8 @@ export interface IGeolocusContextInit {
 export interface IGeolocusContext {
   getObjectByObjectUUID(uuid: string): GeolocusObject | undefined
   getObjectMap(): Map<string, GeolocusObject>
-  getRouteNodeByObjectUUID(uuid: string): IRouteNode
-  getRouteMap(): Route
-  getTripleByRelationUUID(uuid: string): IGeoTriple | undefined
-  getRelationMapOfObjectByObjectUUID(
-    uuid: string,
-  ): Map<string, IGeoTriple> | undefined
-  getRelationMap(): Relation
-  getRegionResultByObjectUUID(uuid: string): IRegionResult | undefined
-  getPdfOfTripleByRelationUUID(uuid: string): IRegionPDF | undefined
+  getRoute(): Route
+  getRelation(): Relation
   getRegion(): Region
   getName(): string
   getDirectionDelta(): DirectionDelta

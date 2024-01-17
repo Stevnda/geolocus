@@ -1,5 +1,5 @@
 import { GeolocusObject } from '@/object'
-import { IGeoTriple, IRegionPDF, IRegionResult, Region } from '@/region'
+import { Region } from '@/region'
 import { Relation } from '@/relation'
 import { GEO_MAX_VALUE } from '@/util'
 import { Route } from './route'
@@ -7,7 +7,6 @@ import {
   DirectionDelta,
   IGeolocusContext,
   IGeolocusContextInit,
-  IRouteNode,
   SemanticDistanceMap,
 } from './type'
 
@@ -58,34 +57,12 @@ export class GeolocusContext implements IGeolocusContext {
     return this._objectMap
   }
 
-  getRouteNodeByObjectUUID = (uuid: string): IRouteNode => {
-    return this._route.getGraphNode(uuid)
-  }
-
-  getRouteMap = (): Route => {
+  getRoute = (): Route => {
     return this._route
   }
 
-  getTripleByRelationUUID = (uuid: string): IGeoTriple | undefined => {
-    return this._relation.getRelationByRelationUUID(uuid)
-  }
-
-  getRelationMapOfObjectByObjectUUID = (
-    uuid: string,
-  ): Map<string, IGeoTriple> | undefined => {
-    return this._relation.getRelationMapOfObjectByObjectUUID(uuid)
-  }
-
-  getRelationMap = (): Relation => {
+  getRelation = (): Relation => {
     return this._relation
-  }
-
-  getRegionResultByObjectUUID = (uuid: string): IRegionResult | undefined => {
-    return this._region.getRegionResultByObjectUUID(uuid)
-  }
-
-  getPdfOfTripleByRelationUUID = (uuid: string): IRegionPDF | undefined => {
-    return this._region.getPdfOfTripleByRelationUUID(uuid)
   }
 
   getRegion = (): Region => {

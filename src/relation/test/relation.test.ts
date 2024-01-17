@@ -13,7 +13,7 @@ describe('Test Relation class', () => {
     })
     const target1 = new GeolocusPointObject([0, 0], { status: 'fuzzy' })
 
-    const relation = context.getRelationMap()
+    const relation = context.getRelation()
     relation.define(target0, origin0, {
       direction: 'W',
       distance: 100,

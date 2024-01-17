@@ -46,7 +46,7 @@ class Geolocus {
   }
 
   defineSemanticRelation(name: string, relation: SemanticRelation) {
-    const relationFactory = this._context.getRelationMap()
+    const relationFactory = this._context.getRelation()
     relationFactory.defineSemanticRelation(name, relation)
   }
 
@@ -55,7 +55,7 @@ class Geolocus {
     origin: GeolocusObject,
     relation: Partial<IGeoRelationWithSemantic>,
   ) {
-    this._context.getRelationMap().define(target, origin, relation)
+    this._context.getRelation().define(target, origin, relation)
   }
 
   computeFuzzyObject(object: GeolocusObject, strategy: RegionStrategy) {

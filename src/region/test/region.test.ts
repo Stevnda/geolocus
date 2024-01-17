@@ -13,7 +13,7 @@ describe('Test the Region class', () => {
     })
 
     const region = context.getRegion()
-    const relation = context.getRelationMap()
+    const relation = context.getRelation()
 
     relation.define(target0, origin0, {
       direction: 'E',
@@ -47,7 +47,7 @@ describe('Test the Region class', () => {
     const target6 = new GeolocusPointObject([0, 0], init)
 
     const region = context.getRegion()
-    const relation = context.getRelationMap()
+    const relation = context.getRelation()
 
     // validateFuzzy and compute order
     expect(() =>

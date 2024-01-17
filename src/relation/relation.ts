@@ -49,7 +49,7 @@ export class Relation {
     }
     const originUUID = origin.getUUID()
     const targetUUID = target.getUUID()
-    const route = this._context.getRouteMap()
+    const route = this._context.getRoute()
     route.addEdge(originUUID, targetUUID)
     const circle = route.topologicalSort()
     if (circle.length !== route.getVertexCount()) {

@@ -50,7 +50,7 @@ export class Region {
     context: GeolocusContext,
     strategy: RegionStrategy,
   ) {
-    const relation = context.getRelationMap()
+    const relation = context.getRelation()
     const tripleMap = relation.getRelationMapOfObjectByObjectUUID(uuid) as Map<
       string,
       IGeoTriple
@@ -222,7 +222,7 @@ export class Region {
 
   computeFuzzyObject(uuid: string, strategy: RegionStrategy) {
     const context = this._context
-    const route = context.getRouteMap()
+    const route = context.getRoute()
     const computedOrderStack = route.validateFuzzy(uuid)
     if (!computedOrderStack) {
       throw new Error(
