@@ -17,8 +17,8 @@ describe('Test the Direction class', () => {
 
   test('Return the region by direction', () => {
     const object = createPolygonFromBBox([0, 0, 1, 1])
-    const region0 = Direction.computeRegion(object, 'ne', 'outside')
-    const region1 = Direction.computeRegion(object, 'sw', 'outside')
+    const region0 = Direction.computeRegion(object, 'NE', 'outside')
+    const region1 = Direction.computeRegion(object, 'SW', 'outside')
 
     expect(region0.getBBox()).toEqual([0.5, 0.5, GEO_MAX_VALUE, GEO_MAX_VALUE])
     expect(region1.getBBox()).toEqual([

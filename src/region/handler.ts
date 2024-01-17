@@ -14,6 +14,7 @@ import {
   Distance,
   EuclideanDistance,
   IGeoRelation,
+  RelativeDirection,
   Topology,
   TopologyRelation,
 } from '@/relation'
@@ -220,7 +221,10 @@ export class RegionResultHandler {
     tag: DirectionAndDistanceTag = 'outside',
   ): IRegionHandlerResult => {
     const context = origin.getContext() as GeolocusContext
-    const direction = relation.direction as AbsoluteDirection
+    const direction = relation.direction as
+      | AbsoluteDirection
+      | RelativeDirection
+    const directionDelta = context.getDirectionDelta(direction)
     const region = Direction.computeRegion(origin, direction, tag)
     const pdf: IRegionPDF = {
       type: 'angle',
@@ -228,8 +232,8 @@ export class RegionResultHandler {
       gdf: {
         distance: null,
         distanceDelta: null,
-        azimuth: context.getDirectionDelta()[direction][0],
-        azimuthDelta: context.getDirectionDelta()[direction][1],
+        azimuth: directionDelta[0],
+        azimuthDelta: directionDelta[1],
       },
       sdf: {
         girdRegion: null,
@@ -246,12 +250,15 @@ export class RegionResultHandler {
     relation: IGeoRelation,
   ): IRegionHandlerResult => {
     const context = origin.getContext() as GeolocusContext
-    const direction = relation.direction as AbsoluteDirection
+    const direction = relation.direction as
+      | AbsoluteDirection
+      | RelativeDirection
     const directionRegion = Direction.computeRegion(
       origin,
       direction,
       'outside',
     )
+    const directionDelta = context.getDirectionDelta(direction)
     const distance = relation.distance as EuclideanDistance
     const distanceRegion = Distance.computeRegionAwayFromObject(
       origin,
@@ -271,8 +278,8 @@ export class RegionResultHandler {
       gdf: {
         distance,
         distanceDelta: context.getDistanceDelta() * distance,
-        azimuth: context.getDirectionDelta()[direction][0],
-        azimuthDelta: context.getDirectionDelta()[direction][1],
+        azimuth: directionDelta[0],
+        azimuthDelta: directionDelta[1],
       },
       sdf: {
         girdRegion: null,

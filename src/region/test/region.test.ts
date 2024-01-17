@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext } from '@/context'
+import { GeolocusGlobalContext } from '@/context'
 import { GeolocusPointObject, createPolygonFromBBox } from '@/object'
 import { describe, expect, test } from 'vitest'
 
 describe('Test the Region class', () => {
   test('Return the result by uuid', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin0 = new GeolocusPointObject([0, 0], { context })
     const target0 = new GeolocusPointObject([0, 0], {
       context,
@@ -30,7 +30,7 @@ describe('Test the Region class', () => {
   })
 
   test('Compute the result property of Region class', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin0 = new GeolocusPointObject([0, 0], { context })
     const origin1 = createPolygonFromBBox([1, 1, 2, 2], { context })
     const init = {
@@ -146,7 +146,7 @@ describe('Test the Region class', () => {
   })
 
   test('Get the gird of Region', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const target = new GeolocusPointObject([0, 0], {
       context,
       status: 'fuzzy',
@@ -162,7 +162,7 @@ describe('Test the Region class', () => {
   })
 
   test('Get the coordinates of the maximum value.', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const target = new GeolocusPointObject([0, 0], {
       context,
       status: 'fuzzy',

@@ -3,11 +3,16 @@ import {
   GeolocusBBox,
   GeolocusObject,
   GeolocusPolygonObject,
+  Transformation,
   createPolygonFromBBox,
 } from '@/object'
 import { GEO_MAX_VALUE } from '@/util'
 import { Topology } from './topology'
-import { DirectionAndDistanceTag } from './type'
+import {
+  AbsoluteDirection,
+  DirectionAndDistanceTag,
+  RelativeDirection,
+} from './type'
 
 export class Direction {
   // radian
@@ -20,16 +25,15 @@ export class Direction {
 
   static computeRegion = (
     object: GeolocusObject,
-    direction: string,
+    direction: AbsoluteDirection | RelativeDirection,
     tag: DirectionAndDistanceTag,
   ) => {
-    const lower = direction.toLowerCase()
-    const AbsoluteDirectionMap = ['n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw']
-    if (AbsoluteDirectionMap.includes(lower)) {
-      const region = this.computeAbsoluteDirection(object, lower, tag)
+    const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+    if (AbsoluteDirectionMap.includes(direction)) {
+      const region = this.computeAbsoluteDirection(object, direction, tag)
       return region
     } else {
-      const region = this.computeAbsoluteDirection(object, lower, tag)
+      const region = this.computeRelativeDirection(object, direction, tag)
       return region
     }
   }
@@ -52,10 +56,10 @@ export class Direction {
       target[2] = source[0]
     }
     const fnMap = new Map([
-      ['n', n],
-      ['s', s],
-      ['e', e],
-      ['w', w],
+      ['N', n],
+      ['S', s],
+      ['E', e],
+      ['W', w],
     ])
 
     const center = object.getCenter()
@@ -81,5 +85,25 @@ export class Direction {
     } else {
       return bboxPolygon
     }
+  }
+
+  private static computeRelativeDirection(
+    object: GeolocusObject,
+    direction: string,
+    tag: DirectionAndDistanceTag,
+  ) {
+    const directionTransform = direction
+      .replace('F', 'N')
+      .replace('B', 'S')
+      .replace('R', 'E')
+      .replace('L', 'W')
+    const temp = this.computeAbsoluteDirection(object, directionTransform, tag)
+    const rotate = Transformation.rotateAroundCoord(
+      temp,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      object.getContext()!.getOrientation(),
+      object.getCenter(),
+    ) as GeolocusPolygonObject
+    return rotate
   }
 }

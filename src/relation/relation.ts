@@ -44,7 +44,7 @@ export class Relation {
     origin: GeolocusObject,
     relation: Partial<IGeoRelationWithSemantic>,
   ) => {
-    if (origin.getContext() !== target.getContext()) {
+    if (origin.getContext()?.getUUID() !== target.getContext()?.getUUID()) {
       throw new Error('The context between origin and target is different.')
     }
     const originUUID = origin.getUUID()

@@ -1,6 +1,7 @@
 import { GeolocusObject } from '@/object'
 import { Region } from '@/region'
 import { AbsoluteDirection, EuclideanDistanceRange, Relation } from '@/relation'
+import { GeolocusGlobalContext, GeolocusLocalContext } from '../context'
 import { Route } from '../route'
 
 export type Position2 = [number, number]
@@ -19,7 +20,9 @@ export type SemanticDistanceMap = [
 ]
 
 export interface IGeolocusContextInit {
+  parentContext: GeolocusContext
   name?: string
+  orientation?: number
   directionDelta?: DirectionDelta
   distanceDelta?: number
   semanticDistanceMap?: SemanticDistanceMap
@@ -27,17 +30,20 @@ export interface IGeolocusContextInit {
 }
 
 export interface IGeolocusContext {
+  getUUID(): string
   getObjectByObjectUUID(uuid: string): GeolocusObject | undefined
   getObjectMap(): Map<string, GeolocusObject>
   getRoute(): Route
   getRelation(): Relation
   getRegion(): Region
   getName(): string
-  getDirectionDelta(): DirectionDelta
+  getDirectionDelta(direction: string): [number, number]
   getDistanceDelta(): number
   getSemanticDistanceMap(): SemanticDistanceMap
   getResultGirdNum(): number
 }
+
+export type GeolocusContext = GeolocusGlobalContext | GeolocusLocalContext
 
 export interface IRouteNode {
   parent?: Set<string>

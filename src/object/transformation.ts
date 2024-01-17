@@ -1,14 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Position2 } from '@/context'
 import * as jsts from 'jsts'
 import { GeolocusObject, geolocusObjectMapping } from '.'
 import { GeolocusGeometryMeta } from './geometry'
 
 export class Transformation {
-  static translate(
+  static translate = (
     object: GeolocusObject,
     x: number,
     y: number,
-  ): GeolocusObject {
+  ): GeolocusObject => {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.translate(x, y)
     const geometry = affineTransformation.transform(object.getGeometry())
@@ -17,7 +18,34 @@ export class Transformation {
     const center = GeolocusGeometryMeta.getCenter(geometry)
     const type = object.getType()
     const ObjectFactory = geolocusObjectMapping[type]
-    const objectTranslated = new ObjectFactory([0, 0] as any, {
+    const objectTranslated = new ObjectFactory(null as never, {
+      type: type as any,
+      bbox,
+      center,
+      context: object.getContext(),
+      geometry,
+      name: object.getName(),
+      status: object.getStatus(),
+      uuid: object.getUUID(),
+    })
+
+    return objectTranslated
+  }
+
+  static rotateAroundCoord = (
+    object: GeolocusObject,
+    theta: number,
+    coord: Position2,
+  ) => {
+    const affineTransformation = new jsts.geom.util.AffineTransformation()
+    affineTransformation.rotate(-theta, ...coord)
+    const geometry = affineTransformation.transform(object.getGeometry())
+
+    const bbox = GeolocusGeometryMeta.getBBox(geometry)
+    const center = GeolocusGeometryMeta.getCenter(geometry)
+    const type = object.getType()
+    const ObjectFactory = geolocusObjectMapping[type]
+    const objectTranslated = new ObjectFactory(null as never, {
       type: type as any,
       bbox,
       center,

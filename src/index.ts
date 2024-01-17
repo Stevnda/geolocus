@@ -1,4 +1,10 @@
-import { GeolocusContext, IGeolocusContextInit, Position2 } from './context'
+import {
+  GeolocusContext,
+  GeolocusGlobalContext,
+  IGeolocusContextInit,
+  Position2,
+} from './context'
+import { GeolocusLocalContext } from './context/context'
 import {
   GeolocusLineStringObject,
   GeolocusObject,
@@ -17,8 +23,24 @@ interface IGeolocusObjectInit {
 class Geolocus {
   private _context: GeolocusContext
 
-  constructor(init?: IGeolocusContextInit) {
-    this._context = new GeolocusContext(init)
+  constructor(type: 'local', init: IGeolocusContextInit)
+  constructor(
+    type: 'global',
+    init?: Omit<IGeolocusContextInit, 'parentContext'>,
+  )
+  constructor(type: 'global' | 'local', init: IGeolocusContextInit) {
+    if (type === 'global') {
+      this._context = new GeolocusGlobalContext(init)
+    } else {
+      this._context = new GeolocusLocalContext(init)
+    }
+  }
+
+  createLocalContext(init: Omit<IGeolocusContextInit, 'parentContext'>) {
+    return new Geolocus('local', {
+      parentContext: this._context,
+      ...init,
+    })
   }
 
   point(position: Position2, option?: IGeolocusObjectInit) {
@@ -74,7 +96,8 @@ class Geolocus {
   }
 }
 
-const createContext = (init?: IGeolocusContextInit) => new Geolocus(init)
+const createContext = (init?: Omit<IGeolocusContextInit, 'parentContext'>) =>
+  new Geolocus('global', init)
 
 export const geolocus = {
   createContext,

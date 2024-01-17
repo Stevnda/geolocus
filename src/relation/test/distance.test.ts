@@ -1,11 +1,11 @@
-import { GeolocusContext } from '@/context'
+import { GeolocusGlobalContext } from '@/context'
 import { GEO_MAX_VALUE } from '@/util'
 import { describe, expect, test } from 'vitest'
 import { Distance } from '../distance'
 
 describe('Test the Distance class', () => {
   test('SemanticDistance to EuclideanDistanceRange.', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     expect(Distance.transformSemanticDistance('VN', context)).toEqual([0, 400])
     expect(Distance.transformSemanticDistance('N', context)).toEqual([
       400, 1000,

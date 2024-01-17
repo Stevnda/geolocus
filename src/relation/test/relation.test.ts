@@ -1,10 +1,10 @@
-import { GeolocusContext } from '@/context'
+import { GeolocusGlobalContext } from '@/context'
 import { GeolocusPointObject } from '@/object'
 import { describe, expect, test } from 'vitest'
 
 describe('Test Relation class', () => {
   test('Define the relation', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin0 = new GeolocusPointObject([0, 0], { context })
     const origin1 = new GeolocusPointObject([10, 0], { context })
     const target0 = new GeolocusPointObject([0, 0], {

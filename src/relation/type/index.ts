@@ -31,7 +31,7 @@ export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
 
 export interface IGeoRelation {
   topology: TopologyRelation | null
-  direction: AbsoluteDirection | null
+  direction: AbsoluteDirection | RelativeDirection | null
   distance: EuclideanDistance | EuclideanDistanceRange | null
   weight: number
 }

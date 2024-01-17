@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext, Position2 } from '@/context'
+import { GeolocusGlobalContext, Position2 } from '@/context'
 import {
   GeolocusBBox,
   GeolocusPointObject,
@@ -12,7 +12,7 @@ import { RegionResultHandler } from '../handler'
 
 describe('Test some handler functions of Region', () => {
   test('Test the RegionResultHandler.topology function', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin = new GeolocusPointObject([0, 0], { context })
     const origin1 = createPolygonFromBBox([-1, -1, 1, 1], {
       context,
@@ -85,7 +85,7 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfDistance function', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin = new GeolocusPointObject([0, 0], { context })
     const target = new GeolocusPointObject([0, 0], { context })
 
@@ -105,7 +105,7 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfDirection function', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin = new GeolocusPointObject([0, 0], { context })
     const target = new GeolocusPointObject([0, 0], { context })
 
@@ -126,7 +126,7 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfDirectionAndDistance function', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin = new GeolocusPointObject([0, 0], { context })
 
     const relation: IGeoRelation = {
@@ -145,7 +145,7 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the RegionResultHandler.topologyAndDistance function', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin = new GeolocusPointObject([0, 0], { context })
     const target = new GeolocusPointObject([0, 0], { context })
 
@@ -169,7 +169,7 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the topologyAndDirection function', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin = new GeolocusPointObject([0, 0], { context })
     const target = new GeolocusPointObject([0, 0], { context })
 
@@ -227,7 +227,7 @@ describe('Test some handler functions of Region', () => {
   })
 
   test('Test the regionHandlerOfAll function', () => {
-    const context = new GeolocusContext()
+    const context = new GeolocusGlobalContext()
     const origin = new GeolocusPointObject([0, 0], { context })
     const target = new GeolocusPointObject([0, 0], { context })
 
