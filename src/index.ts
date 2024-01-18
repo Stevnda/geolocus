@@ -13,7 +13,7 @@ import {
   GeolocusPolygonObject,
 } from './object'
 import { RegionStrategy } from './region'
-import { IGeoRelationWithSemantic, SemanticRelation } from './relation'
+import { IGeoRelation, IGeoRelationWithSemantic } from './relation'
 
 interface IGeolocusObjectInit {
   name?: string
@@ -67,7 +67,7 @@ class Geolocus {
     })
   }
 
-  defineSemanticRelation(name: string, relation: SemanticRelation) {
+  defineSemanticRelation(name: string, relation: Partial<IGeoRelation>) {
     const relationFactory = this._context.getRelation()
     relationFactory.defineSemanticRelation(name, relation)
   }
@@ -96,8 +96,9 @@ class Geolocus {
   }
 }
 
-const createContext = (init?: Omit<IGeolocusContextInit, 'parentContext'>) =>
-  new Geolocus('global', init)
+const createContext = (init?: Omit<IGeolocusContextInit, 'parentContext'>) => {
+  return new Geolocus('global', init)
+}
 
 export const geolocus = {
   createContext,

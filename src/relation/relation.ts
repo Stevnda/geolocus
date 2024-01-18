@@ -2,13 +2,9 @@ import { GeolocusContext } from '@/context'
 import { GeolocusObject } from '@/object'
 import { IGeoTriple } from '@/region'
 import { randomUUID } from 'crypto'
+import { Distance } from './distance'
 import { Semantic } from './semantic'
-import {
-  IGeoRelation,
-  IGeoRelationWithSemantic,
-  SemanticMap,
-  SemanticRelation,
-} from './type'
+import { IGeoRelation, IGeoRelationWithSemantic, SemanticMap } from './type'
 
 export class Relation {
   // the uuid of graph is the same as target geolocusObject
@@ -35,7 +31,7 @@ export class Relation {
     return this._graph.get(uuid)
   }
 
-  defineSemanticRelation = (name: string, relation: SemanticRelation) => {
+  defineSemanticRelation = (name: string, relation: Partial<IGeoRelation>) => {
     Semantic.define(name, relation, this._semanticMap)
   }
 
@@ -44,7 +40,13 @@ export class Relation {
     origin: GeolocusObject,
     relation: Partial<IGeoRelationWithSemantic>,
   ) => {
-    if (origin.getContext()?.getUUID() !== target.getContext()?.getUUID()) {
+    const originContext = origin.getContext()
+    const targetContext = target.getContext()
+    if (!originContext || !targetContext) {
+      throw new Error('Origin and target object must define context.')
+    }
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    if (originContext.getUUID() !== targetContext.getUUID()) {
       throw new Error('The context between origin and target is different.')
     }
     const originUUID = origin.getUUID()
@@ -58,7 +60,7 @@ export class Relation {
     const relationMap = this._graph.get(targetUUID)
     const tempTriple: IGeoTriple = {
       origin: originUUID,
-      relation: this.transform(relation),
+      relation: this.transform(relation, originContext),
       target: targetUUID,
     }
     const tripleUUID = randomUUID()
@@ -73,24 +75,31 @@ export class Relation {
 
   private transform = (
     relation: Partial<IGeoRelationWithSemantic>,
+    context: GeolocusContext,
   ): IGeoRelation => {
     if (relation.semantic) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const semantic = this._semanticMap.get(relation.semantic)!
       const direction = semantic.direction || relation.direction
       const distance = semantic.distance || relation.distance
+      const distanceTransform =
+        distance && Distance.transformSemanticDistance(distance, context)
       const topology = semantic.topology || relation.topology
       const result: IGeoRelation = {
         direction: direction || null,
-        distance: distance || null,
+        distance: distanceTransform || null,
         topology: topology || null,
         weight: relation.weight || 1,
       }
       return result
     } else {
+      const distance = relation.distance
+      distance && Distance.transformSemanticDistance(distance, context)
+      const distanceTransform =
+        distance && Distance.transformSemanticDistance(distance, context)
       const result: IGeoRelation = {
         direction: relation.direction || null,
-        distance: relation.distance || null,
+        distance: distanceTransform || null,
         topology: relation.topology || null,
         weight: relation.weight || 1,
       }

@@ -1,12 +1,13 @@
-export type SemanticRelation = Omit<IGeoRelation, 'weight'>
-export type SemanticMap = Map<string, SemanticRelation>
-
-export interface IGeoRelationWithSemantic extends IGeoRelation {
-  semantic: string | null
-}
-
 export type EuclideanDistance = number
 export type EuclideanDistanceRange = [number, number]
+
+export interface IDistanceNormalization {
+  max: number
+  min: number
+  mean: number
+  range: number
+}
+
 export type SemanticDistance = 'VN' | 'N' | 'M' | 'F' | 'VF'
 export type AbsoluteDirection =
   | 'N'
@@ -27,6 +28,8 @@ export type RelativeDirection =
   | 'L'
   | 'FL'
 
+export type DirectionAndDistanceTag = 'inside' | 'outside' | 'both'
+
 export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
 
 export interface IGeoRelation {
@@ -36,4 +39,13 @@ export interface IGeoRelation {
   weight: number
 }
 
-export type DirectionAndDistanceTag = 'inside' | 'outside' | 'both'
+export interface IGeoRelationWithSemantic {
+  topology: TopologyRelation | null
+  direction: AbsoluteDirection | RelativeDirection | null
+  distance: SemanticDistance | EuclideanDistance | EuclideanDistanceRange | null
+  semantic: string | null
+  weight: number
+}
+
+export type SemanticRelation = Omit<IGeoRelation, 'weight'>
+export type SemanticMap = Map<string, SemanticRelation>

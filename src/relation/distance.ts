@@ -10,6 +10,7 @@ import {
   DirectionAndDistanceTag,
   EuclideanDistance,
   EuclideanDistanceRange,
+  IDistanceNormalization,
   SemanticDistance,
 } from './type'
 
@@ -25,13 +26,52 @@ export class Distance {
   }
 
   static transformSemanticDistance(
-    term: SemanticDistance,
+    distance: EuclideanDistance | EuclideanDistanceRange | SemanticDistance,
     context: GeolocusContext,
-  ): EuclideanDistanceRange {
-    const index = this.SEMANTIC_MAP[term]
-    const threshold = context.getSemanticDistanceMap()
-    const range: EuclideanDistanceRange = threshold[index]
-    return range
+  ): EuclideanDistance | EuclideanDistanceRange {
+    const map = {
+      number: (distance: number) => distance,
+      object: (distance: [number, number]) => distance,
+      string: (distance: SemanticDistance, context: GeolocusContext) => {
+        const index = this.SEMANTIC_MAP[distance]
+        const threshold = context.getSemanticDistanceMap()
+        const range: EuclideanDistanceRange = threshold[index]
+        return range
+      },
+    }
+    const type = typeof distance as 'number' | 'object' | 'string'
+    const result = map[type](distance as never, context)
+    return result
+  }
+
+  static normalize = (
+    distance: EuclideanDistance | EuclideanDistanceRange,
+  ): IDistanceNormalization => {
+    const map = {
+      number: (distance: number) => {
+        const result: IDistanceNormalization = {
+          max: distance,
+          min: distance,
+          mean: distance,
+          range: 0,
+        }
+        return result
+      },
+      object: (distance: [number, number]) => {
+        const min = Math.min(...distance)
+        const max = Math.max(...distance)
+        const result: IDistanceNormalization = {
+          max,
+          min,
+          mean: (min + max) / 2,
+          range: max - min,
+        }
+        return result
+      },
+    }
+    const type = typeof distance as 'number' | 'object'
+    const result = map[type](distance as never)
+    return result
   }
 
   static distance(object0: GeolocusObject, object1: GeolocusObject) {
@@ -46,15 +86,13 @@ export class Distance {
     distance: EuclideanDistance | EuclideanDistanceRange,
     tag: DirectionAndDistanceTag,
   ): GeolocusPolygonObject | GeolocusMultiPolygonObject | null {
-    if (typeof distance === 'number') {
-      return this.computeRegionAwayFromObjectByDistance(object, distance, tag)
-    } else {
-      return this.computeRegionAwayFromObjectByDistanceRange(
-        object,
-        distance,
-        tag,
-      )
+    const type = typeof distance as 'number' | 'object'
+    const map = {
+      number: this.computeRegionAwayFromObjectByDistance,
+      object: this.computeRegionAwayFromObjectByDistanceRange,
     }
+    const result = map[type](object, distance as never, tag)
+    return result
   }
 
   private static computeRegionAwayFromObjectByDistance(
