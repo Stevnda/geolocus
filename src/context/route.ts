@@ -94,9 +94,11 @@ export class Route {
   }
 
   validateFuzzy = (uuid: string) => {
+    // the object must be fuzzy object
     if (!(this._context.getObjectByObjectUUID(uuid)?.getStatus() === 'fuzzy')) {
       return false
     }
+    // get all fuzzy object
     const objectMap = this._context.getObjectMap()
     const fuzzyObject: Set<string> = new Set()
     objectMap.forEach((value, key) => {
@@ -105,6 +107,7 @@ export class Route {
       }
     })
 
+    // calculate order based on DFS
     const computedOrderStack: string[] = [uuid]
     const stack: string[] = [uuid]
     const visited: Set<string> = new Set()
@@ -123,6 +126,7 @@ export class Route {
         computedOrderStack.push(currentUUID)
       }
     }
+    // No need to calculate other fuzzy object
     if (computedOrderStack[0] === computedOrderStack[1]) {
       computedOrderStack.shift()
     }

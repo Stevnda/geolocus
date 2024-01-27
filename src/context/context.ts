@@ -94,12 +94,14 @@ export class GeolocusGlobalContext implements IGeolocusContext {
     if (AbsoluteDirectionMap.includes(direction)) {
       return this._directionDelta[direction as AbsoluteDirection]
     } else {
+      // relativeDirection to AbsoluteDirection
       const directionTransform = direction
         .replace('F', 'N')
         .replace('B', 'S')
         .replace('R', 'E')
         .replace('L', 'W') as AbsoluteDirection
       const delta = this._directionDelta[directionTransform]
+      // add offset of angle
       return [delta[0] + this._orientation, delta[1]]
     }
   }

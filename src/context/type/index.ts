@@ -4,9 +4,11 @@ import { AbsoluteDirection, EuclideanDistanceRange, Relation } from '@/relation'
 import { GeolocusGlobalContext, GeolocusLocalContext } from '../context'
 import { Route } from '../route'
 
+// common
 export type Position2 = [number, number]
 export type Position3 = [number, number, number]
 
+// context.ts
 export type DirectionDelta = {
   [props in AbsoluteDirection]: [number, number]
 }
@@ -45,6 +47,7 @@ export interface IGeolocusContext {
 
 export type GeolocusContext = GeolocusGlobalContext | GeolocusLocalContext
 
+// route.ts
 export interface IRouteNode {
   parent?: Set<string>
   children?: Set<string>
