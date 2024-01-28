@@ -31,14 +31,14 @@ export class Relation {
     return this._graph.get(uuid)
   }
 
-  defineSemanticRelation = (name: string, relation: Partial<IGeoRelation>) => {
+  defineSemanticRelation = (name: string, relation: IGeoRelation) => {
     Semantic.define(name, relation, this._semanticMap)
   }
 
   define = (
     target: GeolocusObject,
     origin: GeolocusObject,
-    relation: Partial<IGeoRelationWithSemantic>,
+    relation: IGeoRelationWithSemantic,
   ) => {
     const originContext = origin.getContext()
     const targetContext = target.getContext()
@@ -60,7 +60,8 @@ export class Relation {
     const relationMap = this._graph.get(targetUUID)
     const tempTriple: IGeoTriple = {
       origin: originUUID,
-      relation: this.transform(relation, originContext),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      relation: this.transform(relation, relation.context!),
       target: targetUUID,
     }
     const tripleUUID = randomUUID()
@@ -74,7 +75,7 @@ export class Relation {
   }
 
   private transform = (
-    relation: Partial<IGeoRelationWithSemantic>,
+    relation: IGeoRelationWithSemantic,
     context: GeolocusContext,
   ): IGeoRelation => {
     if (relation.semantic) {
@@ -86,6 +87,7 @@ export class Relation {
         distance && Distance.transformSemanticDistance(distance, context)
       const topology = semantic.topology || relation.topology
       const result: IGeoRelation = {
+        context: semantic.context,
         direction: direction || null,
         distance: distanceTransform || null,
         topology: topology || null,
@@ -98,6 +100,7 @@ export class Relation {
       const distanceTransform =
         distance && Distance.transformSemanticDistance(distance, context)
       const result: IGeoRelation = {
+        context,
         direction: relation.direction || null,
         distance: distanceTransform || null,
         topology: relation.topology || null,

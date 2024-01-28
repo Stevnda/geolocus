@@ -1,3 +1,5 @@
+import { GeolocusContext } from '@/context'
+
 export type EuclideanDistance = number
 export type EuclideanDistanceRange = [number, number]
 
@@ -33,6 +35,7 @@ export type DirectionAndDistanceTag = 'inside' | 'outside' | 'both'
 export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
 
 export interface IGeoRelation {
+  context: GeolocusContext
   topology: TopologyRelation | null
   direction: AbsoluteDirection | RelativeDirection | null
   distance: EuclideanDistance | EuclideanDistanceRange | null
@@ -40,6 +43,7 @@ export interface IGeoRelation {
 }
 
 export interface IGeoRelationWithSemantic {
+  context: GeolocusContext
   topology: TopologyRelation | null
   direction: AbsoluteDirection | RelativeDirection | null
   distance: SemanticDistance | EuclideanDistance | EuclideanDistanceRange | null

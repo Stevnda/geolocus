@@ -16,8 +16,12 @@ describe('Test the Region class', () => {
     const relation = context.getRelation()
 
     relation.define(target0, origin0, {
+      context,
       direction: 'E',
       distance: 60,
+      semantic: null,
+      topology: null,
+      weight: 1,
     })
     region.computeFuzzyObject(target0.getUUID(), {
       region: 'intersection',
@@ -39,7 +43,7 @@ describe('Test the Region class', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
     const target0 = new GeolocusPointObject([0, 0], init)
-    const target1 = new GeolocusPointObject([0, 0], init)
+    // const target1 = new GeolocusPointObject([0, 0], init)
     const target2 = new GeolocusPointObject([0, 0], init)
     const target3 = new GeolocusPointObject([0, 0], init)
     const target4 = new GeolocusPointObject([0, 0], init)
@@ -62,17 +66,23 @@ describe('Test the Region class', () => {
         gird: 'multiply',
       }),
     ).toThrow()
-    // The geoRelation is null
-    relation.define(target1, origin0, {})
-    expect(() =>
-      region.computeFuzzyObject(target1.getUUID(), {
-        region: 'intersection',
-        gird: 'multiply',
-      }),
-    ).toThrow()
     // The result region is null
-    relation.define(target2, origin0, { direction: 'NE', distance: 100 })
-    relation.define(target2, origin0, { direction: 'SW', distance: 100 })
+    relation.define(target2, origin0, {
+      context,
+      direction: 'NE',
+      distance: 100,
+      topology: null,
+      semantic: null,
+      weight: 1,
+    })
+    relation.define(target2, origin0, {
+      context,
+      direction: 'SW',
+      distance: 100,
+      topology: null,
+      semantic: null,
+      weight: 1,
+    })
     expect(() =>
       region.computeFuzzyObject(target2.getUUID(), {
         region: 'intersection',
@@ -81,10 +91,19 @@ describe('Test the Region class', () => {
     ).toThrow()
     // gdf
     relation.define(target0, target3, {
+      context,
       direction: 'E',
       distance: 60,
+      semantic: null,
+      topology: null,
+      weight: 1,
     })
     relation.define(target3, origin0, {
+      context,
+      direction: null,
+      distance: null,
+      semantic: null,
+      weight: 1,
       topology: 'equal',
     })
     const uuid = region.computeFuzzyObject(target0.getUUID(), {
@@ -96,6 +115,11 @@ describe('Test the Region class', () => {
     expect(x > 59 && x < 61).toBeTruthy()
     // sdf
     relation.define(target4, origin1, {
+      context,
+      direction: null,
+      distance: null,
+      semantic: null,
+      weight: 1,
       topology: 'contain',
     })
     region.computeFuzzyObject(target4.getUUID(), {
@@ -108,6 +132,10 @@ describe('Test the Region class', () => {
 
     // union
     relation.define(target5, origin0, {
+      context,
+      semantic: null,
+      topology: null,
+      weight: 1,
       direction: 'E',
       distance: 60,
     })
@@ -120,14 +148,27 @@ describe('Test the Region class', () => {
     expect(unionX > 59 && unionX < 61).toBeTruthy()
     // the unboundedRegion is null
     relation.define(target6, origin0, {
+      context,
+      semantic: null,
+      topology: null,
+      weight: 1,
       direction: 'E',
       distance: 60,
     })
     relation.define(target6, origin0, {
+      context,
+      semantic: null,
+      topology: null,
+      weight: 1,
       direction: 'N',
       distance: 60,
     })
     relation.define(target6, origin1, {
+      context,
+      semantic: null,
+      topology: null,
+      weight: 1,
+      distance: null,
       direction: 'SW',
     })
     expect(() =>

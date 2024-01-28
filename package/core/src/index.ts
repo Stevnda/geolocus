@@ -13,7 +13,11 @@ import {
   GeolocusPolygonObject,
 } from './object'
 import { RegionStrategy } from './region'
-import { IGeoRelation, IGeoRelationWithSemantic } from './relation'
+import {
+  IGeoRelation,
+  IGeoRelationWithSemantic,
+  SemanticRelation,
+} from './relation'
 
 interface IGeolocusObjectInit {
   name?: string
@@ -67,17 +71,35 @@ class Geolocus {
     })
   }
 
-  defineSemanticRelation(name: string, relation: Partial<IGeoRelation>) {
+  defineSemanticRelation(
+    name: string,
+    relation: Omit<SemanticRelation, 'context'>,
+  ) {
+    const result: IGeoRelation = {
+      context: this._context,
+      direction: relation.direction || null,
+      distance: relation.distance || null,
+      topology: relation.topology || null,
+      weight: 1,
+    }
     const relationFactory = this._context.getRelation()
-    relationFactory.defineSemanticRelation(name, relation)
+    relationFactory.defineSemanticRelation(name, result)
   }
 
   defineRelation(
     target: GeolocusObject,
     origin: GeolocusObject,
-    relation: Partial<IGeoRelationWithSemantic>,
+    relation: Partial<Omit<IGeoRelationWithSemantic, 'context'>>,
   ) {
-    this._context.getRelation().define(target, origin, relation)
+    const result: IGeoRelationWithSemantic = {
+      context: this._context,
+      direction: relation.direction || null,
+      distance: relation.distance || null,
+      topology: relation.topology || null,
+      semantic: relation.semantic || null,
+      weight: relation.weight || 1,
+    }
+    this._context.getRelation().define(target, origin, result)
   }
 
   computeFuzzyObject(object: GeolocusObject, strategy: RegionStrategy) {

@@ -25,9 +25,11 @@ describe('Test some handler functions of Region', () => {
       'disjoint',
     ].map((value) => {
       return {
+        context,
         topology: value,
         direction: null,
         distance: null,
+        weight: 1,
       } as IGeoRelation
     })
 
@@ -90,6 +92,7 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], { context })
 
     const relation: IGeoRelation = {
+      context,
       topology: null,
       direction: null,
       distance: 100,
@@ -110,13 +113,14 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], { context })
 
     const relation: IGeoRelation = {
+      context,
       topology: null,
       direction: 'N',
       distance: null,
       weight: 1,
     }
 
-    const fuzzyRegion = Direction.computeRegion(origin, 'N', 'outside')
+    const fuzzyRegion = Direction.computeRegion(origin, 'N', 'outside', context)
     const topologyRegion = RegionResultHandler.direction(
       origin,
       relation,
@@ -130,6 +134,7 @@ describe('Test some handler functions of Region', () => {
     const origin = new GeolocusPointObject([0, 0], { context })
 
     const relation: IGeoRelation = {
+      context,
       topology: null,
       direction: 'N',
       distance: 100,
@@ -150,6 +155,7 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], { context })
 
     const relation: IGeoRelation = {
+      context,
       topology: 'disjoint',
       direction: null,
       distance: 100,
@@ -180,9 +186,11 @@ describe('Test some handler functions of Region', () => {
       'disjoint',
     ].map((value) => {
       return {
+        context,
         topology: value,
         direction: 'N',
         distance: null,
+        weight: 1,
       } as IGeoRelation
     })
 
@@ -232,6 +240,7 @@ describe('Test some handler functions of Region', () => {
     const target = new GeolocusPointObject([0, 0], { context })
 
     const relation: IGeoRelation = {
+      context,
       topology: 'disjoint',
       direction: 'N',
       distance: 100,

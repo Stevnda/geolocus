@@ -1,4 +1,4 @@
-import { Position2 } from '@/context'
+import { GeolocusContext, Position2 } from '@/context'
 import {
   GeolocusBBox,
   GeolocusObject,
@@ -27,13 +27,19 @@ export class Direction {
     object: GeolocusObject,
     direction: AbsoluteDirection | RelativeDirection,
     tag: DirectionAndDistanceTag,
+    context: GeolocusContext,
   ) => {
     const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
     if (AbsoluteDirectionMap.includes(direction)) {
       const region = this.computeAbsoluteDirection(object, direction, tag)
       return region
     } else {
-      const region = this.computeRelativeDirection(object, direction, tag)
+      const region = this.computeRelativeDirection(
+        object,
+        direction,
+        tag,
+        context,
+      )
       return region
     }
   }
@@ -91,6 +97,7 @@ export class Direction {
     object: GeolocusObject,
     direction: string,
     tag: DirectionAndDistanceTag,
+    context: GeolocusContext,
   ) {
     const directionTransform = direction
       .replace('F', 'N')
@@ -101,7 +108,7 @@ export class Direction {
     const rotate = Transformation.rotateAroundCoord(
       temp,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      object.getContext()!.getOrientation(),
+      context.getOrientation(),
       object.getCenter(),
     ) as GeolocusPolygonObject
     return rotate

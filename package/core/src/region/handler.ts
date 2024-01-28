@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext } from '@/context'
 import {
   GeolocusMultiPolygonObject,
   GeolocusObject,
@@ -62,7 +61,7 @@ export class RegionResultHandler {
       },
       sdf: {
         girdRegion: region,
-        girdNum: origin.getContext()!.getResultGirdNum(),
+        girdNum: relation.context.getResultGirdNum(),
       },
       weight: relation.weight,
     }
@@ -109,7 +108,7 @@ export class RegionResultHandler {
       },
       sdf: {
         girdRegion: region,
-        girdNum: origin.getContext()!.getResultGirdNum(),
+        girdNum: relation.context.getResultGirdNum(),
       },
       weight: relation.weight,
     }
@@ -183,7 +182,7 @@ export class RegionResultHandler {
     _: GeolocusObject,
     tag: DirectionAndDistanceTag = 'outside',
   ): IRegionHandlerResult => {
-    const context = origin.getContext() as GeolocusContext
+    const context = relation.context
     const distance = Distance.normalize(
       relation.distance as EuclideanDistance | EuclideanDistanceRange,
     )
@@ -227,12 +226,12 @@ export class RegionResultHandler {
     _: GeolocusObject,
     tag: DirectionAndDistanceTag = 'outside',
   ): IRegionHandlerResult => {
-    const context = origin.getContext() as GeolocusContext
+    const context = relation.context
     const direction = relation.direction as
       | AbsoluteDirection
       | RelativeDirection
     const directionDelta = context.getDirectionDelta(direction)
-    const region = Direction.computeRegion(origin, direction, tag)
+    const region = Direction.computeRegion(origin, direction, tag, context)
     const pdf: IRegionPDF = {
       type: 'angle',
       origin,
@@ -256,7 +255,7 @@ export class RegionResultHandler {
     origin: GeolocusObject,
     relation: IGeoRelation,
   ): IRegionHandlerResult => {
-    const context = origin.getContext() as GeolocusContext
+    const context = relation.context
     const direction = relation.direction as
       | AbsoluteDirection
       | RelativeDirection
@@ -264,6 +263,7 @@ export class RegionResultHandler {
       origin,
       direction,
       'outside',
+      context,
     )
     const directionDelta = context.getDirectionDelta(direction)
     const distance = Distance.normalize(
