@@ -1,5 +1,25 @@
-coverage/
-node_modules/
-dist/
 pnpm-lock.yaml
-*.js
+
+# IDE config
+.vscode
+
+# Logs
+logs
+*.log
+.pnpm-debug.log*
+
+# Test
+coverage
+
+# Dependency directories
+node_modules/
+
+# Environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Build
+dist

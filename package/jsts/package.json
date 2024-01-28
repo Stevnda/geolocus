@@ -1,0 +1,24 @@
+{
+  "name": "@geolocus/jsts",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "type": "module",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "build": "node ./esbuild.config.js",
+    "lint": "eslint src/**/* test/**/* --max-warnings 0",
+    "prettier": "prettier src/**/* test/**/* --write",
+    "format": "pnpm prettier && pnpm lint"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.16"
+  },
+  "dependencies": {
+    "jsts": "^2.11.0"
+  }
+}
