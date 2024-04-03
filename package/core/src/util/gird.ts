@@ -62,6 +62,7 @@ export class Gird {
         if (gird[row][col] < min) min = gird[row][col]
       }
     }
+    console.log(min, max)
     if (max !== min) {
       for (let row = 0; row < gird.length; row++) {
         for (let col = 0; col < gird[0].length; col++) {

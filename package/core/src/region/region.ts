@@ -45,6 +45,86 @@ export class Region {
     this._context = context
   }
 
+  getRegionResultByObjectUUID(uuid: string) {
+    return this._resultMap.get(uuid)
+  }
+
+  getPdfOfTripleByRelationUUID(uuid: string) {
+    let result: IRegionPDF | undefined
+    this._resultMap.forEach((map) => {
+      map.pdf.get(uuid) && (result = map.pdf.get(uuid))
+    })
+    return result
+  }
+
+  computeFuzzyObject(uuid: string, strategy: RegionStrategy) {
+    const context = this._context
+    const route = context.getRoute()
+    const computedOrderStack = route.validateFuzzy(uuid)
+    if (!computedOrderStack) {
+      throw new Error(
+        'Can not compute this object or it is not necessary be computed.',
+      )
+    }
+
+    const uuidArray = computedOrderStack.slice()
+    while (computedOrderStack.length > 0) {
+      const currentUUID = computedOrderStack.pop() as string
+      const result: IRegionResult = {
+        region: null,
+        pdf: new Map(),
+        coord: null,
+        pdfGird: [],
+        resultGird: null,
+        regionMask: null,
+      }
+      this._resultMap.set(currentUUID, result)
+
+      console.timeLog('default', 'compute region and pdf start')
+      const { resultPdf, resultRegion } = this.computeRegionAndPdf(
+        currentUUID,
+        context,
+        strategy,
+      )
+      result.pdf = resultPdf
+      result.region = resultRegion
+      console.timeLog('default', 'compute region and pdf end')
+
+      console.timeLog('default', 'compute gird start')
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      result.regionMask = computeGeolocusObjectMaskGrid(
+        result.region!,
+        context.getResultGirdNum(),
+      )
+      result.resultGird = this.computeRegionGrid(currentUUID, strategy)
+      const { coord } = this.getCoordOfMaximum(currentUUID)
+      result.coord = coord
+      console.timeLog('default', 'compute gird end')
+
+      const object = context.getObjectByObjectUUID(
+        currentUUID,
+      ) as GeolocusObject
+      const center = object.getCenter()
+      const offset = Vector2.sub(coord, center)
+      const translatedObject = Transformation.translate(object, ...offset)
+      const type = translatedObject.getType()
+      const ObjectFactory = geolocusObjectMapping[type]
+      // eslint-disable-next-line no-new
+      new ObjectFactory([0, 0] as any, {
+        type: translatedObject.getType() as any,
+        bbox: translatedObject.getBBox(),
+        center: translatedObject.getCenter(),
+        context: translatedObject.getContext(),
+        geometry: translatedObject.getGeometry(),
+        name: translatedObject.getName(),
+        status: 'computed',
+        uuid: translatedObject.getUUID(),
+      })
+    }
+
+    return uuidArray
+  }
+
   private computeRegionAndPdf(
     uuid: string,
     context: GeolocusContext,
@@ -84,6 +164,7 @@ export class Region {
         : boundedRegionArray.push(region)
     }
 
+    // BUG 万一 boundedRegionArray 为空就错了
     let resultRegion: IRegionRegion =
       strategy.region === 'intersection'
         ? createPolygonFromBBox([
@@ -108,7 +189,7 @@ export class Region {
       const tempRegion = (
         strategy.region === 'intersection'
           ? Topology.intersection(resultRegion, currentRegion)
-          : resultRegion
+          : Topology.union(resultRegion, currentRegion)
       ) as IRegionRegion
       if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
@@ -206,86 +287,6 @@ export class Region {
     )
 
     return resultGird
-  }
-
-  getRegionResultByObjectUUID(uuid: string) {
-    return this._resultMap.get(uuid)
-  }
-
-  getPdfOfTripleByRelationUUID(uuid: string) {
-    let result: IRegionPDF | undefined
-    this._resultMap.forEach((map) => {
-      map.pdf.get(uuid) && (result = map.pdf.get(uuid))
-    })
-    return result
-  }
-
-  computeFuzzyObject(uuid: string, strategy: RegionStrategy) {
-    const context = this._context
-    const route = context.getRoute()
-    const computedOrderStack = route.validateFuzzy(uuid)
-    if (!computedOrderStack) {
-      throw new Error(
-        'Can not compute this object or it is not necessary be computed.',
-      )
-    }
-
-    const uuidArray = computedOrderStack.slice()
-    while (computedOrderStack.length > 0) {
-      const currentUUID = computedOrderStack.pop() as string
-      const result: IRegionResult = {
-        region: null,
-        pdf: new Map(),
-        coord: null,
-        pdfGird: [],
-        resultGird: null,
-        regionMask: null,
-      }
-      this._resultMap.set(currentUUID, result)
-
-      console.timeLog('default', 'compute region and pdf start')
-      const { resultPdf, resultRegion } = this.computeRegionAndPdf(
-        currentUUID,
-        context,
-        strategy,
-      )
-      result.pdf = resultPdf
-      result.region = resultRegion
-      console.timeLog('default', 'compute region and pdf end')
-
-      console.timeLog('default', 'compute gird start')
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      result.regionMask = computeGeolocusObjectMaskGrid(
-        result.region!,
-        context.getResultGirdNum(),
-      )
-      result.resultGird = this.computeRegionGrid(currentUUID, strategy)
-      const { coord } = this.getCoordOfMaximum(currentUUID)
-      result.coord = coord
-      console.timeLog('default', 'compute gird end')
-
-      const object = context.getObjectByObjectUUID(
-        currentUUID,
-      ) as GeolocusObject
-      const center = object.getCenter()
-      const offset = Vector2.sub(coord, center)
-      const translatedObject = Transformation.translate(object, ...offset)
-      const type = translatedObject.getType()
-      const ObjectFactory = geolocusObjectMapping[type]
-      // eslint-disable-next-line no-new
-      new ObjectFactory([0, 0] as any, {
-        type: translatedObject.getType() as any,
-        bbox: translatedObject.getBBox(),
-        center: translatedObject.getCenter(),
-        context: translatedObject.getContext(),
-        geometry: translatedObject.getGeometry(),
-        name: translatedObject.getName(),
-        status: 'computed',
-        uuid: translatedObject.getUUID(),
-      })
-    }
-
-    return uuidArray
   }
 
   computeRegionGrid(uuid: string, strategy: RegionStrategy) {

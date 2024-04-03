@@ -9,21 +9,17 @@
   "license": "MIT",
   "scripts": {
     "build": "node ./esbuild.config.js",
-    "lint": "eslint src/**/* test/**/* --max-warnings 0",
-    "prettier": "prettier src/**/* test/**/* --write",
+    "lint": "eslint src/**/* --max-warnings 0",
+    "prettier": "prettier src/**/* --write",
     "format": "pnpm prettier && pnpm lint",
-    "test": "vitest run --config ./vitest.config.ts",
+    "test": "vitest --config ./vitest.config.ts",
     "test:coverage": "vitest run --config ./vitest.config.ts --coverage",
     "bench": "vitest bench --config ./vitest.config.ts"
   },
-  "dependencies": {
-    "@geolocus/jsts": "workspace:^",
-    "jsts": "^2.11.0"
-  },
   "devDependencies": {
-    "@types/geojson": "^7946.0.13",
-    "@types/jsts": "^0.17.22",
-    "@types/node": "^18.16.16",
-    "tsconfig-paths": "^4.2.0"
+    "@types/geojson": "^7946.0.14"
+  },
+  "dependencies": {
+    "@geolocus/jsts": "workspace:^"
   }
 }

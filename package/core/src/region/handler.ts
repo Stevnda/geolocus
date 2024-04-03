@@ -22,6 +22,17 @@ import { Compare, GEO_MAX_VALUE, Vector2 } from '@/util'
 import { IRegionHandlerResult, IRegionPDF, IRegionRegion } from './type'
 
 export class RegionResultHandler {
+  private static intersection = (
+    object0: GeolocusObject,
+    object1: GeolocusObject,
+  ) => {
+    let intersection = Topology.intersection(object0, object1)
+    if (!intersection) {
+      intersection = createEmptyGeolocusObject('Polygon')
+    }
+    return intersection as IRegionRegion
+  }
+
   private static equalHandler = (
     origin: GeolocusObject,
     relation: IGeoRelation,
@@ -146,17 +157,6 @@ export class RegionResultHandler {
       weight: relation.weight,
     }
     return { region, pdf, boundless: true }
-  }
-
-  private static intersectionHandler = (
-    object0: GeolocusObject,
-    object1: GeolocusObject,
-  ) => {
-    let intersection = Topology.intersection(object0, object1)
-    if (!intersection) {
-      intersection = createEmptyGeolocusObject('Polygon')
-    }
-    return intersection as IRegionRegion
   }
 
   static topology = (
@@ -340,10 +340,7 @@ export class RegionResultHandler {
       ) => {
         const topology = this.topology(origin, relation, target)
         const distance = this.distance(origin, relation, target, 'inside')
-        const intersection = this.intersectionHandler(
-          topology.region,
-          distance.region,
-        )
+        const intersection = this.intersection(topology.region, distance.region)
         topology.region = intersection
         topology.pdf.sdf.girdRegion = intersection
         return topology
@@ -355,10 +352,7 @@ export class RegionResultHandler {
       ) => {
         const topology = this.topology(origin, relation, target)
         const distance = this.distance(origin, relation, target, 'both')
-        const intersection = this.intersectionHandler(
-          topology.region,
-          distance.region,
-        )
+        const intersection = this.intersection(topology.region, distance.region)
         topology.region = intersection
         topology.pdf.sdf.girdRegion = intersection
         return topology
@@ -406,7 +400,7 @@ export class RegionResultHandler {
       ) => {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'inside')
-        const intersection = this.intersectionHandler(
+        const intersection = this.intersection(
           topology.region,
           direction.region,
         )
@@ -421,7 +415,7 @@ export class RegionResultHandler {
       ) => {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'both')
-        const intersection = this.intersectionHandler(
+        const intersection = this.intersection(
           topology.region,
           direction.region,
         )
@@ -470,9 +464,9 @@ export class RegionResultHandler {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'inside')
         const distance = this.distance(origin, relation, target, 'inside')
-        const intersection = this.intersectionHandler(
+        const intersection = this.intersection(
           topology.region,
-          this.intersectionHandler(direction.region, distance.region),
+          this.intersection(direction.region, distance.region),
         )
         topology.region = intersection
         topology.pdf.sdf.girdRegion = intersection
@@ -486,9 +480,9 @@ export class RegionResultHandler {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'both')
         const distance = this.distance(origin, relation, target, 'both')
-        const intersection = this.intersectionHandler(
+        const intersection = this.intersection(
           topology.region,
-          this.intersectionHandler(direction.region, distance.region),
+          this.intersection(direction.region, distance.region),
         )
         topology.region = intersection
         topology.pdf.sdf.girdRegion = intersection

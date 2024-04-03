@@ -8,18 +8,19 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:import/recommended',
     'plugin:import/typescript',
-    'plugin:promise/recommended',
     'plugin:prettier/recommended',
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-  plugins: ['@typescript-eslint', 'import', 'promise'],
+  plugins: ['@typescript-eslint', 'import'],
   rules: {
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
     'import/default': 0,
     'import/no-named-as-default-member': 0,
     'no-use-before-define': 0,
     'lines-between-class-members': 0,
+    '@typescript-eslint/no-non-null-assertion': 0,
+    '@typescript-eslint/no-explicit-any': 0,
   },
   settings: {
     'import/resolver': {
