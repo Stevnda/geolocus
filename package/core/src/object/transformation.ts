@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Position2 } from '@/context'
+import { TPosition2 } from '@/context'
 import jsts from '@geolocus/jsts'
-import { GeolocusObject, geolocusObjectMapping } from '.'
+import { TGeolocusObject, geolocusObjectMapping } from '.'
 import { GeolocusGeometryMeta } from './geometry'
 
 export class Transformation {
   static translate = (
-    object: GeolocusObject,
+    object: TGeolocusObject,
     x: number,
     y: number,
-  ): GeolocusObject => {
+  ): TGeolocusObject => {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.translate(x, y)
     const geometry = affineTransformation.transform(object.getGeometry())
@@ -33,9 +33,9 @@ export class Transformation {
   }
 
   static rotateAroundCoord = (
-    object: GeolocusObject,
+    object: TGeolocusObject,
     theta: number,
-    coord: Position2,
+    coord: TPosition2,
   ) => {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.rotate(-theta, ...coord)

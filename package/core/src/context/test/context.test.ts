@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest'
 import { GeolocusGlobalContext } from '../context'
 import { Route } from '../route'
 
-describe('Test GeolocusContext', () => {
+describe('Test TGeolocusContext', () => {
   test('Add object and get object', () => {
     const context = new GeolocusGlobalContext()
     const uuid = randomUUID()

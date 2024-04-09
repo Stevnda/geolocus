@@ -2,7 +2,7 @@ import { GeolocusPointObject, GeolocusPolygonObject } from '@/object'
 import { Compare } from '@/util'
 import { describe, expect, test } from 'vitest'
 import { RegionPDF } from '../pdf'
-import { IRegionPDF } from '../type'
+import { IRegionPDF } from '../region.type'
 
 describe('Test the RegionPDF class', () => {
   test('Test the constant PDF', () => {

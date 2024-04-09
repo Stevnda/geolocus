@@ -1,5 +1,5 @@
-import { Position2 } from '@/context'
-import { GeolocusGird, Gird } from '@/util'
+import { TPosition2 } from '@/context'
+import { Gird, TGeolocusGird } from '@/util'
 import jsts from '@geolocus/jsts'
 import { GeolocusGeometryFactory } from './geometry'
 import {
@@ -11,11 +11,11 @@ import {
   GeolocusPolygonObject,
 } from './object'
 import {
-  GeolocusBBox,
-  GeolocusGeometryType,
-  GeolocusObject,
   IGeolocusObjectInit,
-} from './type'
+  TGeolocusBBox,
+  TGeolocusGeometryName,
+  TGeolocusObject,
+} from './object.type'
 
 interface ICreateEmptyGeolocusObject {
   (type: 'Point'): GeolocusPointObject
@@ -26,7 +26,7 @@ interface ICreateEmptyGeolocusObject {
   (type: 'MultiPolygon'): GeolocusMultiPolygonObject
 }
 
-export const createEmptyGeolocusObject = ((type: GeolocusGeometryType) => {
+export const createEmptyGeolocusObject = ((type: TGeolocusGeometryName) => {
   const objectFactoryMap = {
     Point: GeolocusPointObject,
     LineString: GeolocusLineStringObject,
@@ -41,19 +41,24 @@ export const createEmptyGeolocusObject = ((type: GeolocusGeometryType) => {
     geometry: GeolocusGeometryFactory.empty(type),
     bbox: [0, 0, 0, 0],
     center: [0, 0],
+    context: null,
+    name: null,
+    status: null,
+    uuid: null,
+    type,
   })
 
   return object
 }) as ICreateEmptyGeolocusObject
 
 export const createPolygonFromBBox = (
-  bbox: GeolocusBBox,
-  option?: Omit<IGeolocusObjectInit, 'type'> & { type?: 'Polygon' },
+  bbox: TGeolocusBBox,
+  option: IGeolocusObjectInit | null = null,
 ): GeolocusPolygonObject => {
-  const leftDown: Position2 = [bbox[0], bbox[1]]
-  const rightDown: Position2 = [bbox[2], bbox[1]]
-  const rightUp: Position2 = [bbox[2], bbox[3]]
-  const leftUp: Position2 = [bbox[0], bbox[3]]
+  const leftDown: TPosition2 = [bbox[0], bbox[1]]
+  const rightDown: TPosition2 = [bbox[2], bbox[1]]
+  const rightUp: TPosition2 = [bbox[2], bbox[3]]
+  const leftUp: TPosition2 = [bbox[0], bbox[3]]
 
   const polygon = new GeolocusPolygonObject(
     [[leftDown, rightDown, rightUp, leftUp, leftDown]],
@@ -64,9 +69,9 @@ export const createPolygonFromBBox = (
 }
 
 export const computeGeolocusObjectMaskGrid = (
-  object: GeolocusObject,
+  object: TGeolocusObject,
   girdNum: number,
-): GeolocusGird => {
+): TGeolocusGird => {
   const bbox = object.getBBox()
   const xStart = bbox[0]
   const xEnd = bbox[2]

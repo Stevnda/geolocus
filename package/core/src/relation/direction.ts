@@ -1,22 +1,22 @@
-import { GeolocusContext, Position2 } from '@/context'
+import { TGeolocusContext, TPosition2 } from '@/context'
 import {
-  GeolocusBBox,
-  GeolocusObject,
   GeolocusPolygonObject,
+  TGeolocusBBox,
+  TGeolocusObject,
   Transformation,
   createPolygonFromBBox,
 } from '@/object'
 import { GEO_MAX_VALUE } from '@/util'
-import { Topology } from './topology'
 import {
-  AbsoluteDirection,
-  DirectionAndDistanceTag,
-  RelativeDirection,
-} from './type'
+  TAbsoluteDirection,
+  TIsInsideTag,
+  TRelativeDirection,
+} from './relation.type'
+import { Topology } from './topology'
 
 export class Direction {
   // radian
-  static azimuth(vector: Position2): number {
+  static azimuth(vector: TPosition2): number {
     const angle =
       (Math.PI / 2 - Math.atan2(vector[1], vector[0]) + 2 * Math.PI) %
       (2 * Math.PI)
@@ -24,10 +24,10 @@ export class Direction {
   }
 
   static computeRegion = (
-    object: GeolocusObject,
-    direction: AbsoluteDirection | RelativeDirection,
-    tag: DirectionAndDistanceTag,
-    context: GeolocusContext,
+    object: TGeolocusObject,
+    direction: TAbsoluteDirection | TRelativeDirection,
+    tag: TIsInsideTag,
+    context: TGeolocusContext,
   ) => {
     const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
     if (AbsoluteDirectionMap.includes(direction)) {
@@ -45,20 +45,20 @@ export class Direction {
   }
 
   private static computeAbsoluteDirection(
-    object: GeolocusObject,
+    object: TGeolocusObject,
     direction: string,
-    tag: DirectionAndDistanceTag,
+    tag: TIsInsideTag,
   ) {
-    const n = (source: Position2, target: GeolocusBBox) => {
+    const n = (source: TPosition2, target: TGeolocusBBox) => {
       target[1] = source[1]
     }
-    const s = (source: Position2, target: GeolocusBBox) => {
+    const s = (source: TPosition2, target: TGeolocusBBox) => {
       target[3] = source[1]
     }
-    const e = (source: Position2, target: GeolocusBBox) => {
+    const e = (source: TPosition2, target: TGeolocusBBox) => {
       target[0] = source[0]
     }
-    const w = (source: Position2, target: GeolocusBBox) => {
+    const w = (source: TPosition2, target: TGeolocusBBox) => {
       target[2] = source[0]
     }
     const fnMap = new Map([
@@ -69,7 +69,7 @@ export class Direction {
     ])
 
     const center = object.getCenter()
-    const target: GeolocusBBox = [
+    const target: TGeolocusBBox = [
       -GEO_MAX_VALUE,
       -GEO_MAX_VALUE,
       GEO_MAX_VALUE,
@@ -94,10 +94,10 @@ export class Direction {
   }
 
   private static computeRelativeDirection(
-    object: GeolocusObject,
+    object: TGeolocusObject,
     direction: string,
-    tag: DirectionAndDistanceTag,
-    context: GeolocusContext,
+    tag: TIsInsideTag,
+    context: TGeolocusContext,
   ) {
     const directionTransform = direction
       .replace('F', 'N')

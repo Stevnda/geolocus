@@ -9,7 +9,7 @@ test('Create GeolocusPolygonObject from BBox', () => {
   expect(polygon.getBBox()).toEqual([0, 0, 1, 1])
 })
 
-test('Create the mask gird of GeolocusObject', () => {
+test('Create the mask gird of TGeolocusObject', () => {
   const polygon = new GeolocusPolygonObject([
     [
       [0, 0],

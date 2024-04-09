@@ -1,23 +1,23 @@
-import { GeolocusContext } from '@/context'
+import { TGeolocusContext } from '@/context'
 import {
   GeolocusMultiPolygonObject,
-  GeolocusObject,
   GeolocusPolygonObject,
+  TGeolocusObject,
   createEmptyGeolocusObject,
 } from '@/object'
 import jsts from '@geolocus/jsts'
-import { Topology } from './topology'
 import {
-  DirectionAndDistanceTag,
-  EuclideanDistance,
-  EuclideanDistanceRange,
   IDistanceNormalization,
-  SemanticDistance,
-} from './type'
+  TEuclideanDistance,
+  TEuclideanDistanceRange,
+  TIsInsideTag,
+  TSemanticDistance,
+} from './relation.type'
+import { Topology } from './topology'
 
 export class Distance {
   static SEMANTIC_MAP: {
-    [props in SemanticDistance]: number
+    [props in TSemanticDistance]: number
   } = {
     VN: 0,
     N: 1,
@@ -27,16 +27,16 @@ export class Distance {
   }
 
   static transformSemanticDistance(
-    distance: EuclideanDistance | EuclideanDistanceRange | SemanticDistance,
-    context: GeolocusContext,
-  ): EuclideanDistance | EuclideanDistanceRange {
+    distance: TEuclideanDistance | TEuclideanDistanceRange | TSemanticDistance,
+    context: TGeolocusContext,
+  ): TEuclideanDistance | TEuclideanDistanceRange {
     const map = {
       number: (distance: number) => distance,
       object: (distance: [number, number]) => distance,
-      string: (distance: SemanticDistance, context: GeolocusContext) => {
+      string: (distance: TSemanticDistance, context: TGeolocusContext) => {
         const index = this.SEMANTIC_MAP[distance]
         const threshold = context.getSemanticDistanceMap()
-        const range: EuclideanDistanceRange = threshold[index]
+        const range: TEuclideanDistanceRange = threshold[index]
         return range
       },
     }
@@ -46,7 +46,7 @@ export class Distance {
   }
 
   static normalize = (
-    distance: EuclideanDistance | EuclideanDistanceRange,
+    distance: TEuclideanDistance | TEuclideanDistanceRange,
   ): IDistanceNormalization => {
     const map = {
       number: (distance: number) => {
@@ -75,7 +75,7 @@ export class Distance {
     return result
   }
 
-  static distance(object0: GeolocusObject, object1: GeolocusObject) {
+  static distance(object0: TGeolocusObject, object1: TGeolocusObject) {
     const geom0 = object0.getGeometry()
     const geom1 = object1.getGeometry()
     const distance = jsts.operation.distance.DistanceOp.distance(geom0, geom1)
@@ -83,9 +83,9 @@ export class Distance {
   }
 
   static computeRegionAwayFromObject(
-    object: GeolocusObject,
-    distance: EuclideanDistance | EuclideanDistanceRange,
-    tag: DirectionAndDistanceTag,
+    object: TGeolocusObject,
+    distance: TEuclideanDistance | TEuclideanDistanceRange,
+    tag: TIsInsideTag,
   ): GeolocusPolygonObject | GeolocusMultiPolygonObject | null {
     const type = typeof distance as 'number' | 'object'
     const map = {
@@ -97,9 +97,9 @@ export class Distance {
   }
 
   private static computeRegionAwayFromObjectByDistance(
-    object: GeolocusObject,
-    distance: EuclideanDistance,
-    tag: DirectionAndDistanceTag,
+    object: TGeolocusObject,
+    distance: TEuclideanDistance,
+    tag: TIsInsideTag,
   ) {
     const map = {
       inside: () => Topology.bufferOfDistance(object, -distance),
@@ -123,21 +123,21 @@ export class Distance {
   }
 
   private static computeRegionAwayFromObjectByDistanceRange(
-    object: GeolocusObject,
-    distanceRange: EuclideanDistanceRange,
-    tag: DirectionAndDistanceTag,
+    object: TGeolocusObject,
+    distanceRange: TEuclideanDistanceRange,
+    tag: TIsInsideTag,
   ) {
     const map = {
       inside: () =>
         Topology.bufferOfRange(
           object,
-          distanceRange.map((value) => -value) as EuclideanDistanceRange,
+          distanceRange.map((value) => -value) as TEuclideanDistanceRange,
         ),
       outside: () => Topology.bufferOfRange(object, distanceRange),
       both: () => {
         let object0 = Topology.bufferOfRange(
           object,
-          distanceRange.map((value) => -value) as EuclideanDistanceRange,
+          distanceRange.map((value) => -value) as TEuclideanDistanceRange,
         )
         if (!object0) {
           object0 = createEmptyGeolocusObject('Polygon')

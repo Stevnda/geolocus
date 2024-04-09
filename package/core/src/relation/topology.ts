@@ -1,55 +1,19 @@
 import {
-  GeolocusGeometry,
   GeolocusGeometryMeta,
   GeolocusLineStringObject,
   GeolocusMultiLineStringObject,
   GeolocusMultiPointObject,
   GeolocusMultiPolygonObject,
-  GeolocusObject,
   GeolocusPointObject,
   GeolocusPolygonObject,
+  TGeolocusGeometry,
+  TGeolocusObject,
 } from '@/object'
-import { GeolocusGeometryType } from '@/object/type'
+import { TGeolocusGeometryName } from '@/object/object.type'
 import jsts from '@geolocus/jsts'
-import { EuclideanDistance, EuclideanDistanceRange } from './type'
+import { TEuclideanDistance, TEuclideanDistanceRange } from './relation.type'
 
 export class Topology {
-  // static isEqual = (origin: GeolocusObject, target: GeolocusObject) => {
-  //   const originGeometry = origin.getGeometry()
-  //   const targetGeometry = target.getGeometry()
-  //   return targetGeometry.equalsExact(originGeometry, 0.00001)
-  // }
-
-  // static isIntersect = (origin: GeolocusObject, target: GeolocusObject) => {
-  //   const originGeometry = origin.getGeometry()
-  //   const targetGeometry = target.getGeometry()
-  //   return targetGeometry.intersects(originGeometry)
-  // }
-
-  // static isDisjoint = (origin: GeolocusObject, target: GeolocusObject) => {
-  //   const originGeometry = origin.getGeometry()
-  //   const targetGeometry = target.getGeometry()
-  //   return targetGeometry.disjoint(originGeometry)
-  // }
-
-  // static isWithin = (origin: GeolocusObject, target: GeolocusObject) => {
-  //   const originGeometry = origin.getGeometry()
-  //   const targetGeometry = target.getGeometry()
-  //   return targetGeometry.within(originGeometry)
-  // }
-
-  // static isContains = (origin: GeolocusObject, target: GeolocusObject) => {
-  //   const originGeometry = origin.getGeometry()
-  //   const targetGeometry = target.getGeometry()
-  //   return targetGeometry.contains(originGeometry)
-  // }
-
-  // static isTouch = (origin: GeolocusObject, target: GeolocusObject) => {
-  //   const originGeometry = origin.getGeometry()
-  //   const targetGeometry = target.getGeometry()
-  //   return targetGeometry.touches(originGeometry)
-  // }
-
   private static _objectFactoryMap = {
     Point: GeolocusPointObject,
     LineString: GeolocusLineStringObject,
@@ -59,7 +23,7 @@ export class Topology {
     MultiPolygon: GeolocusMultiPolygonObject,
   }
 
-  static difference = (origin: GeolocusObject, target: GeolocusObject) => {
+  static difference = (origin: TGeolocusObject, target: TGeolocusObject) => {
     const originGeometry = origin.getGeometry()
     const targetGeometry = target.getGeometry()
     const result = jsts.operation.overlay.OverlayOp.difference(
@@ -70,7 +34,7 @@ export class Topology {
     if (result.isEmpty()) {
       return null
     }
-    const type = result.getGeometryType() as GeolocusGeometryType
+    const type = result.getGeometryType() as TGeolocusGeometryName
     const bbox = GeolocusGeometryMeta.getBBox(result)
     const center = GeolocusGeometryMeta.getCenter(result)
     const Factory = this._objectFactoryMap[type]
@@ -80,13 +44,16 @@ export class Topology {
       center,
       context: origin.getContext(),
       geometry: result,
+      name: null,
+      status: null,
+      uuid: null,
     })
     return object
   }
 
   static intersection = (
-    polygon0: GeolocusObject,
-    polygon1: GeolocusObject,
+    polygon0: TGeolocusObject,
+    polygon1: TGeolocusObject,
   ) => {
     const geometry0 = polygon0.getGeometry()
     const geometry1 = polygon1.getGeometry()
@@ -98,7 +65,7 @@ export class Topology {
     if (intersection.isEmpty()) {
       return null
     }
-    const type = intersection.getGeometryType() as GeolocusGeometryType
+    const type = intersection.getGeometryType() as TGeolocusGeometryName
     const bbox = GeolocusGeometryMeta.getBBox(intersection)
     const center = GeolocusGeometryMeta.getCenter(intersection)
     const Factory = this._objectFactoryMap[type]
@@ -108,16 +75,19 @@ export class Topology {
       center,
       context: polygon0.getContext(),
       geometry: intersection,
+      name: null,
+      status: null,
+      uuid: null,
     })
     return object
   }
 
-  static union = (polygon0: GeolocusObject, polygon1: GeolocusObject) => {
+  static union = (polygon0: TGeolocusObject, polygon1: TGeolocusObject) => {
     const geometry0 = polygon0.getGeometry()
     const geometry1 = polygon1.getGeometry()
     const union = jsts.operation.overlay.OverlayOp.union(geometry0, geometry1)
 
-    const type = union.getGeometryType() as GeolocusGeometryType
+    const type = union.getGeometryType() as TGeolocusGeometryName
     const bbox = GeolocusGeometryMeta.getBBox(union)
     const center = GeolocusGeometryMeta.getCenter(union)
     const Factory = this._objectFactoryMap[type]
@@ -127,21 +97,24 @@ export class Topology {
       center,
       context: polygon0.getContext(),
       geometry: union,
+      name: null,
+      status: null,
+      uuid: null,
     })
     return object
   }
 
   private static buffer = (
-    geometry: GeolocusGeometry,
-    distance: EuclideanDistance,
+    geometry: TGeolocusGeometry,
+    distance: TEuclideanDistance,
   ) => {
     const buffer = jsts.operation.buffer.BufferOp.bufferOp(geometry, distance)
     return buffer
   }
 
   static bufferOfDistance = (
-    object: GeolocusObject,
-    distance: EuclideanDistance,
+    object: TGeolocusObject,
+    distance: TEuclideanDistance,
   ) => {
     const geometry = object.getGeometry()
     const buffer = this.buffer(geometry, distance)
@@ -159,13 +132,16 @@ export class Topology {
       center,
       context: object.getContext(),
       geometry: buffer,
+      name: null,
+      status: null,
+      uuid: null,
     })
     return polygon
   }
 
   static bufferOfRange = (
-    object: GeolocusObject,
-    range: EuclideanDistanceRange,
+    object: TGeolocusObject,
+    range: TEuclideanDistanceRange,
   ) => {
     const min = Math.min(...range)
     const max = Math.max(...range)
@@ -191,6 +167,9 @@ export class Topology {
       center,
       context: object.getContext(),
       geometry: difference,
+      name: null,
+      status: null,
+      uuid: null,
     })
     return polygon
   }

@@ -17,13 +17,13 @@ export {
   GeolocusPointObject,
   GeolocusPolygonObject,
 } from './object'
-export { Transformation } from './transformation'
 export type {
-  GeolocusBBox,
-  GeolocusGeometry,
-  GeolocusObject,
-  GeolocusObjectStatus,
-} from './type'
+  TGeolocusObjectStatus as GeolocusObjectStatus,
+  TGeolocusBBox,
+  TGeolocusGeometry,
+  TGeolocusObject,
+} from './object.type'
+export { Transformation } from './transformation'
 export {
   computeGeolocusObjectMaskGrid,
   createEmptyGeolocusObject,

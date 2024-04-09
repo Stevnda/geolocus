@@ -3,7 +3,7 @@ import { GeolocusPointObject } from '../object'
 import { Transformation } from '../transformation'
 
 describe('Test Transformation', () => {
-  test('Translate GeolocusObject', () => {
+  test('Translate TGeolocusObject', () => {
     const point = new GeolocusPointObject([0, 0])
     const transform = Transformation.translate(point, 1, 1)
 

@@ -1,79 +1,100 @@
 import {
-  GeolocusContext,
   GeolocusGlobalContext,
-  IGeolocusContextInit,
-  Position2,
+  GeolocusLocalContext,
+  IGeolocusGlobalContextInit,
+  IGeolocusLocalContextInit,
+  TGeolocusContext,
+  TPosition2,
 } from './context'
-import { GeolocusLocalContext } from './context/context'
 import {
   GeolocusLineStringObject,
-  GeolocusObject,
   GeolocusObjectStatus,
   GeolocusPointObject,
   GeolocusPolygonObject,
+  TGeolocusObject,
 } from './object'
-import { RegionStrategy } from './region'
+import { TRegionStrategy } from './region'
 import {
   IGeoRelation,
   IGeoRelationWithSemantic,
-  SemanticRelation,
+  TSemanticRelation,
 } from './relation'
 
 interface IGeolocusObjectInit {
-  name?: string
-  status?: GeolocusObjectStatus
+  name: string | null
+  status: GeolocusObjectStatus | null
 }
 
 class Geolocus {
-  private _context: GeolocusContext
+  private _context: TGeolocusContext
 
-  constructor(type: 'local', init: IGeolocusContextInit)
+  constructor(type: 'local', init: IGeolocusLocalContextInit)
+  constructor(type: 'global', init: IGeolocusGlobalContextInit | null)
   constructor(
-    type: 'global',
-    init?: Omit<IGeolocusContextInit, 'parentContext'>,
-  )
-  constructor(type: 'global' | 'local', init: IGeolocusContextInit) {
+    type: 'global' | 'local',
+    init: IGeolocusLocalContextInit | IGeolocusGlobalContextInit | null,
+  ) {
     if (type === 'global') {
       this._context = new GeolocusGlobalContext(init)
     } else {
-      this._context = new GeolocusLocalContext(init)
+      this._context = new GeolocusLocalContext(
+        init as IGeolocusLocalContextInit,
+      )
     }
   }
 
-  createLocalContext(init: Omit<IGeolocusContextInit, 'parentContext'>) {
+  createLocalContext(init: IGeolocusGlobalContextInit) {
     return new Geolocus('local', {
-      parentContext: this._context,
       ...init,
+      parentContext: this._context,
     })
   }
 
-  point(position: Position2, option?: IGeolocusObjectInit) {
+  point(position: TPosition2, option: IGeolocusObjectInit | null = null) {
     return new GeolocusPointObject(position, {
       context: this._context,
       name: option?.name || '',
       status: option?.status || 'precise',
+      bbox: null,
+      center: null,
+      geometry: null,
+      type: null,
+      uuid: null,
     })
   }
 
-  lineString(position: Position2[], option?: IGeolocusObjectInit) {
+  lineString(
+    position: TPosition2[],
+    option: IGeolocusObjectInit | null = null,
+  ) {
     return new GeolocusLineStringObject(position, {
       context: this._context,
       name: option?.name || '',
       status: option?.status || 'precise',
+      bbox: null,
+      center: null,
+      geometry: null,
+      type: null,
+      uuid: null,
     })
   }
 
-  polygon(position: Position2[][], option?: IGeolocusObjectInit) {
+  polygon(position: TPosition2[][], option: IGeolocusObjectInit | null = null) {
     return new GeolocusPolygonObject(position, {
       context: this._context,
       name: option?.name || '',
       status: option?.status || 'precise',
+      bbox: null,
+      center: null,
+      geometry: null,
+      type: null,
+      uuid: null,
     })
   }
 
   defineSemanticRelation(
     name: string,
-    relation: Omit<SemanticRelation, 'context'>,
+    relation: Omit<TSemanticRelation, 'context'>,
   ) {
     const result: IGeoRelation = {
       context: this._context,
@@ -87,8 +108,8 @@ class Geolocus {
   }
 
   defineRelation(
-    target: GeolocusObject,
-    origin: GeolocusObject,
+    target: TGeolocusObject,
+    origin: TGeolocusObject,
     relation: Partial<Omit<IGeoRelationWithSemantic, 'context'>>,
   ) {
     const result: IGeoRelationWithSemantic = {
@@ -102,24 +123,33 @@ class Geolocus {
     this._context.getRelation().define(target, origin, result)
   }
 
-  computeFuzzyObject(object: GeolocusObject, strategy: RegionStrategy) {
+  computeFuzzyObject(object: TGeolocusObject, strategy: TRegionStrategy) {
     const uuid = this._context
       .getRegion()
       .computeFuzzyObject(object.getUUID(), strategy)
     return uuid.map(
-      (uuid) => this._context.getObjectByObjectUUID(uuid) as GeolocusObject,
+      (uuid) => this._context.getObjectByObjectUUID(uuid) as TGeolocusObject,
     )
   }
 
-  getComputeResult(object: GeolocusObject) {
+  getComputeResult(object: TGeolocusObject) {
     return this._context
       .getRegion()
       .getRegionResultByObjectUUID(object.getUUID())
   }
 }
 
-const createContext = (init?: Omit<IGeolocusContextInit, 'parentContext'>) => {
-  return new Geolocus('global', init)
+const createContext = (
+  init: Partial<IGeolocusGlobalContextInit> | null = null,
+) => {
+  return new Geolocus('global', {
+    directionDelta: init?.directionDelta || null,
+    distanceDelta: init?.distanceDelta || null,
+    name: init?.name || null,
+    orientation: init?.orientation || null,
+    resultGirdNum: init?.resultGirdNum || null,
+    semanticDistanceMap: init?.semanticDistanceMap || null,
+  })
 }
 
 export const geolocus = {

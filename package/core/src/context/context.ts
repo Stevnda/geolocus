@@ -1,31 +1,32 @@
-import { GeolocusObject } from '@/object'
+import { TGeolocusObject } from '@/object'
 import { Region } from '@/region'
-import { AbsoluteDirection, Relation, RelativeDirection } from '@/relation'
+import { Relation, TAbsoluteDirection, TRelativeDirection } from '@/relation'
 import { GEO_MAX_VALUE } from '@/util'
 import { randomUUID } from 'crypto'
-import { Route } from './route'
 import {
-  DirectionDelta,
-  GeolocusContext,
   IGeolocusContext,
-  IGeolocusContextInit,
-  SemanticDistanceMap,
-} from './type'
+  IGeolocusGlobalContextInit,
+  IGeolocusLocalContextInit,
+  TDirectionDelta,
+  TGeolocusContext,
+  TSemanticDistanceMap,
+} from './context.type'
+import { Route } from './route'
 
 export class GeolocusGlobalContext implements IGeolocusContext {
   private _uuid: string
-  private _objectMap: Map<string, GeolocusObject>
+  private _objectMap: Map<string, TGeolocusObject>
   private _route: Route
   private _relation: Relation
   private _region: Region
   private _name: string
   private _orientation: number
-  private _directionDelta: DirectionDelta
+  private _directionDelta: TDirectionDelta
   private _distanceDelta: number
-  private _semanticDistanceMap: SemanticDistanceMap
+  private _semanticDistanceMap: TSemanticDistanceMap
   private _resultGirdNum: number
 
-  constructor(init?: Omit<IGeolocusContextInit, 'parentContext'>) {
+  constructor(init: IGeolocusGlobalContextInit | null = null) {
     this._uuid = randomUUID()
     this._objectMap = new Map()
     this._route = new Route(this)
@@ -59,11 +60,11 @@ export class GeolocusGlobalContext implements IGeolocusContext {
     return this._uuid
   }
 
-  getObjectByObjectUUID = (uuid: string): GeolocusObject | undefined => {
+  getObjectByObjectUUID = (uuid: string): TGeolocusObject | undefined => {
     return this._objectMap.get(uuid)
   }
 
-  getObjectMap = (): Map<string, GeolocusObject> => {
+  getObjectMap = (): Map<string, TGeolocusObject> => {
     return this._objectMap
   }
 
@@ -88,18 +89,18 @@ export class GeolocusGlobalContext implements IGeolocusContext {
   }
 
   getDirectionDelta = (
-    direction: AbsoluteDirection | RelativeDirection,
+    direction: TAbsoluteDirection | TRelativeDirection,
   ): [number, number] => {
     const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
     if (AbsoluteDirectionMap.includes(direction)) {
-      return this._directionDelta[direction as AbsoluteDirection]
+      return this._directionDelta[direction as TAbsoluteDirection]
     } else {
-      // relativeDirection to AbsoluteDirection
+      // relativeDirection to TAbsoluteDirection
       const directionTransform = direction
         .replace('F', 'N')
         .replace('B', 'S')
         .replace('R', 'E')
-        .replace('L', 'W') as AbsoluteDirection
+        .replace('L', 'W') as TAbsoluteDirection
       const delta = this._directionDelta[directionTransform]
       // add offset of angle
       return [delta[0] + this._orientation, delta[1]]
@@ -110,7 +111,7 @@ export class GeolocusGlobalContext implements IGeolocusContext {
     return this._distanceDelta
   }
 
-  getSemanticDistanceMap = (): SemanticDistanceMap => {
+  getSemanticDistanceMap = (): TSemanticDistanceMap => {
     return this._semanticDistanceMap
   }
 
@@ -121,15 +122,15 @@ export class GeolocusGlobalContext implements IGeolocusContext {
 
 export class GeolocusLocalContext implements IGeolocusContext {
   private _uuid: string
-  private _parentContext: GeolocusContext
+  private _parentContext: TGeolocusContext
   private _name: string
   private _orientation: number
-  private _directionDelta: DirectionDelta
+  private _directionDelta: TDirectionDelta
   private _distanceDelta: number
-  private _semanticDistanceMap: SemanticDistanceMap
+  private _semanticDistanceMap: TSemanticDistanceMap
   private _resultGirdNum: number
 
-  constructor(init: IGeolocusContextInit) {
+  constructor(init: IGeolocusLocalContextInit) {
     this._uuid = init.parentContext.getUUID()
     this._parentContext = init.parentContext
     this._name = init.name || 'default'
@@ -152,18 +153,18 @@ export class GeolocusLocalContext implements IGeolocusContext {
       [2500, 5000],
       [5000, GEO_MAX_VALUE],
     ]
-    this._resultGirdNum = init?.resultGirdNum || 16384
+    this._resultGirdNum = init.resultGirdNum || 16384
   }
 
   getUUID = (): string => {
     return this._uuid
   }
 
-  getObjectByObjectUUID = (uuid: string): GeolocusObject | undefined => {
+  getObjectByObjectUUID = (uuid: string): TGeolocusObject | undefined => {
     return this._parentContext.getObjectMap().get(uuid)
   }
 
-  getObjectMap = (): Map<string, GeolocusObject> => {
+  getObjectMap = (): Map<string, TGeolocusObject> => {
     return this._parentContext.getObjectMap()
   }
 
@@ -188,17 +189,17 @@ export class GeolocusLocalContext implements IGeolocusContext {
   }
 
   getDirectionDelta = (
-    direction: AbsoluteDirection | RelativeDirection,
+    direction: TAbsoluteDirection | TRelativeDirection,
   ): [number, number] => {
     const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
     if (AbsoluteDirectionMap.includes(direction)) {
-      return this._directionDelta[direction as AbsoluteDirection]
+      return this._directionDelta[direction as TAbsoluteDirection]
     } else {
       const directionTransform = direction
         .replace('F', 'N')
         .replace('B', 'S')
         .replace('R', 'E')
-        .replace('L', 'W') as AbsoluteDirection
+        .replace('L', 'W') as TAbsoluteDirection
       const delta = this._directionDelta[directionTransform]
       return [delta[0] + this._orientation, delta[1]]
     }
@@ -208,7 +209,7 @@ export class GeolocusLocalContext implements IGeolocusContext {
     return this._distanceDelta
   }
 
-  getSemanticDistanceMap = (): SemanticDistanceMap => {
+  getSemanticDistanceMap = (): TSemanticDistanceMap => {
     return this._semanticDistanceMap
   }
 

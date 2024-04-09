@@ -1,4 +1,4 @@
-import { Position2 } from '@/context'
+import { GeolocusGlobalContext, TPosition2 } from '@/context'
 import { createPolygonFromBBox } from '@/object'
 import { Compare, GEO_MAX_VALUE } from '@/util'
 import { describe, expect, test } from 'vitest'
@@ -6,8 +6,8 @@ import { Direction } from '../direction'
 
 describe('Test the Direction class', () => {
   test('Computes the azimuth of vector', () => {
-    const v1: Position2 = [1, 0]
-    const v2: Position2 = [-1, 1]
+    const v1: TPosition2 = [1, 0]
+    const v2: TPosition2 = [-1, 1]
 
     const result1 = Direction.azimuth(v1)
     const result2 = Direction.azimuth(v2)
@@ -16,9 +16,10 @@ describe('Test the Direction class', () => {
   })
 
   test('Return the region by direction', () => {
+    const context = new GeolocusGlobalContext()
     const object = createPolygonFromBBox([0, 0, 1, 1])
-    const region0 = Direction.computeRegion(object, 'NE', 'outside')
-    const region1 = Direction.computeRegion(object, 'SW', 'outside')
+    const region0 = Direction.computeRegion(object, 'NE', 'outside', context)
+    const region1 = Direction.computeRegion(object, 'SW', 'outside', context)
 
     expect(region0.getBBox()).toEqual([0.5, 0.5, GEO_MAX_VALUE, GEO_MAX_VALUE])
     expect(region1.getBBox()).toEqual([

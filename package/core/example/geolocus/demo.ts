@@ -2,7 +2,7 @@ import { GeoJson } from '@/object'
 import { spawn } from 'child_process'
 import { createWriteStream } from 'fs'
 import { geolocus } from '../../src'
-import { IRegionResult } from '../../src/region/type'
+import { IRegionResult } from '../../src/region/region.type'
 
 const context = geolocus.createContext()
 const xuanwu = context.polygon([
@@ -222,7 +222,7 @@ context.defineRelation(target0, origin3, {
   direction: 'E',
   distance: 100,
   topology: 'disjoint',
-  weight: 1e-322,
+  weight: 1,
 })
 context.defineRelation(target0, origin2, {
   direction: 'W',

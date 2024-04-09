@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusGlobalContext, Position2 } from '@/context'
+import { GeolocusGlobalContext, TPosition2 } from '@/context'
 import {
-  GeolocusBBox,
   GeolocusPointObject,
+  TGeolocusBBox,
   createPolygonFromBBox,
 } from '@/object'
 import { Direction, IGeoRelation } from '@/relation'
@@ -13,11 +13,36 @@ import { RegionResultHandler } from '../handler'
 describe('Test some handler functions of Region', () => {
   test('Test the RegionResultHandler.topology function', () => {
     const context = new GeolocusGlobalContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
+    const origin = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
     const origin1 = createPolygonFromBBox([-1, -1, 1, 1], {
       context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
     })
-    const target = new GeolocusPointObject([0, 0], { context })
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
     const relation: IGeoRelation[] = [
       'equal',
       'contain',
@@ -39,7 +64,7 @@ describe('Test some handler functions of Region', () => {
       relation[0],
       target,
     ).region
-    let bbox = topologyRegion?.getBBox() as GeolocusBBox
+    let bbox = topologyRegion?.getBBox() as TGeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
     ).toBeTruthy()
@@ -49,7 +74,7 @@ describe('Test some handler functions of Region', () => {
       relation[1],
       target,
     ).region
-    bbox = topologyRegion?.getBBox() as GeolocusBBox
+    bbox = topologyRegion?.getBBox() as TGeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.0051) && Compare.LT(bbox[2], 0.0051))(),
     ).toBeTruthy()
@@ -59,7 +84,7 @@ describe('Test some handler functions of Region', () => {
       relation[2],
       target,
     ).region
-    bbox = topologyRegion?.getBBox() as GeolocusBBox
+    bbox = topologyRegion?.getBBox() as TGeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.0051) && Compare.LT(bbox[2], 0.0051))(),
     ).toBeTruthy()
@@ -68,7 +93,7 @@ describe('Test some handler functions of Region', () => {
       relation[2],
       target,
     ).region
-    bbox = topologyRegion?.getBBox() as GeolocusBBox
+    bbox = topologyRegion?.getBBox() as TGeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -1.15) && Compare.LT(bbox[2], 1.15))(),
     ).toBeTruthy()
@@ -78,7 +103,7 @@ describe('Test some handler functions of Region', () => {
       relation[3],
       target,
     ).region
-    bbox = topologyRegion?.getBBox() as GeolocusBBox
+    bbox = topologyRegion?.getBBox() as TGeolocusBBox
     expect(
       (() =>
         Compare.EQ(bbox[0], -281474956710534) &&
@@ -88,8 +113,26 @@ describe('Test some handler functions of Region', () => {
 
   test('Test the regionHandlerOfDistance function', () => {
     const context = new GeolocusGlobalContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
-    const target = new GeolocusPointObject([0, 0], { context })
+    const origin = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
 
     const relation: IGeoRelation = {
       context,
@@ -109,8 +152,26 @@ describe('Test some handler functions of Region', () => {
 
   test('Test the regionHandlerOfDirection function', () => {
     const context = new GeolocusGlobalContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
-    const target = new GeolocusPointObject([0, 0], { context })
+    const origin = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
 
     const relation: IGeoRelation = {
       context,
@@ -131,7 +192,16 @@ describe('Test some handler functions of Region', () => {
 
   test('Test the regionHandlerOfDirectionAndDistance function', () => {
     const context = new GeolocusGlobalContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
+    const origin = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
 
     const relation: IGeoRelation = {
       context,
@@ -151,8 +221,26 @@ describe('Test some handler functions of Region', () => {
 
   test('Test the RegionResultHandler.topologyAndDistance function', () => {
     const context = new GeolocusGlobalContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
-    const target = new GeolocusPointObject([0, 0], { context })
+    const origin = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
 
     const relation: IGeoRelation = {
       context,
@@ -176,8 +264,26 @@ describe('Test some handler functions of Region', () => {
 
   test('Test the topologyAndDirection function', () => {
     const context = new GeolocusGlobalContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
-    const target = new GeolocusPointObject([0, 0], { context })
+    const origin = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
 
     const relation: IGeoRelation[] = [
       'equal',
@@ -200,7 +306,7 @@ describe('Test some handler functions of Region', () => {
       relation[0],
       target,
     ).region
-    let bbox = topologyRegion?.getBBox() as GeolocusBBox
+    let bbox = topologyRegion?.getBBox() as TGeolocusBBox
     expect(
       (() => Compare.GT(bbox[0], -0.051) && Compare.LT(bbox[2], 0.051))(),
     ).toBeTruthy()
@@ -210,7 +316,7 @@ describe('Test some handler functions of Region', () => {
       relation[1],
       target,
     ).region
-    let center = topologyRegion?.getCenter() as Position2
+    let center = topologyRegion?.getCenter() as TPosition2
     expect(
       (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
     ).toBeTruthy()
@@ -220,7 +326,7 @@ describe('Test some handler functions of Region', () => {
       relation[2],
       target,
     ).region
-    center = topologyRegion?.getCenter() as Position2
+    center = topologyRegion?.getCenter() as TPosition2
     expect(
       (() => Compare.EQ(center[0], 0) && Compare.LT(center[1], 0.0251))(),
     ).toBeTruthy()
@@ -230,14 +336,32 @@ describe('Test some handler functions of Region', () => {
       relation[3],
       target,
     ).region
-    bbox = topologyRegion?.getBBox() as GeolocusBBox
+    bbox = topologyRegion?.getBBox() as TGeolocusBBox
     expect((() => Compare.EQ(bbox[1], 0))()).toBeTruthy()
   })
 
   test('Test the regionHandlerOfAll function', () => {
     const context = new GeolocusGlobalContext()
-    const origin = new GeolocusPointObject([0, 0], { context })
-    const target = new GeolocusPointObject([0, 0], { context })
+    const origin = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const target = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
 
     const relation: IGeoRelation = {
       context,

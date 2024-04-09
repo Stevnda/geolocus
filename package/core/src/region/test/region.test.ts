@@ -6,10 +6,25 @@ import { describe, expect, test } from 'vitest'
 describe('Test the Region class', () => {
   test('Return the result by uuid', () => {
     const context = new GeolocusGlobalContext()
-    const origin0 = new GeolocusPointObject([0, 0], { context })
+    const origin0 = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
     const target0 = new GeolocusPointObject([0, 0], {
       context,
       status: 'fuzzy',
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      type: null,
+      uuid: null,
     })
 
     const region = context.getRegion()
@@ -35,8 +50,26 @@ describe('Test the Region class', () => {
 
   test('Compute the result property of Region class', () => {
     const context = new GeolocusGlobalContext()
-    const origin0 = new GeolocusPointObject([0, 0], { context })
-    const origin1 = createPolygonFromBBox([1, 1, 2, 2], { context })
+    const origin0 = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const origin1 = createPolygonFromBBox([1, 1, 2, 2], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
     const init = {
       context,
       status: 'fuzzy',
@@ -191,6 +224,12 @@ describe('Test the Region class', () => {
     const target = new GeolocusPointObject([0, 0], {
       context,
       status: 'fuzzy',
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      type: null,
+      uuid: null,
     })
 
     const region = context.getRegion()
@@ -207,6 +246,12 @@ describe('Test the Region class', () => {
     const target = new GeolocusPointObject([0, 0], {
       context,
       status: 'fuzzy',
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      type: null,
+      uuid: null,
     })
 
     const region = context.getRegion()

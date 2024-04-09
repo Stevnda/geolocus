@@ -1,32 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { GeolocusContext, Position2 } from '@/context'
+import { TGeolocusContext, TPosition2 } from '@/context'
 import {
-  GeolocusBBox,
   GeolocusMultiPolygonObject,
-  GeolocusObject,
   GeolocusPolygonObject,
+  TGeolocusBBox,
+  TGeolocusObject,
   Transformation,
   computeGeolocusObjectMaskGrid,
   createPolygonFromBBox,
   geolocusObjectMapping,
 } from '@/object'
-import { EuclideanDistanceRange, Topology } from '@/relation'
-import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, Vector2 } from '@/util'
+import { TEuclideanDistanceRange, Topology } from '@/relation'
+import { Compare, GEO_MAX_VALUE, Gird, TGeolocusGird, Vector2 } from '@/util'
 import { RegionResultHandler } from './handler'
 import { RegionPDF } from './pdf'
 import {
   IGeoTriple,
   IRegionPDF,
-  IRegionRegion,
   IRegionResult,
   IRegionResultPdfGird,
-  RegionStrategy,
-} from './type'
+  TRegionRegion,
+  TRegionStrategy,
+} from './region.type'
 export class Region {
   // the uuid of resultMap is the same as geolocusObject
   private _resultMap: Map<string, IRegionResult>
-  private _context: GeolocusContext
+  private _context: TGeolocusContext
   private _regionHandlerMap = {
     0: () => {
       throw new Error('The geoRelation is null.')
@@ -40,7 +40,7 @@ export class Region {
     11: RegionResultHandler.all,
   }
 
-  constructor(context: GeolocusContext) {
+  constructor(context: TGeolocusContext) {
     this._resultMap = new Map()
     this._context = context
   }
@@ -57,7 +57,7 @@ export class Region {
     return result
   }
 
-  computeFuzzyObject(uuid: string, strategy: RegionStrategy) {
+  computeFuzzyObject(uuid: string, strategy: TRegionStrategy) {
     const context = this._context
     const route = context.getRoute()
     const computedOrderStack = route.validateFuzzy(uuid)
@@ -103,7 +103,7 @@ export class Region {
 
       const object = context.getObjectByObjectUUID(
         currentUUID,
-      ) as GeolocusObject
+      ) as TGeolocusObject
       const center = object.getCenter()
       const offset = Vector2.sub(coord, center)
       const translatedObject = Transformation.translate(object, ...offset)
@@ -127,8 +127,8 @@ export class Region {
 
   private computeRegionAndPdf(
     uuid: string,
-    context: GeolocusContext,
-    strategy: RegionStrategy,
+    context: TGeolocusContext,
+    strategy: TRegionStrategy,
   ) {
     const relation = context.getRelation()
     const tripleMap = relation.getRelationMapOfObjectByObjectUUID(uuid) as Map<
@@ -137,16 +137,16 @@ export class Region {
     >
     const resultPdf: Map<string, IRegionPDF> = new Map()
 
-    const unboundedRegionArray: IRegionRegion[] = []
-    const boundedRegionArray: IRegionRegion[] = []
+    const unboundedRegionArray: TRegionRegion[] = []
+    const boundedRegionArray: TRegionRegion[] = []
     for (const [tripleUUID, triple] of tripleMap) {
       const relation = triple.relation
       const origin = context.getObjectByObjectUUID(
         triple.origin,
-      ) as GeolocusObject
+      ) as TGeolocusObject
       const target = context.getObjectByObjectUUID(
         triple.target,
-      ) as GeolocusObject
+      ) as TGeolocusObject
       const topologyTag = relation.topology ? 1 : 0
       const directionTag = relation.direction ? 3 : 0
       const distanceTag = relation.distance ? 7 : 0
@@ -165,7 +165,7 @@ export class Region {
     }
 
     // BUG 万一 boundedRegionArray 为空就错了
-    let resultRegion: IRegionRegion =
+    let resultRegion: TRegionRegion =
       strategy.region === 'intersection'
         ? createPolygonFromBBox([
             -GEO_MAX_VALUE,
@@ -173,13 +173,13 @@ export class Region {
             GEO_MAX_VALUE,
             GEO_MAX_VALUE,
           ])
-        : (boundedRegionArray.shift() as IRegionRegion)
+        : (boundedRegionArray.shift() as TRegionRegion)
     for (const currentRegion of boundedRegionArray) {
       const tempRegion = (
         strategy.region === 'intersection'
           ? Topology.intersection(resultRegion, currentRegion)
           : Topology.union(resultRegion, currentRegion)
-      ) as IRegionRegion
+      ) as TRegionRegion
       if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
       }
@@ -190,7 +190,7 @@ export class Region {
         strategy.region === 'intersection'
           ? Topology.intersection(resultRegion, currentRegion)
           : Topology.union(resultRegion, currentRegion)
-      ) as IRegionRegion
+      ) as TRegionRegion
       if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
       }
@@ -201,7 +201,7 @@ export class Region {
   }
 
   private computePdfGird(
-    mask: GeolocusGird,
+    mask: TGeolocusGird,
     pdfArray: Map<string, IRegionPDF>,
     region: GeolocusMultiPolygonObject,
   ) {
@@ -250,10 +250,10 @@ export class Region {
   }
 
   private extractRegionGird(
-    gird: GeolocusGird,
-    originBBox: GeolocusBBox,
-    targetBBox: GeolocusBBox,
-  ): GeolocusGird {
+    gird: TGeolocusGird,
+    originBBox: TGeolocusBBox,
+    targetBBox: TGeolocusBBox,
+  ): TGeolocusGird {
     const girdRow = gird.length
     const girdCol = gird[0].length
 
@@ -289,14 +289,14 @@ export class Region {
     return resultGird
   }
 
-  computeRegionGrid(uuid: string, strategy: RegionStrategy) {
+  computeRegionGrid(uuid: string, strategy: TRegionStrategy) {
     const result = this.getRegionResultByObjectUUID(uuid)
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
-    const mask = result.regionMask as GeolocusGird
+    const mask = result.regionMask as TGeolocusGird
     const fillValue = Number(strategy.gird === 'multiply')
-    const resultGird: GeolocusGird = Gird.createGirdWithValue(
+    const resultGird: TGeolocusGird = Gird.createGirdWithValue(
       mask.length,
       mask[0].length,
       fillValue,
@@ -306,12 +306,16 @@ export class Region {
     const bbox = region.getBBox()
     result.pdfGird = this.computePdfGird(mask, result.pdf, region)
     result.pdfGird.forEach((pdfGird) => {
-      const tempGird = pdfGird.gird as GeolocusGird
+      const tempGird = pdfGird.gird as TGeolocusGird
       const weight = pdfGird.weight
       const transformGird =
         pdfGird.type === 'gdf'
           ? tempGird
-          : this.extractRegionGird(tempGird, pdfGird.bbox as GeolocusBBox, bbox)
+          : this.extractRegionGird(
+              tempGird,
+              pdfGird.bbox as TGeolocusBBox,
+              bbox,
+            )
       if (strategy.gird === 'multiply') {
         Gird.forEach(resultGird, (_, row, col) => {
           resultGird[row][col] *= weight * transformGird[row][col]
@@ -332,7 +336,7 @@ export class Region {
     if (!result) {
       throw new Error('The result of this uuid is not existed.')
     }
-    const resultGrid = result.resultGird as GeolocusGird
+    const resultGrid = result.resultGird as TGeolocusGird
 
     const region = result.region as
       | GeolocusPolygonObject
@@ -349,7 +353,7 @@ export class Region {
 
     let max = -GEO_MAX_VALUE
     let min = GEO_MAX_VALUE
-    let coord: Position2 = [0, 0]
+    let coord: TPosition2 = [0, 0]
     Gird.forEach(resultGrid, (value, row, col) => {
       const x = xStart + col * girdSize
       const y = yStart + row * girdSize
@@ -359,6 +363,6 @@ export class Region {
       }
       if (Compare.LE(resultGrid[row][col], min)) min = value
     })
-    return { coord, range: [min, max] as EuclideanDistanceRange }
+    return { coord, range: [min, max] as TEuclideanDistanceRange }
   }
 }

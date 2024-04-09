@@ -1,19 +1,23 @@
-import { GeolocusContext } from '@/context'
-import { GeolocusObject } from '@/object'
+import { TGeolocusContext } from '@/context'
+import { TGeolocusObject } from '@/object'
 import { IGeoTriple } from '@/region'
 import { randomUUID } from 'crypto'
 import { Distance } from './distance'
+import {
+  IGeoRelation,
+  IGeoRelationWithSemantic,
+  TSemanticMap,
+} from './relation.type'
 import { Semantic } from './semantic'
-import { IGeoRelation, IGeoRelationWithSemantic, SemanticMap } from './type'
 
 export class Relation {
   // the uuid of graph is the same as target geolocusObject
   // the uuid of IGeoRelationMap is auto generate
   private _graph: Map<string, Map<string, IGeoTriple>>
-  private _context: GeolocusContext
-  private _semanticMap: SemanticMap
+  private _context: TGeolocusContext
+  private _semanticMap: TSemanticMap
 
-  constructor(context: GeolocusContext) {
+  constructor(context: TGeolocusContext) {
     this._graph = new Map()
     this._context = context
     this._semanticMap = new Map()
@@ -36,8 +40,8 @@ export class Relation {
   }
 
   define = (
-    target: GeolocusObject,
-    origin: GeolocusObject,
+    target: TGeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelationWithSemantic,
   ) => {
     const originContext = origin.getContext()
@@ -76,7 +80,7 @@ export class Relation {
 
   private transform = (
     relation: IGeoRelationWithSemantic,
-    context: GeolocusContext,
+    context: TGeolocusContext,
   ): IGeoRelation => {
     if (relation.semantic) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

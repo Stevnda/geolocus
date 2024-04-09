@@ -1,13 +1,13 @@
-import { GeolocusContext } from '.'
-import { IRouteNode } from './type'
+import { TGeolocusContext } from '.'
+import { IRouteNode } from './context.type'
 
 export class Route {
   // the uuid of node is the same as geolocusObject
   private _children: Map<string, Set<string>> // the child nodes of node
   private _parent: Map<string, Set<string>> // the parent nodes of node
-  private _context: GeolocusContext
+  private _context: TGeolocusContext
 
-  constructor(context: GeolocusContext) {
+  constructor(context: TGeolocusContext) {
     this._children = new Map()
     this._parent = new Map()
     this._context = context
@@ -21,9 +21,9 @@ export class Route {
     return this._parent
   }
 
-  getGraphNode = (uuid: string): IRouteNode => {
-    const parent = this._parent.get(uuid)
-    const children = this._children.get(uuid)
+  getGraphNodeByNodeUUID = (uuid: string): IRouteNode => {
+    const parent = this._parent.get(uuid) || null
+    const children = this._children.get(uuid) || null
     return { parent, children }
   }
 
@@ -98,6 +98,7 @@ export class Route {
     if (!(this._context.getObjectByObjectUUID(uuid)?.getStatus() === 'fuzzy')) {
       return false
     }
+
     // get all fuzzy object
     const objectMap = this._context.getObjectMap()
     const fuzzyObject: Set<string> = new Set()

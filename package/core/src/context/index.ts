@@ -1,8 +1,9 @@
-export { GeolocusGlobalContext } from './context'
-export { Route } from './route'
+export { GeolocusGlobalContext, GeolocusLocalContext } from './context'
 export type {
-  GeolocusContext,
-  IGeolocusContextInit,
-  Position2,
-  Position3,
-} from './type'
+  IGeolocusGlobalContextInit,
+  IGeolocusLocalContextInit,
+  TGeolocusContext,
+  TPosition2,
+  TPosition3,
+} from './context.type'
+export { Route } from './route'

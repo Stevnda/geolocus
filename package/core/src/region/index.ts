@@ -2,7 +2,7 @@ export { Region } from './region'
 export type {
   IGeoTriple,
   IRegionPDF,
-  IRegionRegion,
   IRegionResult,
-  RegionStrategy,
-} from './type'
+  TRegionRegion,
+  TRegionStrategy,
+} from './region.type'

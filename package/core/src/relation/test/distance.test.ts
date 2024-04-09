@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest'
 import { Distance } from '../distance'
 
 describe('Test the Distance class', () => {
-  test('SemanticDistance to EuclideanDistanceRange.', () => {
+  test('TSemanticDistance to TEuclideanDistanceRange.', () => {
     const context = new GeolocusGlobalContext()
     expect(Distance.transformSemanticDistance('VN', context)).toEqual([0, 400])
     expect(Distance.transformSemanticDistance('N', context)).toEqual([

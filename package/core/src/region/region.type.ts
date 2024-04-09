@@ -1,14 +1,14 @@
-import { Position2 } from '@/context'
+import { TPosition2 } from '@/context'
 import {
-  GeolocusBBox,
   GeolocusMultiPolygonObject,
-  GeolocusObject,
   GeolocusPolygonObject,
+  TGeolocusBBox,
+  TGeolocusObject,
 } from '@/object'
 import { IGeoRelation } from '@/relation'
-import { GeolocusGird } from '@/util'
+import { TGeolocusGird } from '@/util'
 
-export type IRegionRegion = GeolocusPolygonObject | GeolocusMultiPolygonObject
+export type TRegionRegion = GeolocusPolygonObject | GeolocusMultiPolygonObject
 
 export interface IRegionHandlerResult {
   region: GeolocusMultiPolygonObject | GeolocusPolygonObject
@@ -18,7 +18,7 @@ export interface IRegionHandlerResult {
 
 export interface IRegionPDF {
   type: 'constant' | 'distance' | 'angle' | 'distanceAndAngle' | 'sdf'
-  origin: GeolocusObject
+  origin: TGeolocusObject
   gdf: {
     distance: number | null
     distanceDelta: number | null
@@ -26,7 +26,7 @@ export interface IRegionPDF {
     azimuthDelta: number | null
   }
   sdf: {
-    girdRegion: IRegionRegion | null
+    girdRegion: TRegionRegion | null
     girdNum: number | null
   }
   weight: number
@@ -34,19 +34,19 @@ export interface IRegionPDF {
 
 export interface IRegionResultPdfGird {
   type: 'gdf' | 'sdf' | null
-  gird: GeolocusGird | null
-  bbox: GeolocusBBox | null
+  gird: TGeolocusGird | null
+  bbox: TGeolocusBBox | null
   weight: number
 }
 
 // the uuid of IRegionPDF is the same as its corresponding triple
 export interface IRegionResult {
-  region: IRegionRegion | null
+  region: TRegionRegion | null
   pdf: Map<string, IRegionPDF>
-  coord: Position2 | null
+  coord: TPosition2 | null
   pdfGird: IRegionResultPdfGird[]
-  resultGird: GeolocusGird | null
-  regionMask: GeolocusGird | null
+  resultGird: TGeolocusGird | null
+  regionMask: TGeolocusGird | null
 }
 
 export interface IGeoTriple {
@@ -55,7 +55,7 @@ export interface IGeoTriple {
   target: string
 }
 
-export type RegionStrategy = {
+export type TRegionStrategy = {
   region: 'intersection' | 'union'
   gird: 'add' | 'multiply'
 }

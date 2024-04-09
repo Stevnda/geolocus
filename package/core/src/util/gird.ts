@@ -1,8 +1,8 @@
-import { GEO_MAX_VALUE, GeolocusGird } from '.'
+import { GEO_MAX_VALUE, TGeolocusGird } from '.'
 
 export class Gird {
   static createGirdWithValue(row: number, col: number, fillValue: number) {
-    const resultGird: GeolocusGird = []
+    const resultGird: TGeolocusGird = []
     for (let y = 0; y < row; y++) {
       const temp: number[] = []
       for (let x = 0; x < col; x++) {
@@ -17,9 +17,9 @@ export class Gird {
   static createGirdWithFilter(
     rowLength: number,
     colLength: number,
-    filter: (row: number, col: number, gird: GeolocusGird) => number,
+    filter: (row: number, col: number, gird: TGeolocusGird) => number,
   ) {
-    const resultGird: GeolocusGird = []
+    const resultGird: TGeolocusGird = []
     for (let row = 0; row < rowLength; row++) {
       const temp: number[] = []
       for (let col = 0; col < colLength; col++) {
@@ -32,12 +32,12 @@ export class Gird {
   }
 
   static forEach(
-    gird: GeolocusGird,
+    gird: TGeolocusGird,
     callbackFn: (
       value: number,
       row: number,
       col: number,
-      gird: GeolocusGird,
+      gird: TGeolocusGird,
     ) => void,
   ) {
     for (let row = 0; row < gird.length; row++) {
@@ -47,7 +47,7 @@ export class Gird {
     }
   }
 
-  static normalize(gird: GeolocusGird) {
+  static normalize(gird: TGeolocusGird) {
     const transformGird = this.createGirdWithValue(
       gird.length,
       gird[0].length,
@@ -62,7 +62,6 @@ export class Gird {
         if (gird[row][col] < min) min = gird[row][col]
       }
     }
-    console.log(min, max)
     if (max !== min) {
       for (let row = 0; row < gird.length; row++) {
         for (let col = 0; col < gird[0].length; col++) {

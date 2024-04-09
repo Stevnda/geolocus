@@ -1,40 +1,40 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import {
   GeolocusMultiPolygonObject,
-  GeolocusObject,
   GeolocusPolygonObject,
+  TGeolocusObject,
   createEmptyGeolocusObject,
   createPolygonFromBBox,
 } from '@/object'
 import {
-  AbsoluteDirection,
   Direction,
-  DirectionAndDistanceTag,
   Distance,
-  EuclideanDistance,
-  EuclideanDistanceRange,
   IGeoRelation,
-  RelativeDirection,
+  TAbsoluteDirection,
+  TEuclideanDistance,
+  TEuclideanDistanceRange,
+  TIsInsideTag,
+  TRelativeDirection,
+  TTopologyRelation,
   Topology,
-  TopologyRelation,
 } from '@/relation'
 import { Compare, GEO_MAX_VALUE, Vector2 } from '@/util'
-import { IRegionHandlerResult, IRegionPDF, IRegionRegion } from './type'
+import { IRegionHandlerResult, IRegionPDF, TRegionRegion } from './region.type'
 
 export class RegionResultHandler {
   private static intersection = (
-    object0: GeolocusObject,
-    object1: GeolocusObject,
+    object0: TGeolocusObject,
+    object1: TGeolocusObject,
   ) => {
     let intersection = Topology.intersection(object0, object1)
     if (!intersection) {
       intersection = createEmptyGeolocusObject('Polygon')
     }
-    return intersection as IRegionRegion
+    return intersection as TRegionRegion
   }
 
   private static equalHandler = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
   ): IRegionHandlerResult => {
     const region = Topology.bufferOfDistance(origin, 0.005)!
@@ -57,7 +57,7 @@ export class RegionResultHandler {
   }
 
   private static containHandler = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
   ): IRegionHandlerResult => {
     const region = Topology.bufferOfDistance(origin, 0.005)!
@@ -80,9 +80,9 @@ export class RegionResultHandler {
   }
 
   private static intersectHandler = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
-    target: GeolocusObject,
+    target: TGeolocusObject,
   ): IRegionHandlerResult => {
     const originBBox = origin.getBBox()
     const originLength =
@@ -98,7 +98,7 @@ export class RegionResultHandler {
     if (Compare.LE(targetLength, 0.005)) targetLength = 0.005
     if (Compare.LE(targetLength, originLength)) targetLength = originLength
     const objectType = origin.getType()
-    let region: IRegionRegion
+    let region: TRegionRegion
     if (objectType === 'Point' || objectType === 'LineString') {
       region = Topology.bufferOfDistance(origin, targetLength)!
     } else {
@@ -128,7 +128,7 @@ export class RegionResultHandler {
   }
 
   private static disjointHandler = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
   ): IRegionHandlerResult => {
     const buffer = Topology.bufferOfDistance(origin, 0.005)!
@@ -160,11 +160,11 @@ export class RegionResultHandler {
   }
 
   static topology = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
-    target: GeolocusObject,
+    target: TGeolocusObject,
   ): IRegionHandlerResult => {
-    const topology = relation.topology as TopologyRelation
+    const topology = relation.topology as TTopologyRelation
     const map = {
       equal: this.equalHandler,
       contain: this.containHandler,
@@ -177,14 +177,14 @@ export class RegionResultHandler {
   }
 
   static distance = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
-    _: GeolocusObject,
-    tag: DirectionAndDistanceTag = 'outside',
+    _: TGeolocusObject,
+    tag: TIsInsideTag = 'outside',
   ): IRegionHandlerResult => {
     const context = relation.context
     const distance = Distance.normalize(
-      relation.distance as EuclideanDistance | EuclideanDistanceRange,
+      relation.distance as TEuclideanDistance | TEuclideanDistanceRange,
     )
     const meanDistanceDelta = context.getDistanceDelta() * distance.mean
     const minDistance =
@@ -221,15 +221,15 @@ export class RegionResultHandler {
   }
 
   static direction = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
-    _: GeolocusObject,
-    tag: DirectionAndDistanceTag = 'outside',
+    _: TGeolocusObject,
+    tag: TIsInsideTag = 'outside',
   ): IRegionHandlerResult => {
     const context = relation.context
     const direction = relation.direction as
-      | AbsoluteDirection
-      | RelativeDirection
+      | TAbsoluteDirection
+      | TRelativeDirection
     const directionDelta = context.getDirectionDelta(direction)
     const region = Direction.computeRegion(origin, direction, tag, context)
     const pdf: IRegionPDF = {
@@ -252,13 +252,13 @@ export class RegionResultHandler {
   }
 
   static directionAndDistance = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
   ): IRegionHandlerResult => {
     const context = relation.context
     const direction = relation.direction as
-      | AbsoluteDirection
-      | RelativeDirection
+      | TAbsoluteDirection
+      | TRelativeDirection
     const directionRegion = Direction.computeRegion(
       origin,
       direction,
@@ -267,7 +267,7 @@ export class RegionResultHandler {
     )
     const directionDelta = context.getDirectionDelta(direction)
     const distance = Distance.normalize(
-      relation.distance as EuclideanDistance | EuclideanDistanceRange,
+      relation.distance as TEuclideanDistance | TEuclideanDistanceRange,
     )
     const meanDistanceDelta = context.getDistanceDelta() * distance.mean
     const minDistance =
@@ -280,7 +280,7 @@ export class RegionResultHandler {
       origin,
       [minDistance, maxDistance],
       'outside',
-    ) as IRegionRegion
+    ) as TRegionRegion
     const region = Topology.intersection(
       directionRegion,
       distanceRegion,
@@ -305,38 +305,38 @@ export class RegionResultHandler {
   }
 
   static topologyAndDistance = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
-    target: GeolocusObject,
+    target: TGeolocusObject,
   ): IRegionHandlerResult => {
     const map: Record<
-      TopologyRelation,
+      TTopologyRelation,
       (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => IRegionHandlerResult
     > = {
       equal: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         return topology
       },
       disjoint: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const distance = this.distance(origin, relation, target)
         return distance
       },
       contain: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         const distance = this.distance(origin, relation, target, 'inside')
@@ -346,9 +346,9 @@ export class RegionResultHandler {
         return topology
       },
       intersect: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         const distance = this.distance(origin, relation, target, 'both')
@@ -359,44 +359,44 @@ export class RegionResultHandler {
       },
     }
 
-    const topology = relation.topology as TopologyRelation
+    const topology = relation.topology as TTopologyRelation
     const result = map[topology](origin, relation, target)
     return result
   }
 
   static topologyAndDirection = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
-    target: GeolocusObject,
+    target: TGeolocusObject,
   ): IRegionHandlerResult => {
     const map: Record<
-      TopologyRelation,
+      TTopologyRelation,
       (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => IRegionHandlerResult
     > = {
       equal: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         return topology
       },
       disjoint: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const direction = this.direction(origin, relation, target)
         return direction
       },
       contain: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'inside')
@@ -409,9 +409,9 @@ export class RegionResultHandler {
         return topology
       },
       intersect: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'both')
@@ -425,41 +425,41 @@ export class RegionResultHandler {
       },
     }
 
-    const topology = relation.topology as TopologyRelation
+    const topology = relation.topology as TTopologyRelation
     const result = map[topology](origin, relation, target)
     return result
   }
 
   // 存在距离默认相离
   static all = (
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     relation: IGeoRelation,
-    target: GeolocusObject,
+    target: TGeolocusObject,
   ): IRegionHandlerResult => {
     const map: Record<
-      TopologyRelation,
+      TTopologyRelation,
       (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => IRegionHandlerResult
     > = {
       equal: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         return topology
       },
-      disjoint: (origin: GeolocusObject, relation: IGeoRelation) => {
+      disjoint: (origin: TGeolocusObject, relation: IGeoRelation) => {
         const directionAndDistance = this.directionAndDistance(origin, relation)
         return directionAndDistance
       },
       contain: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'inside')
@@ -473,9 +473,9 @@ export class RegionResultHandler {
         return topology
       },
       intersect: (
-        origin: GeolocusObject,
+        origin: TGeolocusObject,
         relation: IGeoRelation,
-        target: GeolocusObject,
+        target: TGeolocusObject,
       ) => {
         const topology = this.topology(origin, relation, target)
         const direction = this.direction(origin, relation, target, 'both')
@@ -490,7 +490,7 @@ export class RegionResultHandler {
       },
     }
 
-    const topology = relation.topology as TopologyRelation
+    const topology = relation.topology as TTopologyRelation
     const result = map[topology](origin, relation, target)
     return result
   }

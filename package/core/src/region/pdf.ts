@@ -1,13 +1,13 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Position2 } from '@/context'
+import { TPosition2 } from '@/context'
 import {
-  GeolocusObject,
   GeolocusPointObject,
+  TGeolocusObject,
   computeGeolocusObjectMaskGrid,
 } from '@/object'
 import { Distance } from '@/relation'
-import { GeolocusGird, Gird, Vector2 } from '@/util'
-import { IRegionPDF } from './type'
+import { Gird, TGeolocusGird, Vector2 } from '@/util'
+import { IRegionPDF } from './region.type'
 
 export class RegionPDF {
   private static computeNormalDistributionValue(
@@ -47,7 +47,7 @@ export class RegionPDF {
   }
 
   private static distance(
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     target: GeolocusPointObject,
     distance: number,
     delta: number,
@@ -58,14 +58,14 @@ export class RegionPDF {
   }
 
   private static angle(
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     target: GeolocusPointObject,
     azimuth: number,
     delta: number,
   ) {
     const radiansTransform = -azimuth + Math.PI / 2
     const v1 = Vector2.sub(target.getCenter(), origin.getCenter())
-    const v2: Position2 = [
+    const v2: TPosition2 = [
       Math.cos(radiansTransform),
       Math.sin(radiansTransform),
     ]
@@ -75,7 +75,7 @@ export class RegionPDF {
   }
 
   private static distanceAndAngle(
-    origin: GeolocusObject,
+    origin: TGeolocusObject,
     target: GeolocusPointObject,
     distance: number,
     deltaDistance: number,
@@ -86,7 +86,7 @@ export class RegionPDF {
 
     const radiansTransform = -azimuth + Math.PI / 2
     const v1 = Vector2.sub(target.getCenter(), origin.getCenter())
-    const v2: Position2 = [
+    const v2: TPosition2 = [
       Math.cos(radiansTransform),
       Math.sin(radiansTransform),
     ]
@@ -103,7 +103,7 @@ export class RegionPDF {
   }
 
   private static sdfCompare(
-    gird: GeolocusGird,
+    gird: TGeolocusGird,
     originRow: number,
     originCol: number,
     rowOffset: number,
@@ -183,12 +183,12 @@ export class RegionPDF {
     return resultGird
   }
 
-  static computePDF(pdf: IRegionPDF): GeolocusGird
-  static computePDF(pdf: IRegionPDF, target: Position2): number
+  static computePDF(pdf: IRegionPDF): TGeolocusGird
+  static computePDF(pdf: IRegionPDF, target: TPosition2): number
   static computePDF(
     pdf: IRegionPDF,
-    target?: Position2,
-  ): number | GeolocusGird {
+    target?: TPosition2,
+  ): number | TGeolocusGird {
     const type = pdf.type
     const origin = pdf.origin
     const targetPoint = target && new GeolocusPointObject(target)

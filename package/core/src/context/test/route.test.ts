@@ -87,11 +87,56 @@ describe('Test the Route class', () => {
     const context = new GeolocusGlobalContext()
 
     const point5 = new GeolocusPointObject([0, 0])
-    const point0 = new GeolocusPointObject([0, 0], { context })
-    const point1 = new GeolocusPointObject([0, 0], { context })
-    const point2 = new GeolocusPointObject([0, 0], { context, status: 'fuzzy' })
-    const point3 = new GeolocusPointObject([0, 0], { context, status: 'fuzzy' })
-    const point4 = new GeolocusPointObject([0, 0], { context, status: 'fuzzy' })
+    const point0 = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const point1 = new GeolocusPointObject([0, 0], {
+      context,
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      status: null,
+      type: null,
+      uuid: null,
+    })
+    const point2 = new GeolocusPointObject([0, 0], {
+      context,
+      status: 'fuzzy',
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      type: null,
+      uuid: null,
+    })
+    const point3 = new GeolocusPointObject([0, 0], {
+      context,
+      status: 'fuzzy',
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      type: null,
+      uuid: null,
+    })
+    const point4 = new GeolocusPointObject([0, 0], {
+      context,
+      status: 'fuzzy',
+      bbox: null,
+      center: null,
+      geometry: null,
+      name: null,
+      type: null,
+      uuid: null,
+    })
 
     const route = context.getRoute()
     expect(route.validateFuzzy('kxh')).toBeFalsy()
