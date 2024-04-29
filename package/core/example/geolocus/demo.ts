@@ -219,17 +219,24 @@ const target0 = context.point([0, 0], { status: 'fuzzy' })
 //   topology: 'disjoint',
 // })
 context.defineRelation(target0, origin3, {
-  direction: 'E',
+  direction: 'NE',
   distance: 100,
   topology: 'disjoint',
   weight: 1,
 })
-context.defineRelation(target0, origin2, {
-  direction: 'W',
-  distance: 100,
-  topology: 'disjoint',
-  weight: 1,
-})
+
+// context.defineRelation(target0, origin3, {
+//   direction: 'NE',
+//   distance: null,
+//   topology: 'disjoint',
+//   weight: 1,
+// })
+// context.defineRelation(target0, origin2, {
+//   direction: 'W',
+//   distance: 100,
+//   topology: 'disjoint',
+//   weight: 1,
+// })
 // context.defineRelation(origin3, target0, {
 //   direction: 'W',
 //   distance: 100,
@@ -239,7 +246,7 @@ context.defineRelation(target0, origin2, {
 console.time()
 console.timeLog()
 context.computeFuzzyObject(target0, {
-  region: 'union',
+  region: 'intersection',
   gird: 'multiply',
 })
 const result = context.getComputeResult(target0) as IRegionResult

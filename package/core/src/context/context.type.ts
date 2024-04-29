@@ -28,7 +28,11 @@ export type TSemanticDistanceMap = [
 export interface IGeolocusGlobalContextInit {
   name: string | null
   orientation: number | null
-  directionDelta: TDirectionDelta | null
+  directionDelta:
+    | number
+    | [number, number]
+    | [number, number, number, number, number, number, number, number]
+    | null
   distanceDelta: number | null
   semanticDistanceMap: TSemanticDistanceMap | null
   resultGirdNum: number | null
@@ -38,7 +42,11 @@ export interface IGeolocusLocalContextInit {
   parentContext: TGeolocusContext
   name: string | null
   orientation: number | null
-  directionDelta: TDirectionDelta | null
+  directionDelta:
+    | number
+    | [number, number]
+    | [number, number, number, number, number, number, number, number]
+    | null
   distanceDelta: number | null
   semanticDistanceMap: TSemanticDistanceMap | null
   resultGirdNum: number | null

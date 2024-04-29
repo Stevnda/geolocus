@@ -13,6 +13,59 @@ import {
 } from './context.type'
 import { Route } from './route'
 
+const generateDirectionDelta = (
+  value:
+    | number
+    | [number, number]
+    | [number, number, number, number, number, number, number, number],
+): TDirectionDelta => {
+  const fnMap: Record<number, (value: any) => TDirectionDelta> = {
+    1: (value: number) => ({
+      N: [0, value],
+      NE: [Math.PI / 4, value],
+      E: [Math.PI / 2, value],
+      SE: [(Math.PI / 4) * 3, value],
+      S: [Math.PI, value],
+      SW: [(Math.PI / 4) * 5, value],
+      W: [(Math.PI / 2) * 3, value],
+      NW: [(Math.PI / 4) * 7, value],
+    }),
+    2: (value: [number, number]) => ({
+      N: [0, value[0]],
+      NE: [Math.PI / 4, value[1]],
+      E: [Math.PI / 2, value[0]],
+      SE: [(Math.PI / 4) * 3, value[1]],
+      S: [Math.PI, value[0]],
+      SW: [(Math.PI / 4) * 5, value[1]],
+      W: [(Math.PI / 2) * 3, value[0]],
+      NW: [(Math.PI / 4) * 7, value[1]],
+    }),
+    8: (
+      value: [number, number, number, number, number, number, number, number],
+    ) => ({
+      N: [0, value[0]],
+      NE: [Math.PI / 4, value[1]],
+      E: [Math.PI / 2, value[2]],
+      SE: [(Math.PI / 4) * 3, value[3]],
+      S: [Math.PI, value[4]],
+      SW: [(Math.PI / 4) * 5, value[5]],
+      W: [(Math.PI / 2) * 3, value[6]],
+      NW: [(Math.PI / 4) * 7, value[7]],
+    }),
+  }
+
+  const length = (() => {
+    if (typeof value === 'number') {
+      return 1
+    } else {
+      return value.length
+    }
+  })()
+
+  const result = fnMap[length as keyof typeof fnMap](value as never)
+  return result
+}
+
 export class GeolocusGlobalContext implements IGeolocusContext {
   private _uuid: string
   private _objectMap: Map<string, TGeolocusObject>
@@ -35,16 +88,18 @@ export class GeolocusGlobalContext implements IGeolocusContext {
 
     this._name = init?.name || 'default'
     this._orientation = init?.orientation || 0
-    this._directionDelta = init?.directionDelta || {
-      N: [0, Math.PI / 3],
-      NE: [Math.PI / 4, Math.PI / 6],
-      E: [Math.PI / 2, Math.PI / 3],
-      SE: [(Math.PI / 4) * 3, Math.PI / 6],
-      S: [Math.PI, Math.PI / 3],
-      SW: [(Math.PI / 4) * 5, Math.PI / 6],
-      W: [(Math.PI / 2) * 3, Math.PI / 3],
-      NW: [(Math.PI / 4) * 7, Math.PI / 6],
-    }
+    this._directionDelta = init?.directionDelta
+      ? generateDirectionDelta(init?.directionDelta)
+      : {
+          N: [0, Math.PI / 3],
+          NE: [Math.PI / 4, Math.PI / 6],
+          E: [Math.PI / 2, Math.PI / 3],
+          SE: [(Math.PI / 4) * 3, Math.PI / 6],
+          S: [Math.PI, Math.PI / 3],
+          SW: [(Math.PI / 4) * 5, Math.PI / 6],
+          W: [(Math.PI / 2) * 3, Math.PI / 3],
+          NW: [(Math.PI / 4) * 7, Math.PI / 6],
+        }
     this._distanceDelta = init?.distanceDelta || 0.2
     this._semanticDistanceMap = init?.semanticDistanceMap || [
       [0, 400],
@@ -135,16 +190,18 @@ export class GeolocusLocalContext implements IGeolocusContext {
     this._parentContext = init.parentContext
     this._name = init.name || 'default'
     this._orientation = init.orientation || 0
-    this._directionDelta = init.directionDelta || {
-      N: [0, Math.PI / 3],
-      NE: [Math.PI / 4, Math.PI / 6],
-      E: [Math.PI / 2, Math.PI / 3],
-      SE: [(Math.PI / 4) * 3, Math.PI / 6],
-      S: [Math.PI, Math.PI / 3],
-      SW: [(Math.PI / 4) * 5, Math.PI / 6],
-      W: [(Math.PI / 2) * 3, Math.PI / 3],
-      NW: [(Math.PI / 4) * 7, Math.PI / 6],
-    }
+    this._directionDelta = init?.directionDelta
+      ? generateDirectionDelta(init?.directionDelta)
+      : {
+          N: [0, Math.PI / 3],
+          NE: [Math.PI / 4, Math.PI / 6],
+          E: [Math.PI / 2, Math.PI / 3],
+          SE: [(Math.PI / 4) * 3, Math.PI / 6],
+          S: [Math.PI, Math.PI / 3],
+          SW: [(Math.PI / 4) * 5, Math.PI / 6],
+          W: [(Math.PI / 2) * 3, Math.PI / 3],
+          NW: [(Math.PI / 4) * 7, Math.PI / 6],
+        }
     this._distanceDelta = init.distanceDelta || 0.2
     this._semanticDistanceMap = init.semanticDistanceMap || [
       [0, 400],
