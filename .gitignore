@@ -1,6 +1,7 @@
 # Temporary file
 prisma
 doc
+*backup*
 
 # IDE config
 .vscode

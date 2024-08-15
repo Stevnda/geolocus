@@ -1,31 +1,20 @@
-import { TPosition2 } from '@/context'
 import jsts from '@geolocus/jsts'
-import {
-  TGeolocusBBox,
-  TGeolocusGeometry,
-  TGeolocusGeometryName,
-  TGeolocusLineStringGeometry,
-  TGeolocusMultiLineStringGeometry,
-  TGeolocusMultiPointGeometry,
-  TGeolocusMultiPolygonGeometry,
-  TGeolocusPointGeometry,
-  TGeolocusPolygonGeometry,
-} from './object.type'
+import { GeolocusBBox, GeolocusGeometryType, Position2 } from './object.type'
 
 export class GeolocusGeometryFactory {
   private static _geometryFactory = new jsts.geom.GeometryFactory()
 
-  static point = (position: TPosition2): TGeolocusPointGeometry => {
+  static point = (position: Position2): jsts.geom.Geometry => {
     const coord = new jsts.geom.Coordinate(...position)
     return this._geometryFactory.createPoint(coord)
   }
 
-  static lineString = (position: TPosition2[]): TGeolocusLineStringGeometry => {
+  static lineString = (position: Position2[]): jsts.geom.Geometry => {
     const coord = position.map((value) => new jsts.geom.Coordinate(...value))
     return this._geometryFactory.createLineString(coord)
   }
 
-  static polygon = (position: TPosition2[][]): TGeolocusPolygonGeometry => {
+  static polygon = (position: Position2[][]): jsts.geom.Geometry => {
     const lineStringArray = position.map((value) => this.lineString(value))
     return this._geometryFactory.createPolygon(
       lineStringArray[0],
@@ -33,26 +22,22 @@ export class GeolocusGeometryFactory {
     )
   }
 
-  static multiPoint = (position: TPosition2[]): TGeolocusMultiPointGeometry => {
+  static multiPoint = (position: Position2[]): jsts.geom.Geometry => {
     const pointArray = position.map((value) => this.point(value))
     return this._geometryFactory.createMultiPoint(pointArray)
   }
 
-  static multiLineString = (
-    position: TPosition2[][],
-  ): TGeolocusMultiLineStringGeometry => {
+  static multiLineString = (position: Position2[][]): jsts.geom.Geometry => {
     const lineStringArray = position.map((value) => this.lineString(value))
     return this._geometryFactory.createMultiLineString(lineStringArray)
   }
 
-  static multiPolygon = (
-    position: TPosition2[][][],
-  ): TGeolocusMultiPolygonGeometry => {
+  static multiPolygon = (position: Position2[][][]): jsts.geom.Geometry => {
     const polygonArray = position.map((value) => this.polygon(value))
     return this._geometryFactory.createMultiPolygon(polygonArray)
   }
 
-  static empty(type: TGeolocusGeometryName) {
+  static empty(type: GeolocusGeometryType) {
     const map = {
       Point: this._geometryFactory.createPoint(),
       LineString: this._geometryFactory.createLineString(),
@@ -68,7 +53,7 @@ export class GeolocusGeometryFactory {
 }
 
 export class GeolocusGeometryMeta {
-  static getBBox(geometry: TGeolocusGeometry): TGeolocusBBox {
+  static getBBox(geometry: jsts.geom.Geometry): GeolocusBBox {
     const envelope = geometry.getEnvelopeInternal()
     const minX = envelope.getMinX()
     const maxX = envelope.getMaxX()
@@ -78,7 +63,7 @@ export class GeolocusGeometryMeta {
     return [minX, minY, maxX, maxY]
   }
 
-  static getCenter(geometry: TGeolocusGeometry): TPosition2 {
+  static getCenter(geometry: jsts.geom.Geometry): Position2 {
     const center = jsts.algorithm.Centroid.getCentroid(geometry)
     return [center.x, center.y]
   }
