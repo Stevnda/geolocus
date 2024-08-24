@@ -80,12 +80,8 @@ importers:
       '@geolocus/jsts':
         specifier: workspace:^
         version: link:../jsts
-    devDependencies:
-      '@types/geojson':
-        specifier: ^7946.0.14
-        version: 7946.0.14
 
-  package/core-old:
+  package/core-backup:
     dependencies:
       '@geolocus/jsts':
         specifier: workspace:^

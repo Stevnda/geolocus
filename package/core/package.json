@@ -16,9 +16,7 @@
     "test:coverage": "vitest run --config ./vitest.config.ts --coverage",
     "bench": "vitest bench --config ./vitest.config.ts"
   },
-  "devDependencies": {
-    "@types/geojson": "^7946.0.14"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@geolocus/jsts": "workspace:^"
   }
