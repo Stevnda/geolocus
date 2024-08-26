@@ -19,9 +19,9 @@ export class GeolocusObject implements GeolocusObjectProps {
   private _geometry: GeolocusGeometry
 
   constructor(
-    type: 'fuzzy' | 'precise',
-    name: string | null = null,
     geometry: GeolocusGeometry,
+    name: string | null = null,
+    type: 'fuzzy' | 'precise' = 'precise',
   ) {
     this._uuid = randomUUID()
     this._status = type

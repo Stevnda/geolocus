@@ -1,7 +1,7 @@
 import {
   GeolocusBBox,
   GeolocusGeometry,
-  GeolocusGeometryFactory,
+  JTSGeometryFactory,
   GeolocusGeometryTransformation,
   Position2,
 } from '@/object'
@@ -11,7 +11,7 @@ import {
   RelativeDirection,
   ComputeRegionRange,
 } from './relation.type'
-import { Topology } from './topology.action'
+import { Topology } from './topology.util'
 
 export class Direction {
   // radian from [1,0] (N)
@@ -81,17 +81,17 @@ export class Direction {
     })
     const bboxPolygon = new GeolocusGeometry(
       'Polygon',
-      GeolocusGeometryFactory.bbox(target),
+      JTSGeometryFactory.bbox(target),
     )
 
     if (range === 'inside') {
       const intersection = Topology.intersection(bboxPolygon, geometry)
-      return intersection!
+      return intersection as GeolocusGeometry
     } else if (range === 'outside') {
       const difference = Topology.difference(bboxPolygon, geometry)
-      return difference!
+      return difference as GeolocusGeometry
     } else {
-      return bboxPolygon!
+      return bboxPolygon as GeolocusGeometry
     }
   }
 

@@ -7,7 +7,9 @@ export {
 export { GeolocusObject } from './object.actor'
 export { GeolocusGeometry } from './geometry.actor'
 export {
-  GeolocusGeometryFactory,
+  JTSGeometryFactory,
   GeolocusGeometryMeta,
   GeolocusGeometryTransformation,
 } from './geometry.action'
+
+export { computeGeolocusObjectMaskGrid, GeoJson } from './object.util'

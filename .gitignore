@@ -2,6 +2,7 @@
 prisma
 doc
 *backup*
+*example*
 
 # IDE config
 .vscode

@@ -1,5 +1,5 @@
 import { Position2 } from '@/object'
-import { Compare, MathUtil } from './math-util'
+import { Compare, MathUtil } from './math.util'
 
 export class Vector2 {
   /**

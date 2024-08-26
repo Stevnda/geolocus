@@ -29,14 +29,15 @@ export type RelativeDirection =
 
 export type ComputeRegionRange = 'inside' | 'outside' | 'both'
 
-export type TopologyRelation = 'equal' | 'intersect' | 'disjoint' | 'contain'
+export type TopologyRelation = 'contain' | 'intersect' | 'disjoint'
 
 export interface GeoRelation {
-  topology?: TopologyRelation
+  topology: TopologyRelation
   direction?: AbsoluteDirection | RelativeDirection
   distance?: EuclideanDistance | EuclideanDistanceRange
+  range: ComputeRegionRange
   semantic?: string
-  weight?: number
+  weight: number
 }
 
 export interface GeoTriple {

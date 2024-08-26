@@ -1,3 +1,4 @@
+import { GeolocusContext } from '@/context'
 import { GeoTriple, SemanticRelation } from './relation.type'
 
 interface RelationProps {
@@ -6,6 +7,8 @@ interface RelationProps {
   getTripleListOfObject(objectUUID: string): Set<GeoTriple> | null
   setSemanticMap(value: Map<string, SemanticRelation>): void
   getSemanticMap(): Map<string, SemanticRelation>
+  setContext(value: GeolocusContext): void
+  getContext(): GeolocusContext
 }
 
 export class Relation implements RelationProps {
@@ -13,10 +16,12 @@ export class Relation implements RelationProps {
   // the uuid of tripleList is auto generate
   private _tripleListMap: Map<string, Set<GeoTriple>>
   private _semanticMap: Map<string, SemanticRelation>
+  private _context: GeolocusContext
 
-  constructor() {
+  constructor(context: GeolocusContext) {
     this._tripleListMap = new Map()
     this._semanticMap = new Map()
+    this._context = context
   }
 
   setTripleListMap(value: Map<string, Set<GeoTriple>>): void {
@@ -37,5 +42,13 @@ export class Relation implements RelationProps {
 
   getSemanticMap(): Map<string, SemanticRelation> {
     return this._semanticMap
+  }
+
+  setContext(value: GeolocusContext): void {
+    this._context = value
+  }
+
+  getContext(): GeolocusContext {
+    return this._context
   }
 }

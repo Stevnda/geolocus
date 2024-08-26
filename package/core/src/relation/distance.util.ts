@@ -6,7 +6,7 @@ import {
   SemanticDistanceMap,
   ComputeRegionRange,
 } from './relation.type'
-import { Topology } from './topology.action'
+import { Topology } from './topology.util'
 import { GeolocusGeometry } from '@/object'
 
 interface DistanceNormalization {
@@ -79,7 +79,10 @@ export class Distance {
       outside: () => Topology.bufferOfDistance(geometry, distance),
       both: () => {
         const geom0 = Topology.bufferOfDistance(geometry, -distance)
-        const geom1 = Topology.bufferOfDistance(geometry, distance)!
+        const geom1 = Topology.bufferOfDistance(
+          geometry,
+          distance,
+        ) as GeolocusGeometry
         if (geom0) {
           return Topology.union(geom0, geom1)
         }
@@ -108,12 +111,15 @@ export class Distance {
           geometry,
           distanceRange.map((value) => -value) as EuclideanDistanceRange,
         )
-        const geom1 = Topology.bufferOfRange(geometry, distanceRange)!
+        const geom1 = Topology.bufferOfRange(
+          geometry,
+          distanceRange,
+        ) as GeolocusGeometry
         if (geom0) {
           const result = Topology.union(geom0, geom1)
           return result
         }
-        return geom1
+        return Topology.union(geometry, geom1) as GeolocusGeometry
       },
     }
 

@@ -1,32 +1,109 @@
-import { GeolocusObject } from '@/object'
-import { Relation } from './relation.actor'
+import { GeolocusGeometry, GeolocusObject, JTSGeometryFactory } from '@/object'
 import { GeoRelation, GeoTriple } from './relation.type'
-import { Role, RouteAction } from '@/context'
+import { GeolocusContext, Role, RouteAction } from '@/context'
 import { randomUUID } from 'crypto'
+import { UserGeolocusRelation, UserGeolocusTriple } from '..'
+import { Distance } from './distance.util'
 
 export class RelationAction {
-  static defineSemanticRelation(
-    relation: Relation,
-    name: string,
-    geoRelation: GeoRelation,
-  ) {
-    const map = relation.getSemanticMap()
-    map.set(name, geoRelation)
+  // static defineSemanticRelation(
+  //   relation: Relation,
+  //   name: string,
+  //   geoRelation: GeoRelation,
+  // ) {
+  //   const map = relation.getSemanticMap()
+  //   map.set(name, geoRelation)
+  // }
+
+  static handleOrigin(
+    triple: UserGeolocusTriple,
+    context: GeolocusContext,
+  ): string {
+    let { name, type, coord } = triple.origin
+    let uuid = context.getObjectUUIDByPlaceName(name)
+    if (uuid) return uuid
+    if (coord == null || type == null) {
+      const placePlugin = context.getPlugin('place')
+      // NOTE place is always has result
+      const { type: resultType, coord: resultCoord } = placePlugin(name)
+      type = resultType
+      coord = resultCoord
+    }
+    const jstGeometry = JTSGeometryFactory.create(type, coord)
+    const geolocusGeometry = new GeolocusGeometry(type, jstGeometry)
+    const object = new GeolocusObject(geolocusGeometry, name)
+    uuid = object.getUUID()
+    context.addObject(uuid, object)
+    context.addPlaceName(name, uuid)
+    return uuid
   }
 
-  static defineTriple(
-    relation: Relation,
-    target: GeolocusObject,
-    origin: GeolocusObject,
-    geoRelation: GeoRelation,
-    role: Role,
-  ) {
-    const originUUID = origin.getUUID()
-    const targetUUID = target.getUUID()
-    const route = role.getContext().getRoute()
+  static handleTarget(
+    triple: UserGeolocusTriple,
+    context: GeolocusContext,
+  ): string {
+    const name = triple.target
+    let uuid = context.getObjectUUIDByPlaceName(name)
+    if (uuid) return uuid
+    const jstGeometry = JTSGeometryFactory.empty('Point')
+    const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
+    const object = new GeolocusObject(geolocusGeometry, name)
+    uuid = object.getUUID()
+    context.addObject(uuid, object)
+    context.addPlaceName(name, uuid)
+    return uuid
+  }
+
+  static transform(relation: UserGeolocusRelation, role: Role): GeoRelation {
+    const res: GeoRelation = {
+      topology: 'disjoint',
+      direction: undefined,
+      distance: undefined,
+      range: 'both',
+      semantic: undefined,
+      weight: 1,
+    }
+
+    // topology
+    if (relation.topology) {
+      res.topology = relation.topology
+    } else {
+      res.topology = 'disjoint'
+    }
+    // direction
+    res.direction = relation.direction
+    // distance
+    if (relation.distance) {
+      res.distance = Distance.transformDistance(
+        relation.distance,
+        role.getSemanticDistanceMap(),
+      )
+    } else {
+      res.distance = role.getSemanticDistanceMap().VF
+    }
+    // range
+    if (relation.topology === 'disjoint') {
+      res.range = 'outside'
+    } else if (relation.topology === 'contain') {
+      res.range = 'inside'
+    }
+    // weight
+    res.weight = role.getWeight()
+
+    return res
+  }
+
+  static defineTriple(triple: UserGeolocusTriple, context: GeolocusContext) {
+    const role = context.getRoleMap().get(triple.role)
+    if (!role) throw new Error('role is not existed')
+    const originUUID = this.handleOrigin(triple, context)
+    const targetUUID = this.handleTarget(triple, context)
+
+    const route = context.getRoute()
     route.addEdge(originUUID, targetUUID)
     const circle = RouteAction.validateRouteValidity(route)
     if (circle.length !== route.getNodeCount()) {
+      route.removeEdge(originUUID, targetUUID)
       throw new Error('Route contains a cycle.')
     }
 
@@ -34,10 +111,11 @@ export class RelationAction {
       uuid: randomUUID(),
       role,
       origin: originUUID,
-      relation: this.transform(geoRelation, role),
+      relation: this.transform(triple.relation, role),
       target: targetUUID,
     }
     const tripleUUID = randomUUID()
+    const relation = context.getRelation()
     const relationSet = relation.getTripleListOfObject(targetUUID)
     if (!relationSet) {
       const tripleListMap = relation.getTripleListMap()
@@ -47,11 +125,5 @@ export class RelationAction {
     }
 
     return tripleUUID
-  }
-
-  // NOTE
-  static transform(relation: GeoRelation, role: Role): GeoRelation {
-    console.log(role)
-    return relation
   }
 }

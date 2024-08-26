@@ -2,7 +2,7 @@ import jsts from '@geolocus/jsts'
 import { GeolocusBBox, GeolocusGeometryType, Position2 } from './object.type'
 import { GeolocusGeometry } from './geometry.actor'
 
-export class GeolocusGeometryFactory {
+export class JTSGeometryFactory {
   private static _geometryFactory = new jsts.geom.GeometryFactory()
 
   static point = (position: Position2): jsts.geom.Geometry => {
@@ -60,6 +60,23 @@ export class GeolocusGeometryFactory {
     const factory = map[type]
     return factory
   }
+
+  static create(
+    type: GeolocusGeometryType,
+    coord: Position2 | Position2[] | Position2[][] | Position2[][][],
+  ) {
+    const map = {
+      Point: this.point,
+      LineString: this.lineString,
+      Polygon: this.polygon,
+      MultiPoint: this.multiPoint,
+      MultiLineString: this.multiLineString,
+      MultiPolygon: this.multiPolygon,
+    }
+    const factory = map[type](coord as any)
+
+    return factory
+  }
 }
 
 export class GeolocusGeometryMeta {
@@ -74,6 +91,7 @@ export class GeolocusGeometryMeta {
   }
 
   static getCenter(geometry: jsts.geom.Geometry): Position2 {
+    if (geometry.isEmpty()) return [0, 0]
     const center = jsts.algorithm.Centroid.getCentroid(geometry)
     return [center.x, center.y]
   }

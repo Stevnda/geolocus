@@ -1,6 +1,11 @@
-import { SemanticDistanceMap } from '@/relation'
+import {
+  AbsoluteDirection,
+  RelativeDirection,
+  SemanticDistanceMap,
+} from '@/relation'
 import { randomUUID } from 'crypto'
 import { GeolocusContext } from './context'
+import { DirectionDelta } from './context.type'
 
 interface RoleProps {
   setUUID(value: string): void
@@ -11,22 +16,27 @@ interface RoleProps {
   getContext(): GeolocusContext
   setOrientation(value: number): void
   getOrientation(): number
-  setDirectionDelta(value: number): void
-  getDirectionDelta(): number
+  setDirectionDelta(value: DirectionDelta): void
+  getDirectionDelta(
+    value: AbsoluteDirection | RelativeDirection,
+  ): [number, number]
   setDistanceDelta(value: number): void
   getDistanceDelta(): number
   setSemanticDistanceMap(value: SemanticDistanceMap): void
   getSemanticDistanceMap(): SemanticDistanceMap
+  setWeight(value: number): void
+  getWeight(): number
 }
 
 export class Role implements RoleProps {
   private _uuid: string
   private _name: string
+  private _context: GeolocusContext
   private _orientation: number
-  private _directionDelta: number
+  private _directionDelta: DirectionDelta
   private _distanceDelta: number
   private _semanticDistanceMap: SemanticDistanceMap
-  private _context: GeolocusContext
+  private _weight: number
 
   constructor(
     name: string,
@@ -34,15 +44,26 @@ export class Role implements RoleProps {
     directionDelta: number,
     distanceDelta: number,
     semanticDistanceMap: SemanticDistanceMap,
+    weight: number,
     context: GeolocusContext,
   ) {
     this._uuid = randomUUID()
     this._name = name
+    this._context = context
     this._orientation = orientation
-    this._directionDelta = directionDelta
+    this._directionDelta = {
+      N: [0, directionDelta],
+      NE: [Math.PI / 4, directionDelta],
+      E: [Math.PI / 2, directionDelta],
+      SE: [(Math.PI / 4) * 3, directionDelta],
+      S: [Math.PI, directionDelta],
+      SW: [(Math.PI / 4) * 5, directionDelta],
+      W: [(Math.PI / 2) * 3, directionDelta],
+      NW: [(Math.PI / 4) * 7, directionDelta],
+    }
     this._distanceDelta = distanceDelta
     this._semanticDistanceMap = semanticDistanceMap
-    this._context = context
+    this._weight = weight
   }
 
   setUUID(value: string): void {
@@ -77,12 +98,27 @@ export class Role implements RoleProps {
     return this._orientation
   }
 
-  setDirectionDelta(value: number): void {
+  setDirectionDelta(value: DirectionDelta): void {
     this._directionDelta = value
   }
 
-  getDirectionDelta(): number {
-    return this._directionDelta
+  getDirectionDelta(
+    value: AbsoluteDirection | RelativeDirection,
+  ): [number, number] {
+    const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
+    if (AbsoluteDirectionMap.includes(value)) {
+      return this._directionDelta[value as AbsoluteDirection]
+    } else {
+      // relativeDirection to TAbsoluteDirection
+      const directionTransform = value
+        .replace('F', 'N')
+        .replace('B', 'S')
+        .replace('R', 'E')
+        .replace('L', 'W') as AbsoluteDirection
+      const delta = this._directionDelta[directionTransform]
+      // add offset of angle
+      return [delta[0] + this._orientation, delta[1]]
+    }
   }
 
   setDistanceDelta(value: number): void {
@@ -99,5 +135,13 @@ export class Role implements RoleProps {
 
   getSemanticDistanceMap(): SemanticDistanceMap {
     return this._semanticDistanceMap
+  }
+
+  setWeight(value: number): void {
+    this._weight = value
+  }
+
+  getWeight(): number {
+    return this._weight
   }
 }
