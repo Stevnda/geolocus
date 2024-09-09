@@ -6,15 +6,6 @@ import { UserGeolocusTriple, UserGeoRelation } from '..'
 import { Distance } from './distance.util'
 
 export class RelationAction {
-  // static defineSemanticRelation(
-  //   relation: Relation,
-  //   name: string,
-  //   geoRelation: GeoRelation,
-  // ) {
-  //   const map = relation.getSemanticMap()
-  //   map.set(name, geoRelation)
-  // }
-
   static handleOrigin(
     triple: UserGeolocusTriple,
     context: GeolocusContext,
@@ -24,7 +15,7 @@ export class RelationAction {
     if (uuid) return uuid
     if (coord == null || type == null) {
       const placePlugin = context.getPlugin('place')
-      // NOTE place is always has result
+      // TODO place is always has result
       const { type: resultType, coord: resultCoord } = placePlugin(name)
       type = resultType
       coord = resultCoord

@@ -303,7 +303,7 @@ export class Region {
     let { name, type, coord } = userTriple.origin
     if (coord == null || type == null) {
       const placePlugin = context.getPlugin('place')
-      // NOTE place is always has result
+      // TODO place is always has result
       const { type: resultType, coord: resultCoord } = placePlugin(name)
       type = resultType
       coord = resultCoord
@@ -503,7 +503,6 @@ export class Region {
         res.unshift([row0, col0])
 
         const coordList: Position2[] = []
-        // const gap = Math.max(Math.floor(res.length / 10), 1)
         for (let i = 0; i < res.length; i++) {
           const col = res[i][1]
           const row = res[i][0]
@@ -511,11 +510,6 @@ export class Region {
           const y = yStart + (row + 0.5) * girdSize
           coordList.push([x, y])
         }
-        // const col = res[res.length - 1][1]
-        // const row = res[res.length - 1][0]
-        // const x = xStart + (col + 0.5) * girdSize
-        // const y = yStart + (row + 0.5) * girdSize
-        // coordList.push([x, y])
 
         return coordList
       } else {

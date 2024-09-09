@@ -251,32 +251,6 @@ export class RegionResultHandler {
     const direction = this.directionHandler(origin, relation, role)
     const intersection = this.intersection(td.region, direction.region)
 
-    // const jstGeometry = intersection.getGeometry().getGeometry()
-    // if (jstGeometry.getGeometryType() === 'MultiPolygon') {
-    //   let res: GeolocusGeometry | null = null
-    //   const nums = jstGeometry.getNumGeometries()
-    //   const bbox = origin.getGeometry().getBBox()
-    //   for (let i = 0; i < nums; i++) {
-    //     const geometry = jstGeometry.getGeometryN(i)
-    //     const coords = geometry.getCoordinates()
-    //     for (const { x, y } of coords) {
-    //       if (x < bbox[0] || x > bbox[2] || y < bbox[1] || y > bbox[3]) {
-    //         res = new GeolocusGeometry('Polygon', geometry)
-    //         break
-    //       }
-    //     }
-    //     if (res) {
-    //       break
-    //     }
-    //   }
-    //   console.log(res)
-    //   td.region = new GeolocusObject(res as GeolocusGeometry)
-    //   td.pdf.sdf.girdRegion = new GeolocusObject(res as GeolocusGeometry)
-    // } else {
-    //   td.region = intersection
-    //   td.pdf.sdf.girdRegion = intersection
-    // }
-
     td.region = intersection
     td.pdf.sdf.girdRegion = intersection
 

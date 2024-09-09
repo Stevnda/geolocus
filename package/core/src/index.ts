@@ -20,7 +20,6 @@ export interface UserGeoRelation {
   distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
   range?: ComputeRegionRange
   semantic?: string
-  // NOTE layout model
   layout?: string
 }
 
