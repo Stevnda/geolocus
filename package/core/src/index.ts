@@ -1,11 +1,11 @@
 import {
-  TopologyRelation,
   AbsoluteDirection,
-  RelativeDirection,
+  ComputeRegionRange,
   EuclideanDistance,
   EuclideanDistanceRange,
-  ComputeRegionRange,
+  RelativeDirection,
   SemanticDistanceMap,
+  TopologyRelation,
 } from './relation'
 import { GeolocusContext, GeolocusContextInit, Role } from './context'
 import { GeolocusPlugin, PlacePlugin } from './context/plugin'
@@ -14,32 +14,26 @@ import { RelationAction } from './relation/relation.action'
 import { Region } from './region'
 import { SemanticDistance } from './relation/relation.type'
 
-export interface UserGeolocusRelation {
+export interface UserGeoRelation {
   topology?: TopologyRelation
   direction?: AbsoluteDirection | RelativeDirection
   distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
   range?: ComputeRegionRange
   semantic?: string
+  // NOTE layout model
+  layout?: string
 }
 
 export interface UserGeolocusTriple {
   role: string
+  mode: null | 'from' | 'to' | 'across' | 'along' | 'towards'
   origin: {
     name: string
     type?: GeolocusGeometryType
     coord?: Position2 | Position2[] | Position2[][] | Position2[][][]
   }
-  relation: UserGeolocusRelation
-  target: string
-}
-
-export interface LineRelation {
-  role: string
-  name: string
-  mode: 'from' | 'to' | 'across' | 'along'
-  type?: GeolocusGeometryType
-  coord?: Position2 | Position2[] | Position2[][] | Position2[][][]
-  relation?: UserGeolocusRelation
+  relation?: UserGeoRelation
+  target?: string
 }
 
 export interface RoleInit {
@@ -98,7 +92,7 @@ class Geolocus {
     })
   }
 
-  computeFuzzyLineObject(lineName: string, relationList: LineRelation[]) {
+  computeFuzzyLineObject(lineName: string, relationList: UserGeolocusTriple[]) {
     const result = Region.computeFuzzyLineObject(
       lineName,
       relationList,

@@ -31,18 +31,23 @@ export type ComputeRegionRange = 'inside' | 'outside' | 'both'
 
 export type TopologyRelation = 'contain' | 'intersect' | 'disjoint'
 
+export type LineMode = 'from' | 'to' | 'across' | 'along' | 'towards'
+
 export interface GeoRelation {
   topology: TopologyRelation
   direction?: AbsoluteDirection | RelativeDirection
-  distance?: EuclideanDistance | EuclideanDistanceRange
+  distance: EuclideanDistance | EuclideanDistanceRange
   range: ComputeRegionRange
   semantic?: string
+  // NOTE layout model
+  layout?: string
   weight: number
 }
 
 export interface GeoTriple {
   uuid: string
   role: Role
+  mode: null | LineMode
   origin: string
   relation: GeoRelation
   target: string

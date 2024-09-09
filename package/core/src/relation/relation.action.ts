@@ -2,7 +2,7 @@ import { GeolocusGeometry, GeolocusObject, JTSGeometryFactory } from '@/object'
 import { GeoRelation, GeoTriple } from './relation.type'
 import { GeolocusContext, Role, RouteAction } from '@/context'
 import { randomUUID } from 'crypto'
-import { UserGeolocusRelation, UserGeolocusTriple } from '..'
+import { UserGeolocusTriple, UserGeoRelation } from '..'
 import { Distance } from './distance.util'
 
 export class RelationAction {
@@ -42,7 +42,7 @@ export class RelationAction {
     triple: UserGeolocusTriple,
     context: GeolocusContext,
   ): string {
-    const name = triple.target
+    const name = triple.target as string
     let uuid = context.getObjectUUIDByPlaceName(name)
     if (uuid) return uuid
     const jstGeometry = JTSGeometryFactory.empty('Point')
@@ -54,14 +54,30 @@ export class RelationAction {
     return uuid
   }
 
-  static transform(relation: UserGeolocusRelation, role: Role): GeoRelation {
+  // NOTE 修改逻辑关系, 布局模型目前没有搞
+  static transform(relation: UserGeoRelation, role: Role): GeoRelation {
     const res: GeoRelation = {
       topology: 'disjoint',
       direction: undefined,
-      distance: undefined,
+      distance: 0,
       range: 'both',
       semantic: undefined,
       weight: 1,
+    }
+
+    // range
+    if (relation.topology === 'disjoint') {
+      res.range = 'outside'
+    } else if (relation.topology === 'contain') {
+      res.range = 'inside'
+    } else if (relation.topology === 'intersect') {
+      if (relation.range) {
+        res.range = relation.range
+      } else if (typeof relation.distance === 'number') {
+        res.range = 'outside'
+      } else {
+        res.range = 'both'
+      }
     }
 
     // topology
@@ -73,20 +89,29 @@ export class RelationAction {
     // direction
     res.direction = relation.direction
     // distance
-    if (relation.distance) {
-      res.distance = Distance.transformDistance(
+    if (typeof relation.distance === 'number') {
+      let distanceTransform = Distance.transformDistance(
         relation.distance,
         role.getSemanticDistanceMap(),
       )
+      if (
+        distanceTransform instanceof Array &&
+        relation.topology !== 'disjoint'
+      ) {
+        distanceTransform = (distanceTransform[0] + distanceTransform[1]) / 2
+      }
+      res.distance = distanceTransform
     } else {
-      res.distance = role.getSemanticDistanceMap().VF
+      if (res.topology === 'contain') {
+        res.distance = 0
+      } else if (res.topology === 'disjoint') {
+        res.distance = role.getSemanticDistanceMap().VF[1]
+      } else if (res.topology === 'intersect') {
+        const range = role.getSemanticDistanceMap().M
+        res.distance = (range[0] + range[1]) / 2
+      }
     }
-    // range
-    if (relation.topology === 'disjoint') {
-      res.range = 'outside'
-    } else if (relation.topology === 'contain') {
-      res.range = 'inside'
-    }
+
     // weight
     res.weight = role.getWeight()
 
@@ -110,8 +135,9 @@ export class RelationAction {
     const tripleTransform: GeoTriple = {
       uuid: randomUUID(),
       role,
+      mode: null,
       origin: originUUID,
-      relation: this.transform(triple.relation, role),
+      relation: this.transform(triple.relation as UserGeoRelation, role),
       target: targetUUID,
     }
     const tripleUUID = randomUUID()

@@ -4,10 +4,8 @@ import {
   EuclideanDistanceRange,
   SemanticDistance,
   SemanticDistanceMap,
-  ComputeRegionRange,
 } from './relation.type'
-import { Topology } from './topology.util'
-import { GeolocusGeometry } from '@/object'
+import { GeolocusGeometry, Position2 } from '@/object'
 
 interface DistanceNormalization {
   max: number
@@ -58,72 +56,88 @@ export class Distance {
     return distance
   }
 
-  static computeRegion(
-    geometry: GeolocusGeometry,
-    distance: EuclideanDistance | EuclideanDistanceRange,
-    range: ComputeRegionRange,
-  ): GeolocusGeometry | null {
-    if (typeof distance === 'number') {
-      return this.computeRegionByDistance(geometry, distance, range)
-    }
-    return this.computeRegionByDistanceRange(geometry, distance, range)
+  static nearestPoints(
+    object0: GeolocusGeometry,
+    object1: GeolocusGeometry,
+  ): [Position2, Position2] {
+    const geom0 = object0.getGeometry()
+    const geom1 = object1.getGeometry()
+    const [coord0, coord1] = jsts.operation.distance.DistanceOp.nearestPoints(
+      geom0,
+      geom1,
+    )
+    return [
+      [coord0.x, coord0.y],
+      [coord1.x, coord1.y],
+    ]
   }
 
-  private static computeRegionByDistance(
-    geometry: GeolocusGeometry,
-    distance: EuclideanDistance,
-    range: ComputeRegionRange,
-  ) {
-    const map = {
-      inside: () => Topology.bufferOfDistance(geometry, -distance),
-      outside: () => Topology.bufferOfDistance(geometry, distance),
-      both: () => {
-        const geom0 = Topology.bufferOfDistance(geometry, -distance)
-        const geom1 = Topology.bufferOfDistance(
-          geometry,
-          distance,
-        ) as GeolocusGeometry
-        if (geom0) {
-          return Topology.union(geom0, geom1)
-        }
-        return geom1
-      },
-    }
+  // static computeRegion(
+  //   geometry: GeolocusGeometry,
+  //   distance: EuclideanDistance | EuclideanDistanceRange,
+  //   range: ComputeRegionRange,
+  // ): GeolocusGeometry | null {
+  //   if (typeof distance === 'number') {
+  //     return this.computeRegionByDistance(geometry, distance, range)
+  //   }
+  //   return this.computeRegionByDistanceRange(geometry, distance, range)
+  // }
 
-    const result = map[range]()
-    return result
-  }
+  // private static computeRegionByDistance(
+  //   geometry: GeolocusGeometry,
+  //   distance: EuclideanDistance,
+  //   range: ComputeRegionRange,
+  // ) {
+  //   const map = {
+  //     inside: () => Topology.bufferOfDistance(geometry, -distance),
+  //     outside: () => Topology.bufferOfDistance(geometry, distance),
+  //     both: () => {
+  //       const geom0 = Topology.bufferOfDistance(geometry, -distance)
+  //       const geom1 = Topology.bufferOfDistance(
+  //         geometry,
+  //         distance,
+  //       ) as GeolocusGeometry
+  //       if (geom0) {
+  //         return Topology.union(geom0, geom1)
+  //       }
+  //       return geom1
+  //     },
+  //   }
 
-  private static computeRegionByDistanceRange(
-    geometry: GeolocusGeometry,
-    distanceRange: EuclideanDistanceRange,
-    range: ComputeRegionRange,
-  ) {
-    const map = {
-      inside: () =>
-        Topology.bufferOfRange(
-          geometry,
-          distanceRange.map((value) => -value) as EuclideanDistanceRange,
-        ),
-      outside: () => Topology.bufferOfRange(geometry, distanceRange),
-      both: () => {
-        const geom0 = Topology.bufferOfRange(
-          geometry,
-          distanceRange.map((value) => -value) as EuclideanDistanceRange,
-        )
-        const geom1 = Topology.bufferOfRange(
-          geometry,
-          distanceRange,
-        ) as GeolocusGeometry
-        if (geom0) {
-          const result = Topology.union(geom0, geom1)
-          return result
-        }
-        return Topology.union(geometry, geom1) as GeolocusGeometry
-      },
-    }
+  //   const result = map[range]()
+  //   return result
+  // }
 
-    const result = map[range]()
-    return result
-  }
+  // private static computeRegionByDistanceRange(
+  //   geometry: GeolocusGeometry,
+  //   distanceRange: EuclideanDistanceRange,
+  //   range: ComputeRegionRange,
+  // ) {
+  //   const map = {
+  //     inside: () =>
+  //       Topology.bufferOfRange(
+  //         geometry,
+  //         distanceRange.map((value) => -value) as EuclideanDistanceRange,
+  //       ),
+  //     outside: () => Topology.bufferOfRange(geometry, distanceRange),
+  //     both: () => {
+  //       const geom0 = Topology.bufferOfRange(
+  //         geometry,
+  //         distanceRange.map((value) => -value) as EuclideanDistanceRange,
+  //       )
+  //       const geom1 = Topology.bufferOfRange(
+  //         geometry,
+  //         distanceRange,
+  //       ) as GeolocusGeometry
+  //       if (geom0) {
+  //         const result = Topology.union(geom0, geom1)
+  //         return result
+  //       }
+  //       return Topology.union(geometry, geom1) as GeolocusGeometry
+  //     },
+  //   }
+
+  //   const result = map[range]()
+  //   return result
+  // }
 }

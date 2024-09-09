@@ -17,7 +17,7 @@ function getHeap() {
   })
 }
 
-class Astar {
+export class Astar {
   static heuristics = {
     manhattan: function (pos0: GridNode, pos1: GridNode) {
       const d1 = Math.abs(pos1.x - pos0.x)
@@ -121,7 +121,7 @@ class Astar {
   }
 }
 
-class Graph {
+export class Graph {
   nodes: GridNode[]
   grid: GridNode[][]
   diagonal: boolean
@@ -358,18 +358,3 @@ class BinaryHeap {
     }
   }
 }
-
-const graph = new Graph(
-  [
-    [1, 20, 3],
-    [4, 5, 6],
-    [7, 8, 9],
-  ],
-  {
-    diagonal: true,
-  },
-)
-const start = graph.grid[0][0]
-const end = graph.grid[2][2]
-const result = Astar.search(graph, start, end)
-console.log(result.map((node) => [node.y, node.x]))

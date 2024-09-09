@@ -203,6 +203,7 @@ declare namespace jsts {
         constructor(g0: Geometry, g1: Geometry)
         constructor(g0: Geometry, g1: Geometry, terminateDistance: number)
         static distance(g0: Geometry, g1: Geometry): number
+        static nearestPoints(g0, g1): [Coordinate, Coordinate]
       }
     }
     namespace overlay {
