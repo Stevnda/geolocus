@@ -57,14 +57,14 @@ export class RelationAction {
     }
 
     // range
-    if (relation.topology === 'disjoint') {
+    if (relation.range) {
+      res.range = relation.range
+    } else if (relation.topology === 'disjoint') {
       res.range = 'outside'
     } else if (relation.topology === 'contain') {
       res.range = 'inside'
     } else if (relation.topology === 'intersect') {
-      if (relation.range) {
-        res.range = relation.range
-      } else if (typeof relation.distance === 'number') {
+      if (typeof relation.distance === 'number') {
         res.range = 'outside'
       } else {
         res.range = 'both'
@@ -80,7 +80,7 @@ export class RelationAction {
     // direction
     res.direction = relation.direction
     // distance
-    if (typeof relation.distance === 'number') {
+    if (relation.distance != null) {
       let distanceTransform = Distance.transformDistance(
         relation.distance,
         role.getSemanticDistanceMap(),
@@ -96,7 +96,7 @@ export class RelationAction {
       if (res.topology === 'contain') {
         res.distance = 0
       } else if (res.topology === 'disjoint') {
-        res.distance = role.getSemanticDistanceMap().VF[1]
+        res.distance = [0, role.getSemanticDistanceMap().VF[1]]
       } else if (res.topology === 'intersect') {
         const range = role.getSemanticDistanceMap().M
         res.distance = (range[0] + range[1]) / 2

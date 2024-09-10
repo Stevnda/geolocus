@@ -349,20 +349,30 @@ export class Region {
     for (const userTriple of userTripleList) {
       const role = context.getRoleMap().get(userTriple.role)
       if (!role) throw new Error('role is not existed')
-
-      const originObject = this.getLineOriginObject(userTriple, context)
+      // NOTE mode - relation
+      const mode = userTriple.mode
       if (userTriple.relation) {
-        // NOTE mode - relation
-        const mode = userTriple.mode
-        if (mode === 'along') {
-          if (userTriple.relation.topology == null) {
+        if (userTriple.relation.topology == null) {
+          if (mode === 'along') {
             userTriple.relation.topology = 'intersect'
-          }
-        } else {
-          if (userTriple.relation.topology == null) {
+          } else {
             userTriple.relation.topology = 'contain'
           }
         }
+      } else if (userTriple.relation == null) {
+        if (mode === 'along') {
+          userTriple.relation = {
+            topology: 'intersect',
+          }
+        } else {
+          userTriple.relation = {
+            topology: 'contain',
+          }
+        }
+      }
+
+      const originObject = this.getLineOriginObject(userTriple, context)
+      if (userTriple.relation) {
         const relation: GeoRelation = RelationAction.transform(
           userTriple.relation,
           role,

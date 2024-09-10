@@ -190,11 +190,15 @@ export class RegionResultHandler {
         )
 
         let distanceRegion: GeolocusObject
+        const geometry = Topology.bufferOfDistance(
+          origin.getGeometry(),
+          MAGIC_NUMBER,
+        ) as GeolocusGeometry
         if (relation.distance === 0) {
-          distanceRegion = origin
+          distanceRegion = new GeolocusObject(geometry)
         } else {
           const tempRegion = Topology.bufferOfDistance(
-            origin.getGeometry(),
+            geometry,
             -relation.distance,
           )
           if (tempRegion) {
