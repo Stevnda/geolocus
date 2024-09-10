@@ -98,7 +98,7 @@ export class RelationAction {
       } else if (res.topology === 'disjoint') {
         res.distance = [0, role.getSemanticDistanceMap().VF[1]]
       } else if (res.topology === 'intersect') {
-        const range = role.getSemanticDistanceMap().M
+        const range = role.getSemanticDistanceMap().N
         res.distance = (range[0] + range[1]) / 2
       }
     }
