@@ -20,7 +20,6 @@ import {
   EuclideanDistanceRange,
   GeoTriple,
   GeoRelation,
-  LineMode,
   Distance,
 } from '@/relation'
 import {
@@ -336,12 +335,12 @@ export class Region {
     userTripleList: UserGeolocusTriple[],
     context: GeolocusContext,
   ): {
-    tripleList: (GeoTriple | null)[]
-    resultList: (RegionResult | GeolocusObject)[]
+    tripleList: GeoTriple[]
+    resultList: RegionResult[]
   } {
     const res: {
-      tripleList: (GeoTriple | null)[]
-      resultList: (RegionResult | GeolocusObject)[]
+      tripleList: GeoTriple[]
+      resultList: RegionResult[]
     } = {
       tripleList: [],
       resultList: [],
@@ -349,187 +348,159 @@ export class Region {
     for (const userTriple of userTripleList) {
       const role = context.getRoleMap().get(userTriple.role)
       if (!role) throw new Error('role is not existed')
-      // NOTE mode - relation
-      const mode = userTriple.mode
+
+      // NOTE move to transform
       if (userTriple.relation) {
         if (userTriple.relation.topology == null) {
-          if (mode === 'along') {
-            userTriple.relation.topology = 'intersect'
-          } else {
-            userTriple.relation.topology = 'contain'
-          }
+          userTriple.relation.topology = 'contain'
         }
       } else if (userTriple.relation == null) {
-        if (mode === 'along') {
-          userTriple.relation = {
-            topology: 'intersect',
-          }
-        } else {
-          userTriple.relation = {
-            topology: 'contain',
-          }
+        userTriple.relation = {
+          topology: 'contain',
         }
       }
 
       const originObject = this.getLineOriginObject(userTriple, context)
-      if (userTriple.relation) {
-        const relation: GeoRelation = RelationAction.transform(
-          userTriple.relation,
-          role,
-        )
-
-        const result: RegionResult = {
-          region: null,
-          pdf: new Set(),
-          coord: null,
-          pdfGird: [],
-          resultGird: null,
-          regionMask: null,
+      if (userTriple.relation == null) {
+        userTriple.relation = {
+          distance: 0,
+          topology: 'contain',
         }
-        // compute pdf and region
-        console.log(relation)
-        const regionHandler = RegionResultHandler.getRegionHandler(relation)
-        const { region, pdf } = regionHandler(originObject, relation, role)
-        result.pdf = new Set([pdf])
-        result.region = region
-
-        // compute grid
-        result.regionMask = computeGeolocusObjectMaskGrid(
-          result.region,
-          context.getGridSize(),
-        )
-        result.resultGird = this.computeRegionGrid(
-          result,
-          context.getGridSize(),
-        )
-
-        // compute coord
-        const { coord } = this.getCoordOfMaximum(result, context.getGridSize())
-        result.coord = coord
-
-        const triple: GeoTriple = {
-          uuid: 'temp',
-          role,
-          mode: userTriple.mode,
-          origin: originObject.getUUID(),
-          relation,
-          target: 'temp',
-        }
-        res.resultList.push(result)
-        res.tripleList.push(triple)
-      } else {
-        res.resultList.push(originObject)
-        res.tripleList.push(null)
       }
+      const relation: GeoRelation = RelationAction.transform(
+        userTriple.relation,
+        role,
+      )
+
+      const result: RegionResult = {
+        region: null,
+        pdf: new Set(),
+        coord: null,
+        pdfGird: [],
+        resultGird: null,
+        regionMask: null,
+      }
+      // compute pdf and region
+      console.log(relation)
+      const regionHandler = RegionResultHandler.getRegionHandler(relation)
+      const { region, pdf } = regionHandler(originObject, relation, role)
+      result.pdf = new Set([pdf])
+      result.region = region
+
+      // compute grid
+      result.regionMask = computeGeolocusObjectMaskGrid(
+        result.region,
+        context.getGridSize(),
+      )
+      result.resultGird = this.computeRegionGrid(result, context.getGridSize())
+
+      // compute coord
+      const { coord } = this.getCoordOfMaximum(result, context.getGridSize())
+      result.coord = coord
+
+      const triple: GeoTriple = {
+        uuid: 'temp',
+        role,
+        origin: originObject.getUUID(),
+        relation,
+        target: 'temp',
+      }
+      res.resultList.push(result)
+      res.tripleList.push(triple)
     }
 
     return res
   }
 
   private static computeFuzzyLineCoord(
-    triple: GeoTriple | null,
-    resultList: (GeolocusObject | RegionResult)[],
-    result: GeolocusObject | RegionResult,
+    triple: GeoTriple,
+    resultList: RegionResult[],
+    result: RegionResult,
     index: number,
-  ): Position2 | Position2[] {
-    if (triple) {
-      result = result as RegionResult
-      const mode = triple.mode as LineMode
-      const context = triple.role.getContext()
-      if (mode === 'from' || mode === 'to') {
-        return result.coord as Position2
-      } else if (mode === 'along' || mode === 'across') {
-        const curRegion = new GeolocusGeometry(
-          'Point',
-          JTSGeometryFactory.point(result.coord as Position2),
-        )
+    beforeCoord: Position2,
+  ): [Position2[], Position2] {
+    result = result as RegionResult
+    const context = triple.role.getContext()
+    const curRegion = new GeolocusGeometry(
+      'Point',
+      JTSGeometryFactory.point(result.coord as Position2),
+    )
 
-        const beforeResult = resultList[index - 1]
-        let beforeRegion: GeolocusGeometry
-        if (beforeResult instanceof GeolocusObject) {
-          beforeRegion = beforeResult.getGeometry()
-        } else {
-          beforeRegion = beforeResult.region?.getGeometry() as GeolocusGeometry
-        }
-        const afterResult = resultList[index + 1]
-        let afterRegion: GeolocusGeometry
-        if (afterResult instanceof GeolocusObject) {
-          afterRegion = afterResult.getGeometry()
-        } else {
-          afterRegion = afterResult.region?.getGeometry() as GeolocusGeometry
-        }
-
-        const [coord0] = Distance.nearestPoints(beforeRegion, curRegion)
-        const [coord1] = Distance.nearestPoints(afterRegion, curRegion)
-
-        const bbox = result.region?.getGeometry().getBBox() as GeolocusBBox
-        const xStart = bbox[0]
-        const xEnd = bbox[2]
-        const dx = xEnd - xStart
-        const yStart = bbox[1]
-        const yEnd = bbox[3]
-        const dy = yEnd - yStart
-        const ratio = dy / dx
-        const girdSize = dx / Math.sqrt(context.getGridSize() / ratio)
-        const rowCount = Math.ceil(dy / girdSize)
-        const colCount = Math.ceil(dx / girdSize)
-
-        const col0 = MathUtil.clamp(
-          Math.floor((coord0[0] - xStart) / girdSize),
-          0,
-          colCount - 1,
-        )
-        const row0 = MathUtil.clamp(
-          Math.floor((coord0[1] - yStart) / girdSize),
-          0,
-          rowCount - 1,
-        )
-        const col1 = MathUtil.clamp(
-          Math.floor((coord1[0] - xStart) / girdSize),
-          0,
-          colCount - 1,
-        )
-        const row1 = MathUtil.clamp(
-          Math.floor((coord1[1] - yStart) / girdSize),
-          0,
-          rowCount - 1,
-        )
-
-        const gird = result.resultGird as GeolocusGird
-        const gridTransform = Gird.createGirdWithFilter(
-          gird.length,
-          gird[0].length,
-          (row, col) => 1 / (gird[row][col] + 0.1),
-        )
-        const graph = new Graph(gridTransform, {
-          diagonal: true,
-        })
-        const start = graph.grid[row0][col0]
-        const end = graph.grid[row1][col1]
-        const res: Position2[] = Astar.search(graph, start, end).map((node) => [
-          node.x,
-          node.y,
-        ])
-        res.unshift([row0, col0])
-
-        const coordList: Position2[] = []
-        for (let i = 0; i < res.length; i++) {
-          const col = res[i][1]
-          const row = res[i][0]
-          const x = xStart + (col + 0.5) * girdSize
-          const y = yStart + (row + 0.5) * girdSize
-          coordList.push([x, y])
-        }
-
-        return coordList
-      } else {
-        // NOTE toward
-        return [0, 0]
-      }
+    let afterRegion: GeolocusGeometry
+    if (index === resultList.length - 1) {
+      afterRegion = result.region?.getGeometry() as GeolocusGeometry
     } else {
-      result = result as GeolocusObject
-      return result.getGeometry().getCenter()
+      const afterResult = resultList[index + 1]
+      if (afterResult instanceof GeolocusObject) {
+        afterRegion = afterResult.getGeometry()
+      } else {
+        afterRegion = afterResult.region?.getGeometry() as GeolocusGeometry
+      }
     }
+
+    const coord0 = beforeCoord
+    const [coord1] = Distance.nearestPoints(afterRegion, curRegion)
+
+    const bbox = result.region?.getGeometry().getBBox() as GeolocusBBox
+    const xStart = bbox[0]
+    const xEnd = bbox[2]
+    const dx = xEnd - xStart
+    const yStart = bbox[1]
+    const yEnd = bbox[3]
+    const dy = yEnd - yStart
+    const ratio = dy / dx
+    const girdSize = dx / Math.sqrt(context.getGridSize() / ratio)
+    const rowCount = Math.ceil(dy / girdSize)
+    const colCount = Math.ceil(dx / girdSize)
+
+    const col0 = MathUtil.clamp(
+      Math.floor((coord0[0] - xStart) / girdSize),
+      0,
+      colCount - 1,
+    )
+    const row0 = MathUtil.clamp(
+      Math.floor((coord0[1] - yStart) / girdSize),
+      0,
+      rowCount - 1,
+    )
+    const col1 = MathUtil.clamp(
+      Math.floor((coord1[0] - xStart) / girdSize),
+      0,
+      colCount - 1,
+    )
+    const row1 = MathUtil.clamp(
+      Math.floor((coord1[1] - yStart) / girdSize),
+      0,
+      rowCount - 1,
+    )
+
+    const gird = result.resultGird as GeolocusGird
+    const gridTransform = Gird.createGirdWithFilter(
+      gird.length,
+      gird[0].length,
+      (row, col) => 1 / (gird[row][col] + 0.1),
+    )
+    const graph = new Graph(gridTransform, {
+      diagonal: true,
+    })
+    const start = graph.grid[row0][col0]
+    const end = graph.grid[row1][col1]
+    const res: Position2[] = Astar.search(graph, start, end).map((node) => [
+      node.x,
+      node.y,
+    ])
+    res.unshift([row0, col0])
+
+    const coordList: Position2[] = []
+    for (let i = 0; i < res.length; i++) {
+      const col = res[i][1]
+      const row = res[i][0]
+      const x = xStart + (col + 0.5) * girdSize
+      const y = yStart + (row + 0.5) * girdSize
+      coordList.push([x, y])
+    }
+
+    return [coordList, coord1]
   }
 
   static computeFuzzyLineObject(
@@ -542,18 +513,17 @@ export class Region {
       context,
     )
     const coords: Position2[] = []
+    let beforeCoord = resultList[0].coord as Position2
     for (let i = 0; i < resultList.length; i++) {
       const res = this.computeFuzzyLineCoord(
         tripleList[i],
         resultList,
         resultList[i],
         i,
+        beforeCoord,
       )
-      if (typeof res[0] === 'number') {
-        coords.push(res as Position2)
-      } else {
-        coords.push(...(res as Position2[]))
-      }
+      coords.push(...(res[0] as Position2[]))
+      beforeCoord = res[1]
     }
     const jstGeometry = JTSGeometryFactory.lineString(coords)
     const geolocusGeometry = new GeolocusGeometry('LineString', jstGeometry)

@@ -73,6 +73,7 @@ export class JTSGeometryFactory {
       MultiLineString: this.multiLineString,
       MultiPolygon: this.multiPolygon,
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const factory = map[type](coord as any)
 
     return factory

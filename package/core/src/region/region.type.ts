@@ -2,7 +2,7 @@ import { GeolocusBBox, GeolocusObject, Position2 } from '@/object'
 import { GeolocusGird } from '@/util'
 
 export interface RegionPDFInput {
-  type: 'constant' | 'distance' | 'angle' | 'distanceAndAngle' | 'sdf'
+  type: 'distance' | 'angle' | 'distanceAndAngle' | 'sdf'
   origin: GeolocusObject
   gdf: {
     distance?: number

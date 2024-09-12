@@ -27,11 +27,9 @@ export type RelativeDirection =
   | 'L'
   | 'FL'
 
-export type ComputeRegionRange = 'inside' | 'outside' | 'both'
+export type ComputeRegionRange = 'inside' | 'outside'
 
 export type TopologyRelation = 'contain' | 'intersect' | 'disjoint'
-
-export type LineMode = 'from' | 'to' | 'across' | 'along' | 'towards'
 
 export interface GeoRelation {
   topology: TopologyRelation
@@ -47,7 +45,6 @@ export interface GeoRelation {
 export interface GeoTriple {
   uuid: string
   role: Role
-  mode: null | LineMode
   origin: string
   relation: GeoRelation
   target: string
