@@ -59,39 +59,63 @@ export class RegionResultHandler {
   private static intersectHandler = (
     origin: GeolocusObject,
     relation: GeoRelation,
-    context: GeolocusContext,
+    role: Role,
   ): RegionHandlerResult => {
+    const context = role.getContext()
     const distance = relation.distance as EuclideanDistance
-    const objectType = origin.getGeometry().getType()
+    const originGeometry = origin.getGeometry()
+    const objectType = originGeometry.getType()
+    const N = role.getSemanticDistanceMap().N
+    const rangeDistance = (N[0] + N[1]) / 2
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {
       geometry = Topology.bufferOfDistance(
-        origin.getGeometry(),
-        distance,
+        originGeometry,
+        rangeDistance,
       ) as GeolocusGeometry
     } else {
       const range = relation.range
-      if (range === 'both') {
-        geometry = Topology.bufferOfRange(origin.getGeometry(), [
+      let bufferGeometry: GeolocusGeometry = originGeometry
+      if (distance === 0) {
+        bufferGeometry = originGeometry
+      } else if (range === 'outside') {
+        bufferGeometry = Topology.union(
+          originGeometry,
+          Topology.bufferOfDistance(
+            originGeometry,
+            distance,
+          ) as GeolocusGeometry,
+        ) as GeolocusGeometry
+      } else {
+        // inside
+        const tempGeometry = Topology.bufferOfDistance(
+          originGeometry,
           -distance,
-          distance,
-        ])
-        if (geometry == null) {
-          geometry = Topology.union(
-            origin.getGeometry(),
-            Topology.bufferOfDistance(
-              origin.getGeometry(),
-              distance,
-            ) as GeolocusGeometry,
+        )
+        if (tempGeometry === null) {
+          bufferGeometry = new GeolocusGeometry(
+            'Point',
+            JTSGeometryFactory.point(originGeometry.getCenter()),
+          )
+        } else {
+          bufferGeometry = Topology.difference(
+            originGeometry,
+            tempGeometry,
           ) as GeolocusGeometry
         }
-      } else if (range === 'inside') {
-        geometry = Topology.bufferOfDistance(origin.getGeometry(), -distance)
-        if (geometry == null) geometry = origin.getGeometry()
-      } else {
-        geometry = Topology.bufferOfDistance(
-          origin.getGeometry(),
-          distance,
+      }
+
+      geometry = Topology.bufferOfRange(bufferGeometry as GeolocusGeometry, [
+        -rangeDistance,
+        rangeDistance,
+      ])
+      if (geometry === null) {
+        geometry = Topology.union(
+          bufferGeometry,
+          Topology.bufferOfDistance(
+            bufferGeometry,
+            rangeDistance,
+          ) as GeolocusGeometry,
         ) as GeolocusGeometry
       }
     }
@@ -231,11 +255,7 @@ export class RegionResultHandler {
         relation: GeoRelation,
         role: Role,
       ) => {
-        const topology = this.intersectHandler(
-          origin,
-          relation,
-          role.getContext(),
-        )
+        const topology = this.intersectHandler(origin, relation, role)
         return topology
       },
     }
@@ -257,6 +277,12 @@ export class RegionResultHandler {
 
     td.region = intersection
     td.pdf.sdf.girdRegion = intersection
+    td.pdf.type = td.pdf.type === 'sdf' ? 'sdf' : 'distanceAndAngle'
+    td.pdf.gdf = {
+      ...td.pdf.gdf,
+      azimuth: direction.pdf.gdf.azimuth,
+      azimuthDelta: direction.pdf.gdf.azimuthDelta,
+    }
 
     return td
   }

@@ -51,7 +51,7 @@ export class RelationAction {
       topology: 'disjoint',
       direction: undefined,
       distance: 0,
-      range: 'both',
+      range: 'outside',
       semantic: undefined,
       weight: 1,
     }
@@ -64,11 +64,7 @@ export class RelationAction {
     } else if (relation.topology === 'contain') {
       res.range = 'inside'
     } else if (relation.topology === 'intersect') {
-      if (typeof relation.distance === 'number') {
-        res.range = 'outside'
-      } else {
-        res.range = 'both'
-      }
+      res.range = 'outside'
     }
 
     // topology
@@ -93,13 +89,10 @@ export class RelationAction {
       }
       res.distance = distanceTransform
     } else {
-      if (res.topology === 'contain') {
-        res.distance = 0
-      } else if (res.topology === 'disjoint') {
+      if (res.topology === 'disjoint') {
         res.distance = [0, role.getSemanticDistanceMap().VF[1]]
-      } else if (res.topology === 'intersect') {
-        const range = role.getSemanticDistanceMap().N
-        res.distance = (range[0] + range[1]) / 2
+      } else {
+        res.distance = 0
       }
     }
 
@@ -126,7 +119,6 @@ export class RelationAction {
     const tripleTransform: GeoTriple = {
       uuid: randomUUID(),
       role,
-      mode: null,
       origin: originUUID,
       relation: this.transform(triple.relation as UserGeoRelation, role),
       target: targetUUID,

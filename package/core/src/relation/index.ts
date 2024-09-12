@@ -8,7 +8,6 @@ export {
   type TopologyRelation,
   type GeoTriple,
   type ComputeRegionRange,
-  type LineMode,
 } from './relation.type'
 export { Distance } from './distance.util'
 export { Topology } from './topology.util'

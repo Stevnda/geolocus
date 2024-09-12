@@ -25,7 +25,6 @@ export interface UserGeoRelation {
 
 export interface UserGeolocusTriple {
   role: string
-  mode: null | 'from' | 'to' | 'across' | 'along' | 'towards'
   origin: {
     name: string
     type?: GeolocusGeometryType

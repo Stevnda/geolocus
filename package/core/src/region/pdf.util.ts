@@ -42,10 +42,6 @@ export class RegionPDF {
     return result
   }
 
-  private static constant(): 1 {
-    return 1
-  }
-
   private static distance(
     origin: GeolocusObject,
     target: GeolocusObject,
@@ -131,7 +127,11 @@ export class RegionPDF {
     }
   }
 
-  private static getUnsignedInternalDistanceField(pdf: RegionPDFInput) {
+  private static getUnsignedInternalDistanceField(
+    pdf: RegionPDFInput,
+    azimuth?: number,
+    deltaAzimuth?: number,
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const mask = computeGeolocusObjectMaskGrid(
       pdf.sdf.girdRegion as GeolocusObject,
@@ -178,15 +178,42 @@ export class RegionPDF {
       }
     }
 
-    const resultGird = Gird.createGirdWithFilter(
-      mask.length,
-      mask[0].length,
-      (row, col) => {
-        return tempGird[row + 2][col + 2]
-      },
-    )
+    if (azimuth != null && deltaAzimuth != null) {
+      const radiansTransform = -azimuth + Math.PI / 2
+      const center: Position2 = [
+        Math.floor(tempGird[0].length / 2),
+        Math.floor(tempGird.length / 2),
+      ]
+      const resultGird = Gird.createGirdWithFilter(
+        mask.length,
+        mask[0].length,
+        (row, col) => {
+          const v1 = Vector2.sub([col, row], center)
+          const v2: Position2 = [
+            Math.cos(radiansTransform),
+            Math.sin(radiansTransform),
+          ]
+          const radians = Vector2.angleTo(v1, v2)
 
-    return resultGird
+          const pdf = this.computeNormalDistributionValue(
+            radians,
+            0,
+            deltaAzimuth / 2,
+          )
+          return tempGird[row + 2][col + 2] + pdf / 10
+        },
+      )
+      return resultGird
+    } else {
+      const resultGird = Gird.createGirdWithFilter(
+        mask.length,
+        mask[0].length,
+        (row, col) => {
+          return tempGird[row + 2][col + 2]
+        },
+      )
+      return resultGird
+    }
   }
 
   static computePDF(pdf: RegionPDFInput): GeolocusGird
@@ -204,7 +231,6 @@ export class RegionPDF {
       targetObject = new GeolocusObject(geolocusGeometry)
     }
     const map = {
-      constant: () => this.constant(),
       distance: () =>
         this.distance(
           origin,
@@ -228,7 +254,12 @@ export class RegionPDF {
           pdf.gdf.azimuth as number,
           pdf.gdf.azimuthDelta as number,
         ),
-      sdf: () => this.getUnsignedInternalDistanceField(pdf),
+      sdf: () =>
+        this.getUnsignedInternalDistanceField(
+          pdf,
+          pdf.gdf.azimuth,
+          pdf.gdf.azimuthDelta,
+        ),
     }
 
     return map[type]()
