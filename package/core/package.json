@@ -12,6 +12,7 @@
     "lint": "eslint src/**/* --max-warnings 0",
     "prettier": "prettier src/**/* --write",
     "format": "pnpm prettier && pnpm lint",
+    "check": "tsc --noEmit",
     "test": "vitest --config ./vitest.config.ts",
     "test:coverage": "vitest run --config ./vitest.config.ts --coverage",
     "bench": "vitest bench --config ./vitest.config.ts"
@@ -20,6 +21,7 @@
     "@types/geojson": "^7946.0.14"
   },
   "dependencies": {
-    "@geolocus/jsts": "workspace:^"
+    "@geolocus/jsts": "workspace:^",
+    "fast-xml-parser": "^4.5.0"
   }
 }

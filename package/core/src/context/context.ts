@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { GeolocusObject } from '@/object'
 import { Route } from './route.actor'
 import { Role } from './role.actor'
 import { randomUUID } from 'crypto'
@@ -7,39 +6,12 @@ import { Relation } from '@/relation'
 import { GeolocusPlugin, PlacePlugin } from './plugin'
 import { GeolocusContextInit } from './context.type'
 import { RegionResult } from '@/region'
+import { ObjectMap } from './objectMap.actor'
 
-interface GeolocusContextProps {
-  setUUID(value: string): void
-  getUUID(): string
-  setName(value: string): void
-  getName(): string
-  setObjectMap(value: Map<string, GeolocusObject>): void
-  getObjectMap(): Map<string, GeolocusObject>
-  getObjectByObjectUUID(uuid: string): GeolocusObject | null
-  setPlaceObjectMap(value: Map<string, string>): void
-  getPlaceObjectMap(): Map<string, string>
-  getObjectUUIDByPlaceName(place: string): string | null
-  setPluginMap(value: Map<GeolocusPlugin, Function>): void
-  getPluginMap(): Map<GeolocusPlugin, Function>
-  setRelation(value: Relation): void
-  getRelation(): Relation
-  setRoute(value: Route): void
-  getRoute(): Route
-  setRoleMap(value: Map<string, Role>): void
-  getRoleMap(): Map<string, Role>
-  setResultMap(value: Map<string, RegionResult>): void
-  getResultMap(): Map<string, RegionResult>
-  setMaxDistance(value: number): void
-  getMaxDistance(): number
-  setGridSize(value: number): void
-  getGridSize(): number
-}
-
-export class GeolocusContext implements GeolocusContextProps {
+export class GeolocusContext {
   private _uuid: string
   private _name: string
-  private _objectMap: Map<string, GeolocusObject>
-  private _placeObjectMap: Map<string, string>
+  private _objectMap: ObjectMap
   private _pluginMap: Map<GeolocusPlugin, Function>
   private _relation: Relation
   private _route: Route
@@ -51,8 +23,7 @@ export class GeolocusContext implements GeolocusContextProps {
   constructor(init: GeolocusContextInit) {
     this._uuid = randomUUID()
     this._name = init.name || 'default'
-    this._objectMap = new Map() // the key is the uuid of object
-    this._placeObjectMap = new Map() // placeName - objectUUID
+    this._objectMap = new ObjectMap(this)
     this._pluginMap = new Map()
     this._relation = new Relation(this)
     this._route = new Route(this)
@@ -78,36 +49,12 @@ export class GeolocusContext implements GeolocusContextProps {
     return this._name
   }
 
-  setObjectMap(value: Map<string, GeolocusObject>): void {
+  setObjectMap(value: ObjectMap): void {
     this._objectMap = value
   }
 
-  getObjectMap(): Map<string, GeolocusObject> {
+  getObjectMap(): ObjectMap {
     return this._objectMap
-  }
-
-  getObjectByObjectUUID(uuid: string): GeolocusObject | null {
-    return this._objectMap.get(uuid) || null
-  }
-
-  addObject(uuid: string, object: GeolocusObject): void {
-    this._objectMap.set(uuid, object)
-  }
-
-  setPlaceObjectMap(value: Map<string, string>): void {
-    this._placeObjectMap = value
-  }
-
-  getPlaceObjectMap(): Map<string, string> {
-    return this._placeObjectMap
-  }
-
-  getObjectUUIDByPlaceName(place: string): string | null {
-    return this._placeObjectMap.get(place) || null
-  }
-
-  addPlaceName(placeName: string, objectUUID: string): void {
-    this._placeObjectMap.set(placeName, objectUUID)
   }
 
   setPluginMap(value: Map<GeolocusPlugin, Function>): void {

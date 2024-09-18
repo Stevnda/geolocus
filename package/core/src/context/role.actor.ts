@@ -7,28 +7,7 @@ import { randomUUID } from 'crypto'
 import { GeolocusContext } from './context'
 import { DirectionDelta } from './context.type'
 
-interface RoleProps {
-  setUUID(value: string): void
-  getUUID(): string
-  setName(value: string): void
-  getName(): string
-  setContext(value: GeolocusContext): void
-  getContext(): GeolocusContext
-  setOrientation(value: number): void
-  getOrientation(): number
-  setDirectionDelta(value: DirectionDelta): void
-  getDirectionDelta(
-    value: AbsoluteDirection | RelativeDirection,
-  ): [number, number]
-  setDistanceDelta(value: number): void
-  getDistanceDelta(): number
-  setSemanticDistanceMap(value: SemanticDistanceMap): void
-  getSemanticDistanceMap(): SemanticDistanceMap
-  setWeight(value: number): void
-  getWeight(): number
-}
-
-export class Role implements RoleProps {
+export class Role {
   private _uuid: string
   private _name: string
   private _context: GeolocusContext

@@ -1,5 +1,6 @@
 # Local File
 pnpm-lock.yaml
+*.xml
 
 # IDE config
 .vscode

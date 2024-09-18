@@ -8,6 +8,8 @@ interface GeolocusObjectProps {
   getStatus(): 'fuzzy' | 'precise'
   setName(value: string | null): void
   getName(): string | null
+  setType(value: string | null): void
+  getType(): string | null
   setGeometry(geometry: GeolocusGeometry): void
   getGeometry(): GeolocusGeometry
 }
@@ -16,16 +18,19 @@ export class GeolocusObject implements GeolocusObjectProps {
   private _uuid: string
   private _status: 'fuzzy' | 'precise'
   private _name: string | null
+  private _type: string | null
   private _geometry: GeolocusGeometry
 
   constructor(
     geometry: GeolocusGeometry,
     name: string | null = null,
-    type: 'fuzzy' | 'precise' = 'precise',
+    type: string | null = null,
+    status: 'fuzzy' | 'precise' = 'precise',
   ) {
     this._uuid = randomUUID()
-    this._status = type
+    this._status = status
     this._name = name
+    this._type = type
     this._geometry = geometry
   }
 
@@ -51,6 +56,14 @@ export class GeolocusObject implements GeolocusObjectProps {
 
   getName(): string | null {
     return this._name
+  }
+
+  setType(value: string | null): void {
+    this._type = value
+  }
+
+  getType(): string | null {
+    return this._type
   }
 
   setGeometry(geometry: GeolocusGeometry): void {

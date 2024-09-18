@@ -1,18 +1,6 @@
 import { GeolocusContext } from './context'
 
-interface RouteProps {
-  setInNodeList(value: Map<string, Set<string>>): void
-  getInNodeList(): Map<string, Set<string>>
-  setOutNodeList(value: Map<string, Set<string>>): void
-  getOutNodeList(): Map<string, Set<string>>
-  setContext(value: GeolocusContext): void
-  getContext(): GeolocusContext
-  getNodeCount(): number
-  addEdge(parent: string, child: string): void
-  removeEdge(parent: string, child: string): void
-}
-
-export class Route implements RouteProps {
+export class Route {
   // the uuid of node is the same as geolocusObject
   private _outNodeList: Map<string, Set<string>>
   private _inNodeList: Map<string, Set<string>>

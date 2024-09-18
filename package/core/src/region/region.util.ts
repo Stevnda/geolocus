@@ -40,14 +40,13 @@ export class Region {
     context: GeolocusContext,
   ) {
     const resultPdf: Set<RegionPDFInput> = new Set()
+    const objectMap = context.getObjectMap()
 
     // compute region and pdf
     const regionArray: GeolocusObject[] = []
     for (const triple of tripleSet) {
       const relation = triple.relation
-      const origin = context.getObjectByObjectUUID(
-        triple.origin,
-      ) as GeolocusObject
+      const origin = objectMap.getObjectByUUID(triple.origin) as GeolocusObject
       const regionHandler = RegionResultHandler.getRegionHandler(relation)
       const { region, pdf } = regionHandler(origin, relation, triple.role)
       resultPdf.add(pdf)
@@ -279,9 +278,8 @@ export class Region {
       console.timeLog('default', 'compute gird end')
 
       // update the object
-      const object = context.getObjectByObjectUUID(
-        currentUUID,
-      ) as GeolocusObject
+      const objectMap = context.getObjectMap()
+      const object = objectMap.getObjectByUUID(currentUUID) as GeolocusObject
       const center = object.getGeometry().getCenter()
       const offset = Vector2.sub(coord, center)
       const translatedGeometry = GeolocusGeometryTransformation.translate(
@@ -317,14 +315,14 @@ export class Region {
     userTriple: UserGeolocusTriple,
     context: GeolocusContext,
   ) {
-    const uuid = context.getObjectUUIDByPlaceName(userTriple.origin.name)
+    const objectMap = context.getObjectMap()
+    const object = objectMap.getObjectByPlaceName(userTriple.origin.name)
     // the name is not in geolocus
-    if (!uuid) return this.handleUnknownLineOriginObject(userTriple, context)
+    if (!object) return this.handleUnknownLineOriginObject(userTriple, context)
     // the name is in geolocus
-    const object = context.getObjectByObjectUUID(uuid) as GeolocusObject
     if (object.getStatus() === 'precise') return object
     try {
-      this.computeFuzzyPointObject(uuid, context)
+      this.computeFuzzyPointObject(object.getUUID(), context)
       return object
     } catch (error) {
       return this.handleUnknownLineOriginObject(userTriple, context)
