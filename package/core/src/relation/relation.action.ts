@@ -11,7 +11,8 @@ export class RelationAction {
     context: GeolocusContext,
   ): string {
     let { name, type, coord } = triple.origin
-    let uuid = context.getObjectUUIDByPlaceName(name)
+    const objectMap = context.getObjectMap()
+    let uuid = objectMap.getObjectByPlaceName(name)?.getUUID()
     if (uuid) return uuid
     if (coord == null || type == null) {
       const placePlugin = context.getPlugin('place')
@@ -24,8 +25,7 @@ export class RelationAction {
     const geolocusGeometry = new GeolocusGeometry(type, jstGeometry)
     const object = new GeolocusObject(geolocusGeometry, name)
     uuid = object.getUUID()
-    context.addObject(uuid, object)
-    context.addPlaceName(name, uuid)
+    objectMap.addObject(object)
     return uuid
   }
 
@@ -34,14 +34,14 @@ export class RelationAction {
     context: GeolocusContext,
   ): string {
     const name = triple.target as string
-    let uuid = context.getObjectUUIDByPlaceName(name)
+    const objectMap = context.getObjectMap()
+    let uuid = objectMap.getObjectByPlaceName(name)?.getUUID()
     if (uuid) return uuid
     const jstGeometry = JTSGeometryFactory.empty('Point')
     const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
     const object = new GeolocusObject(geolocusGeometry, name)
     uuid = object.getUUID()
-    context.addObject(uuid, object)
-    context.addPlaceName(name, uuid)
+    objectMap.addObject(object)
     return uuid
   }
 

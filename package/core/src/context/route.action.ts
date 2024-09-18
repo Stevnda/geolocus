@@ -46,15 +46,16 @@ export class RouteAction {
     inNode: Map<string, Set<string>>,
   ) {
     // the object must be fuzzy object
-    const object = context.getObjectByObjectUUID(uuid)
+    const objectMap = context.getObjectMap()
+    const object = objectMap.getObjectByUUID(uuid)
     if (!object || object.getStatus() === 'fuzzy') {
       return false
     }
 
     // get all fuzzy object
-    const objectMap = context.getObjectMap()
+    const objectUUIDMap = objectMap.getObjectUUIDMap()
     const fuzzyObject: Set<string> = new Set()
-    objectMap.forEach((value, key) => {
+    objectUUIDMap.forEach((value, key) => {
       if (value.getStatus() === 'fuzzy') {
         fuzzyObject.add(key)
       }
