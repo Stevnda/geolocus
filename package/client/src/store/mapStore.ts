@@ -11,7 +11,8 @@ interface MapStore {
 
 export const useMapStore = create<MapStore>((set) => ({
   map: null,
-  mapPosition: [118.9089, 32.1161, 16.5],
+  // mapPosition: [118.9089, 32.1161, 16.5],
+  mapPosition: [114.5382, 9.8379, 3.5],
   clickPosition: [0, 0],
   setMap: (value) => set({ map: value }),
   setMapPosition: (value) => set({ mapPosition: value }),

@@ -1,6 +1,7 @@
 export {
   type EuclideanDistance,
   type EuclideanDistanceRange,
+  type SemanticDistance,
   type SemanticDistanceMap,
   type GeoRelation,
   type AbsoluteDirection,
@@ -13,3 +14,4 @@ export { Distance } from './distance.util'
 export { Topology } from './topology.util'
 export { Direction } from './direction.util'
 export { Relation } from './relation.actor'
+export { RelationAction } from './relation.action'

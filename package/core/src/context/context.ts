@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-types */
 import { Route } from './route.actor'
 import { Role } from './role.actor'
-import { randomUUID } from 'crypto'
 import { Relation } from '@/relation'
 import { GeolocusPlugin, PlacePlugin } from './plugin'
 import { GeolocusContextInit } from './context.type'
 import { RegionResult } from '@/region'
 import { ObjectMap } from './objectMap.actor'
+import { generateUUID } from '@/util'
 
 export class GeolocusContext {
   private _uuid: string
@@ -21,7 +21,7 @@ export class GeolocusContext {
   private _gridSize: number
 
   constructor(init: GeolocusContextInit) {
-    this._uuid = randomUUID()
+    this._uuid = generateUUID()
     this._name = init.name || 'default'
     this._objectMap = new ObjectMap(this)
     this._pluginMap = new Map()

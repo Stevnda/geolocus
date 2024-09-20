@@ -3,9 +3,9 @@ import {
   RelativeDirection,
   SemanticDistanceMap,
 } from '@/relation'
-import { randomUUID } from 'crypto'
 import { GeolocusContext } from './context'
 import { DirectionDelta } from './context.type'
+import { generateUUID } from '@/util'
 
 export class Role {
   private _uuid: string
@@ -26,7 +26,7 @@ export class Role {
     weight: number,
     context: GeolocusContext,
   ) {
-    this._uuid = randomUUID()
+    this._uuid = generateUUID()
     this._name = name
     this._context = context
     this._orientation = orientation

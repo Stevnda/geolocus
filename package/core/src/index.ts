@@ -6,13 +6,20 @@ import {
   RelativeDirection,
   SemanticDistanceMap,
   TopologyRelation,
+  GeoTriple,
+  SemanticDistance,
+  RelationAction,
 } from './relation'
 import { GeolocusContext, GeolocusContextInit, Role } from './context'
 import { GeolocusPlugin, PlacePlugin } from './context/plugin'
-import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
-import { RelationAction } from './relation/relation.action'
-import { Region } from './region'
-import { SemanticDistance } from './relation/relation.type'
+import {
+  GeoJson,
+  GeolocusGeometryType,
+  GeolocusObject,
+  Position2,
+} from './object'
+import { Region, RegionResult } from './region'
+import { GeoJSON } from 'geojson'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
@@ -89,7 +96,14 @@ class Geolocus {
     })
   }
 
-  computeFuzzyLineObject(lineName: string, relationList: UserGeolocusTriple[]) {
+  computeFuzzyLineObject(
+    lineName: string,
+    relationList: UserGeolocusTriple[],
+  ): {
+    lineString: GeolocusObject
+    resultList: RegionResult[]
+    tripleList: GeoTriple[]
+  } {
     const result = Region.computeFuzzyLineObject(
       lineName,
       relationList,
@@ -104,6 +118,11 @@ class Geolocus {
     const uuid = objectMap.getObjectByPlaceName(placeName)?.getUUID() as string
     if (!uuid) return null
     return this._context.getRegionResultByObjectUUID(uuid) || null
+  }
+
+  toGeoJSON(object: GeolocusObject): GeoJSON {
+    const geometry = object.getGeometry()
+    return GeoJson.stringify(geometry)
   }
 }
 

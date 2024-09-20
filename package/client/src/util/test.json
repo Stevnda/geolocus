@@ -1,0 +1,79 @@
+[
+  {
+    "origin": {
+      "name": "吉隆坡机场"
+    }
+  },
+  {
+    "origin": {
+      "name": "马六甲海峡"
+    },
+    "relation": {
+      "direction": "E",
+      "topology": "intersect"
+    }
+  },
+  {
+    "origin": {
+      "name": "卡里马塔海峡"
+    }
+  },
+  {
+    "origin": {
+      "name": "九段线"
+    },
+    "relation": {
+      "direction": "S",
+      "topology": "disjoint",
+      "distance": 400000
+    }
+  },
+  {
+    "origin": {
+      "name": "加里曼尼岛"
+    }
+  },
+  {
+    "origin": {
+      "name": "苏拉威西海"
+    },
+    "relation": {
+      "direction": "SE",
+      "topology": "contain"
+    }
+  },
+  {
+    "origin": {
+      "name": "菲律宾"
+    },
+    "relation": {
+      "direction": "E",
+      "topology": "disjoint",
+      "distance": 100000
+    }
+  },
+  {
+    "origin": {
+      "name": "巴士海峡"
+    },
+    "relation": {
+      "direction": "W",
+      "topology": "disjoint",
+      "distance": 150000
+    }
+  },
+  {
+    "origin": {
+      "name": "台湾"
+    },
+    "relation": {
+      "direction": "E",
+      "topology": "intersect"
+    }
+  },
+  {
+    "origin": {
+      "name": "松山机场"
+    }
+  }
+]
