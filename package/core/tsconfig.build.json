@@ -13,6 +13,7 @@
     "sourceMap": true,
     "isolatedModules": true,
     "declaration": true,
+    "emitDeclarationOnly": true,
 
     "outDir": "./dist",
     "baseUrl": ".",

@@ -1,9 +1,9 @@
 import { GeolocusGeometry, GeolocusObject, JTSGeometryFactory } from '@/object'
 import { GeoRelation, GeoTriple } from './relation.type'
 import { GeolocusContext, Role, RouteAction } from '@/context'
-import { randomUUID } from 'crypto'
 import { UserGeolocusTriple, UserGeoRelation } from '..'
 import { Distance } from './distance.util'
+import { generateUUID } from '@/util'
 
 export class RelationAction {
   static handleOrigin(
@@ -117,13 +117,13 @@ export class RelationAction {
     }
 
     const tripleTransform: GeoTriple = {
-      uuid: randomUUID(),
+      uuid: generateUUID(),
       role,
       origin: originUUID,
       relation: this.transform(triple.relation as UserGeoRelation, role),
       target: targetUUID,
     }
-    const tripleUUID = randomUUID()
+    const tripleUUID = generateUUID()
     const relation = context.getRelation()
     const relationSet = relation.getTripleListOfObject(targetUUID)
     if (!relationSet) {

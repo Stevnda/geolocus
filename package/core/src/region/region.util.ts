@@ -379,7 +379,6 @@ export class Region {
         regionMask: null,
       }
       // compute pdf and region
-      console.log(relation)
       const regionHandler = RegionResultHandler.getRegionHandler(relation)
       const { region, pdf } = regionHandler(originObject, relation, role)
       result.pdf = new Set([pdf])

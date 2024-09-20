@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { generateUUID } from '@/util'
 import { GeolocusGeometry } from './geometry.actor'
 
 interface GeolocusObjectProps {
@@ -27,7 +27,7 @@ export class GeolocusObject implements GeolocusObjectProps {
     type: string | null = null,
     status: 'fuzzy' | 'precise' = 'precise',
   ) {
-    this._uuid = randomUUID()
+    this._uuid = generateUUID()
     this._status = status
     this._name = name
     this._type = type
