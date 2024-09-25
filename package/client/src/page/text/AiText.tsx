@@ -1,7 +1,7 @@
 import { useLayerStore } from '@/store/layerStore'
 import { useMapStore } from '@/store/mapStore'
 import { useTextStore } from '@/store/textStore'
-import { aiTest } from '@/util/deepseek.uti'
+import { aiLineTest } from '@/util/deepseek.uti'
 import { removeMapLayer, removeMapSource } from '@/util/mapbox.util'
 import { Button, Input } from 'antd'
 
@@ -9,6 +9,7 @@ const { TextArea } = Input
 
 export const AiText = () => {
   const map = useMapStore((state) => state.map)
+  const type = useTextStore((state) => state.type)
   const aiText = useTextStore((state) => state.aiText)
   const setAiText = useTextStore((state) => state.setAiText)
   const setJsonText = useTextStore((state) => state.setJsonText)
@@ -44,14 +45,24 @@ export const AiText = () => {
               removeMapSource(map, id)
             })
             clearLayer()
-            const res = await aiTest(aiText)
+            const res = await aiLineTest(aiText)
+            console.log(res)
             if (!res) return
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const arr = JSON.parse(res).response as any[]
+            const id = Date.now()
             const tripleList = arr.map((value) => {
-              return {
-                role: 'default',
-                ...value,
+              if (type === 'point') {
+                return {
+                  role: 'default',
+                  target: 'kxh' + id,
+                  ...value,
+                }
+              } else {
+                return {
+                  role: 'default',
+                  ...value,
+                }
               }
             })
             setJsonText(JSON.stringify(tripleList, null, 2))

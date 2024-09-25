@@ -39,7 +39,7 @@ export class RelationAction {
     if (uuid) return uuid
     const jstGeometry = JTSGeometryFactory.empty('Point')
     const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-    const object = new GeolocusObject(geolocusGeometry, name)
+    const object = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
     uuid = object.getUUID()
     objectMap.addObject(object)
     return uuid
@@ -111,7 +111,7 @@ export class RelationAction {
     const route = context.getRoute()
     route.addEdge(originUUID, targetUUID)
     const circle = RouteAction.validateRouteValidity(route)
-    if (circle.length !== route.getNodeCount()) {
+    if (!circle[0]) {
       route.removeEdge(originUUID, targetUUID)
       throw new Error('Route contains a cycle.')
     }

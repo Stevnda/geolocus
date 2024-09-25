@@ -48,7 +48,7 @@ export class RouteAction {
     // the object must be fuzzy object
     const objectMap = context.getObjectMap()
     const object = objectMap.getObjectByUUID(uuid)
-    if (!object || object.getStatus() === 'fuzzy') {
+    if (!object || object.getStatus() !== 'fuzzy') {
       return false
     }
 

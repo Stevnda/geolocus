@@ -66,6 +66,7 @@ export class RegionResultHandler {
     const originGeometry = origin.getGeometry()
     const objectType = originGeometry.getType()
     const N = role.getSemanticDistanceMap().N
+    // NOTE 可以加入相对于物体形状百分比的概念
     const rangeDistance = (N[0] + N[1]) / 2
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {

@@ -4,7 +4,8 @@ import { json } from '@codemirror/lang-json'
 import { Button } from 'antd'
 import { useTextStore } from '@/store/textStore'
 import {
-  computeTest,
+  computeLineTest,
+  computePointTest,
   generateBlobPng,
   geolocusContext,
 } from '@/util/geolocus.util'
@@ -17,8 +18,9 @@ import {
   removeMapSource,
 } from '@/util/mapbox.util'
 import { useMapStore } from '@/store/mapStore'
-import { GeolocusObject, Position2 } from '@geolocus/core'
+import { GeolocusGird, GeolocusObject, Position2 } from '@geolocus/core'
 import { useLayerStore } from '@/store/layerStore'
+import { generatePointByCoord } from '@/util/geojson.util'
 
 export const JsonText = () => {
   const textRef = useRef<null>(null)
@@ -28,6 +30,54 @@ export const JsonText = () => {
   const addLayer = useLayerStore((state) => state.addLayer)
   const layerList = useLayerStore((state) => state.layerList)
   const clearLayer = useLayerStore((state) => state.clearLayer)
+  const type = useTextStore((state) => state.type)
+
+  const lineTest = () => {
+    if (typeof jsonText === 'string') {
+      if (!map) return
+      const res = computeLineTest(jsonText)
+      const regionList = res.resultList.map((res) => res.region)
+      regionList.forEach((region) => {
+        const polygon = region as GeolocusObject
+        const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
+        const id = (Date.now() + Math.random()).toString()
+        addGeoJSONToMap(map, id, polygon84, 'fill', {
+          'fill-outline-color': '#15803d',
+          'fill-color': '#4ade80',
+          'fill-opacity': 0.5,
+        })
+        addLayer(id)
+      })
+
+      const resultGirdList = res.resultList.map((res) => res.resultGird)
+      resultGirdList.forEach((item, index) => {
+        const region = regionList[index]
+        if (!item || !region) return
+        const pngBlob = generateBlobPng(item)
+        const bbox = convertToWgs84(
+          region.getGeometry().getBBox().slice(0, 2) as Position2,
+        ).concat(
+          convertToWgs84(
+            region.getGeometry().getBBox().slice(2, 4) as Position2,
+          ),
+        )
+        const id = (Date.now() + Math.random()).toString()
+        addImageToMap(map, id, pngBlob, bbox)
+        addLayer(id)
+      })
+
+      const line = res.lineString
+      const line84 = toWgs84(geolocusContext.toGeoJSON(line))
+      // const coords = line84.coordinates as Position2[]
+      // const coordsTransform = chaikin(coords, 0.4, 1)
+      // const lineJson = generateLineStringByCoordList(coordsTransform)
+      addGeoJSONToMap(map, line.getName() as string, line84, 'line', {
+        'line-color': '#dc2626',
+        'line-width': 2,
+      })
+      addLayer(line.getName() as string)
+    }
+  }
 
   return (
     <div
@@ -53,27 +103,26 @@ export const JsonText = () => {
       >
         <Button
           onClick={() => {
-            if (typeof jsonText === 'string') {
-              if (!map) return
-              const res = computeTest(jsonText)
-              const regionList = res.resultList.map((res) => res.region)
-              regionList.forEach((region) => {
-                const polygon = region as GeolocusObject
+            if (type === 'point') {
+              if (typeof jsonText === 'string') {
+                if (!map) return
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const res = computePointTest(jsonText)!
+                const region = res.region as GeolocusObject
+                const pdfGird = res.resultGird as GeolocusGird
+                const coord = res.coord as Position2
+
+                const polygon = region
                 const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
-                const id = (Date.now() + Math.random()).toString()
+                let id = (Date.now() + Math.random()).toString()
                 addGeoJSONToMap(map, id, polygon84, 'fill', {
                   'fill-outline-color': '#15803d',
                   'fill-color': '#4ade80',
                   'fill-opacity': 0.5,
                 })
                 addLayer(id)
-              })
 
-              const resultGirdList = res.resultList.map((res) => res.resultGird)
-              resultGirdList.forEach((item, index) => {
-                const region = regionList[index]
-                if (!item || !region) return
-                const pngBlob = generateBlobPng(item)
+                const pngBlob = generateBlobPng(pdfGird)
                 const bbox = convertToWgs84(
                   region.getGeometry().getBBox().slice(0, 2) as Position2,
                 ).concat(
@@ -81,21 +130,20 @@ export const JsonText = () => {
                     region.getGeometry().getBBox().slice(2, 4) as Position2,
                   ),
                 )
-                const id = (Date.now() + Math.random()).toString()
+                id = (Date.now() + Math.random()).toString()
                 addImageToMap(map, id, pngBlob, bbox)
                 addLayer(id)
-              })
 
-              const line = res.lineString
-              const line84 = toWgs84(geolocusContext.toGeoJSON(line))
-              // const coords = line84.coordinates as Position2[]
-              // const coordsTransform = chaikin(coords, 0.4, 1)
-              // const lineJson = generateLineStringByCoordList(coordsTransform)
-              addGeoJSONToMap(map, line.getName() as string, line84, 'line', {
-                'line-color': '#dc2626',
-                'line-width': 2,
-              })
-              addLayer(line.getName() as string)
+                const coord84 = convertToWgs84(coord)
+                const point = generatePointByCoord(coord84)
+                addGeoJSONToMap(map, 'kxh-point', point, 'circle', {
+                  'circle-color': '#dc2626',
+                  'circle-radius': 6,
+                })
+                addLayer('kxh-point')
+              }
+            } else {
+              lineTest()
             }
           }}
         >
