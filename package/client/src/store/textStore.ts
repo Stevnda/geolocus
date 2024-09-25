@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 
 interface textStore {
+  type: 'point' | 'line'
   aiText: string | null
   jsonText: string | null
+  setType: (value: 'point' | 'line') => void
   setAiText: (value: string | null) => void
   getAiText: () => string | null
   clearAiText: () => void
@@ -12,8 +14,14 @@ interface textStore {
 }
 
 export const useTextStore = create<textStore>((set, get) => ({
+  type: 'point',
   aiText: null,
   jsonText: null,
+  setType: (value) => {
+    set({
+      type: value,
+    })
+  },
   setAiText: (value) => {
     set({
       aiText: value,

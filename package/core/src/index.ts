@@ -86,7 +86,11 @@ class Geolocus {
 
   computeFuzzyPointObject(placeName: string) {
     const objectMap = this._context.getObjectMap()
-    const uuid = objectMap.getObjectByPlaceName(placeName)?.getUUID() as string
+    const object = objectMap.getObjectByPlaceName(placeName)
+    if (object?.getStatus() === 'precise') {
+      return { name: object.getName(), uuid: object.getUUID() }
+    }
+    const uuid = object?.getUUID()
     if (!uuid) return null
     const uuidList = Region.computeFuzzyPointObject(uuid, this._context)
     return uuidList.map((value) => {
