@@ -1,5 +1,6 @@
-import { generateUUID } from '@/util'
-import { GeolocusGeometry } from './geometry.actor'
+import { generateUUID, GeolocusGird, Gird } from '@/util'
+import jsts from '@geolocus/jsts'
+import { GeolocusGeometry, JTSGeometryFactory } from './geometry'
 
 interface GeolocusObjectProps {
   setUUID(value: string): void
@@ -73,4 +74,39 @@ export class GeolocusObject implements GeolocusObjectProps {
   getGeometry(): GeolocusGeometry {
     return this._geometry
   }
+}
+
+export const computeGeolocusObjectMaskGrid = (
+  object: GeolocusObject,
+  girdNum: number,
+): GeolocusGird => {
+  const bbox = object.getGeometry().getBBox()
+  const xStart = bbox[0]
+  const xEnd = bbox[2]
+  const dx = xEnd - xStart
+  const yStart = bbox[1]
+  const yEnd = bbox[3]
+  const dy = yEnd - yStart
+  const ratio = dy / dx
+  const girdSize = dx / Math.sqrt(girdNum / ratio)
+  const geometry = object.getGeometry()
+
+  const mask = Gird.createGirdWithFilter(
+    Math.ceil(dy / girdSize),
+    Math.ceil(dx / girdSize),
+    (row, col) => {
+      const tempPoint = JTSGeometryFactory.point([
+        xStart + col * girdSize,
+        yStart + row * girdSize,
+      ])
+      const result =
+        jsts.operation.distance.DistanceOp.distance(
+          geometry.getGeometry(),
+          tempPoint,
+        ) === 0
+      return +result
+    },
+  )
+
+  return mask
 }

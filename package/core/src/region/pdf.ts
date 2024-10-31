@@ -7,7 +7,7 @@ import {
 import { Distance } from '@/relation'
 import { GeolocusGird, Gird, Vector2 } from '@/util'
 import { RegionPDFInput } from './region.type'
-import { JTSGeometryFactory } from '@/object/geometry.action'
+import { JTSGeometryFactory } from '@/object/geometry'
 
 export class RegionPDF {
   private static computeNormalDistributionValue(

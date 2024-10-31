@@ -1,6 +1,94 @@
 import jsts from '@geolocus/jsts'
 import { GeolocusBBox, GeolocusGeometryType, Position2 } from './object.type'
-import { GeolocusGeometry } from './geometry.actor'
+
+interface GeolocusGeometryProps {
+  setType(value: GeolocusGeometryType): void
+  getType(): GeolocusGeometryType
+  setGeometry(value: jsts.geom.Geometry): void
+  getGeometry(): jsts.geom.Geometry
+  setBBox(value: GeolocusBBox): void
+  getBBox(): GeolocusBBox
+  setCenter(value: Position2): void
+  getCenter(): Position2
+}
+
+export class GeolocusGeometry implements GeolocusGeometryProps {
+  private _type: GeolocusGeometryType
+  private _geometry: jsts.geom.Geometry
+  private _bbox: GeolocusBBox
+  private _center: Position2
+
+  constructor(type: GeolocusGeometryType, geometry: jsts.geom.Geometry) {
+    this._type = type
+    this._geometry = geometry
+    this._bbox = JTSGeometryAction.getBBox(geometry)
+    this._center = JTSGeometryAction.getCenter(geometry)
+  }
+
+  setType(value: GeolocusGeometryType): void {
+    this._type = value
+  }
+
+  getType(): GeolocusGeometryType {
+    return this._type
+  }
+
+  setGeometry(value: jsts.geom.Geometry): void {
+    this._geometry = value
+  }
+
+  getGeometry(): jsts.geom.Geometry {
+    return this._geometry
+  }
+
+  setBBox(value: GeolocusBBox): void {
+    this._bbox = value
+  }
+
+  getBBox(): GeolocusBBox {
+    return this._bbox
+  }
+
+  setCenter(value: Position2): void {
+    this._center = value
+  }
+
+  getCenter(): Position2 {
+    return this._center
+  }
+}
+
+export class GeolocusGeometryTransformation {
+  static translate = (
+    geometry: GeolocusGeometry,
+    x: number,
+    y: number,
+  ): GeolocusGeometry => {
+    const affineTransformation = new jsts.geom.util.AffineTransformation()
+    affineTransformation.translate(x, y)
+    const geometryTranslated = affineTransformation.transform(
+      geometry.getGeometry(),
+    )
+    const type = geometry.getType()
+
+    return new GeolocusGeometry(type, geometryTranslated)
+  }
+
+  static rotateAroundCoord = (
+    geometry: GeolocusGeometry,
+    theta: number,
+    coord: Position2,
+  ) => {
+    const affineTransformation = new jsts.geom.util.AffineTransformation()
+    affineTransformation.rotate(-theta, ...coord)
+    const geometryRotated = affineTransformation.transform(
+      geometry.getGeometry(),
+    )
+    const type = geometry.getType()
+
+    return new GeolocusGeometry(type, geometryRotated)
+  }
+}
 
 export class JTSGeometryFactory {
   private static _geometryFactory = new jsts.geom.GeometryFactory()
@@ -80,7 +168,7 @@ export class JTSGeometryFactory {
   }
 }
 
-export class GeolocusGeometryMeta {
+export class JTSGeometryAction {
   static getBBox(geometry: jsts.geom.Geometry): GeolocusBBox {
     const envelope = geometry.getEnvelopeInternal()
     const minX = envelope.getMinX()
@@ -95,37 +183,5 @@ export class GeolocusGeometryMeta {
     if (geometry.isEmpty()) return [0, 0]
     const center = jsts.algorithm.Centroid.getCentroid(geometry)
     return [center.x, center.y]
-  }
-}
-
-export class GeolocusGeometryTransformation {
-  static translate = (
-    geometry: GeolocusGeometry,
-    x: number,
-    y: number,
-  ): GeolocusGeometry => {
-    const affineTransformation = new jsts.geom.util.AffineTransformation()
-    affineTransformation.translate(x, y)
-    const geometryTranslated = affineTransformation.transform(
-      geometry.getGeometry(),
-    )
-    const type = geometry.getType()
-
-    return new GeolocusGeometry(type, geometryTranslated)
-  }
-
-  static rotateAroundCoord = (
-    geometry: GeolocusGeometry,
-    theta: number,
-    coord: Position2,
-  ) => {
-    const affineTransformation = new jsts.geom.util.AffineTransformation()
-    affineTransformation.rotate(-theta, ...coord)
-    const geometryRotated = affineTransformation.transform(
-      geometry.getGeometry(),
-    )
-    const type = geometry.getType()
-
-    return new GeolocusGeometry(type, geometryRotated)
   }
 }

@@ -11,7 +11,7 @@ import {
   RelativeDirection,
   ComputeRegionRange,
 } from './relation.type'
-import { Topology } from './topology.util'
+import { Topology } from './topology'
 
 export class Direction {
   // radian from [1,0] (N)
