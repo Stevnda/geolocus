@@ -10,7 +10,7 @@ const App = () => {
   return (
     <div className="flex h-screen w-screen flex-col bg-green-100">
       <div className="flex h-16 items-center bg-blue-400 pl-6 text-2xl leading-8">
-        这是一个标题
+        描述性地理位置形式化模型与估计方法平台
       </div>
       <div className="relative flex-auto ">
         <div
