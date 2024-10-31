@@ -9,16 +9,19 @@ import { ObjectMap } from './objectMap.actor'
 import { generateUUID } from '@/util'
 
 export class GeolocusContext {
+  // init
   private _uuid: string
   private _name: string
-  private _objectMap: ObjectMap
   private _pluginMap: Map<GeolocusPlugin, Function>
-  private _relation: Relation
-  private _route: Route
   private _roleMap: Map<string, Role>
-  private _resultMap: Map<string, RegionResult>
   private _maxDistance: number
   private _gridSize: number
+
+  // runtime
+  private _objectMap: ObjectMap
+  private _relation: Relation
+  private _route: Route
+  private _resultMap: Map<string, RegionResult>
 
   constructor(init: GeolocusContextInit) {
     this._uuid = generateUUID()

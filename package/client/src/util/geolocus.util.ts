@@ -126,6 +126,7 @@ export const computePointTest = (text: string) => {
 export const computeLineTest = (text: string) => {
   const tripleList = JSON.parse(text) as UserGeolocusTriple[]
   const res = geolocusContext.computeFuzzyLineObject('taiwan', tripleList)
+  console.log(res)
   return res
 }
 

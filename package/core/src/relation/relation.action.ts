@@ -76,6 +76,7 @@ export class RelationAction {
     // direction
     res.direction = relation.direction
     // distance
+    // NOTE 无限距离的设置
     if (relation.distance != null) {
       let distanceTransform = Distance.transformDistance(
         relation.distance,
