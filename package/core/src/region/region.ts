@@ -4,7 +4,7 @@ import {
   RegionResult,
   RegionResultPdfGird,
 } from './region.type'
-import { RegionPDF } from './pdf.util'
+import { RegionPDF } from './pdf'
 import {
   computeGeolocusObjectMaskGrid,
   GeolocusBBox,
@@ -14,13 +14,14 @@ import {
   JTSGeometryFactory,
   Position2,
 } from '@/object'
-import { RegionResultHandler } from './regionHandler.util'
+import { RegionResultHandler } from './regionHandler'
 import {
   Topology,
   EuclideanDistanceRange,
   GeoTriple,
   GeoRelation,
   Distance,
+  RelationAction,
 } from '@/relation'
 import {
   Compare,
@@ -30,9 +31,8 @@ import {
   MathUtil,
   Vector2,
 } from '@/util'
-import { RelationAction } from '@/relation/relation.action'
 import { UserGeolocusTriple } from '..'
-import { Astar, Graph } from './aStart.util'
+import { Astar, Graph } from './aStart'
 
 export class Region {
   private static computeRegionAndPdf(

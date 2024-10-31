@@ -12,14 +12,10 @@ import {
 } from './relation'
 import { GeolocusContext, GeolocusContextInit, Role } from './context'
 import { GeolocusPlugin, PlacePlugin } from './context/plugin'
-import {
-  GeoJson,
-  GeolocusGeometryType,
-  GeolocusObject,
-  Position2,
-} from './object'
+import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
 import { Region, RegionResult } from './region'
 import { GeoJSON } from 'geojson'
+import { GeoJson } from './io'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation

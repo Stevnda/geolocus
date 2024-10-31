@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { Route } from './route.actor'
-import { Role } from './role.actor'
+import { Route } from './route'
+import { Role } from './role'
 import { Relation } from '@/relation'
 import { GeolocusPlugin, PlacePlugin } from './plugin'
 import { GeolocusContextInit } from './context.type'
 import { RegionResult } from '@/region'
-import { ObjectMap } from './objectMap.actor'
+import { ObjectMap } from './objectMap'
 import { generateUUID } from '@/util'
 
 export class GeolocusContext {

@@ -4,12 +4,10 @@ export {
   type GeolocusGeometryType,
   type GeolocusBBox,
 } from './object.type'
-export { GeolocusObject } from './object.actor'
-export { GeolocusGeometry } from './geometry.actor'
+export { GeolocusObject, computeGeolocusObjectMaskGrid } from './object'
 export {
+  GeolocusGeometry,
   JTSGeometryFactory,
-  GeolocusGeometryMeta,
+  JTSGeometryAction as GeolocusGeometryMeta,
   GeolocusGeometryTransformation,
-} from './geometry.action'
-
-export { computeGeolocusObjectMaskGrid, GeoJson } from './object.util'
+} from './geometry'
