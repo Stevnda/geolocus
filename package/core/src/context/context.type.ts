@@ -1,3 +1,4 @@
+import { Position2 } from '@/object'
 import { AbsoluteDirection } from '@/relation'
 
 export interface RouteNode {
@@ -13,4 +14,5 @@ export interface GeolocusContextInit {
   maxDistance: number
   name?: string
   gridSize?: number
+  region: Position2[]
 }

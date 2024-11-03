@@ -7,11 +7,13 @@ import { GeolocusContextInit } from './context.type'
 import { RegionResult } from '@/region'
 import { ObjectMap } from './objectMap'
 import { generateUUID } from '@/util'
+import { GeolocusGeometry, GeolocusObject, JTSGeometryFactory } from '@/object'
 
 export class GeolocusContext {
   // init
   private _uuid: string
   private _name: string
+  private _regionRange: GeolocusObject
   private _pluginMap: Map<GeolocusPlugin, Function>
   private _roleMap: Map<string, Role>
   private _maxDistance: number
@@ -26,6 +28,7 @@ export class GeolocusContext {
   constructor(init: GeolocusContextInit) {
     this._uuid = generateUUID()
     this._name = init.name || 'default'
+    this._regionRange = new GeolocusObject(new GeolocusGeometry('Polygon', JTSGeometryFactory.polygon([init.region])))
     this._objectMap = new ObjectMap(this)
     this._pluginMap = new Map()
     this._relation = new Relation(this)
@@ -50,6 +53,14 @@ export class GeolocusContext {
 
   getName(): string {
     return this._name
+  }
+
+  setRegionRange(value: GeolocusObject): void {
+    this._regionRange = value
+  }
+
+  getRegionRange(): GeolocusObject {
+    return this._regionRange
   }
 
   setObjectMap(value: ObjectMap): void {
