@@ -87,10 +87,7 @@ export class Astar {
           neighbor.f = neighbor.g + neighbor.h
           graph.markDirty(neighbor)
           if (closest) {
-            if (
-              neighbor.h < closestNode.h ||
-              (neighbor.h === closestNode.h && neighbor.g < closestNode.g)
-            ) {
+            if (neighbor.h < closestNode.h || (neighbor.h === closestNode.h && neighbor.g < closestNode.g)) {
               closestNode = neighbor
             }
           }
@@ -245,11 +242,7 @@ class GridNode {
   }
 
   getCost(fromNeighbor: GridNode) {
-    if (
-      fromNeighbor &&
-      fromNeighbor.x !== this.x &&
-      fromNeighbor.y !== this.y
-    ) {
+    if (fromNeighbor && fromNeighbor.x !== this.x && fromNeighbor.y !== this.y) {
       return this.weight * 1.41421
     }
     return this.weight

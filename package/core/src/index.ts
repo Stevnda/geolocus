@@ -104,11 +104,7 @@ class Geolocus {
     resultList: RegionResult[]
     tripleList: GeoTriple[]
   } {
-    const result = Region.computeFuzzyLineObject(
-      lineName,
-      relationList,
-      this._context,
-    )
+    const result = Region.computeFuzzyLineObject(lineName, relationList, this._context)
 
     return result
   }

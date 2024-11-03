@@ -1,9 +1,5 @@
 import { GeolocusContext, RouteAction } from '@/context'
-import {
-  RegionPDFInput,
-  RegionResult,
-  RegionResultPdfGird,
-} from './region.type'
+import { RegionPDFInput, RegionResult, RegionResultPdfGird } from './region.type'
 import { RegionPDF } from './pdf'
 import {
   computeGeolocusObjectMaskGrid,
@@ -15,30 +11,13 @@ import {
   Position2,
 } from '@/object'
 import { RegionResultHandler } from './regionHandler'
-import {
-  Topology,
-  EuclideanDistanceRange,
-  GeoTriple,
-  GeoRelation,
-  Distance,
-  RelationAction,
-} from '@/relation'
-import {
-  Compare,
-  GEO_MAX_VALUE,
-  GeolocusGird,
-  Gird,
-  MathUtil,
-  Vector2,
-} from '@/util'
+import { Topology, EuclideanDistanceRange, GeoTriple, GeoRelation, Distance, RelationAction } from '@/relation'
+import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MathUtil, Vector2 } from '@/util'
 import { UserGeolocusTriple } from '..'
 import { Astar, Graph } from './aStart'
 
 export class Region {
-  private static computeRegionAndPdf(
-    tripleSet: Set<GeoTriple>,
-    context: GeolocusContext,
-  ) {
+  private static computeRegionAndPdf(tripleSet: Set<GeoTriple>, context: GeolocusContext) {
     const resultPdf: Set<RegionPDFInput> = new Set()
     const objectMap = context.getObjectMap()
 
@@ -56,18 +35,10 @@ export class Region {
     // compute the intersection of all region
     let resultRegion = new GeolocusGeometry(
       'Polygon',
-      JTSGeometryFactory.bbox([
-        -GEO_MAX_VALUE,
-        -GEO_MAX_VALUE,
-        GEO_MAX_VALUE,
-        GEO_MAX_VALUE,
-      ]),
+      JTSGeometryFactory.bbox([-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE]),
     )
     for (const currentRegion of regionArray) {
-      const tempRegion = Topology.intersection(
-        resultRegion,
-        currentRegion.getGeometry(),
-      )
+      const tempRegion = Topology.intersection(resultRegion, currentRegion.getGeometry())
       if (!tempRegion) {
         throw new Error("Can't compute the fuzzy region.")
       }
@@ -104,15 +75,11 @@ export class Region {
           weight: pdf.weight,
         })
       } else {
-        const gird = Gird.createGirdWithFilter(
-          rowCount,
-          colCount,
-          (row, col) => {
-            const x = xStart + (col + 0.5) * girdSize
-            const y = yStart + (row + 0.5) * girdSize
-            return mask[row][col] && RegionPDF.computePDF(pdf, [x, y])
-          },
-        )
+        const gird = Gird.createGirdWithFilter(rowCount, colCount, (row, col) => {
+          const x = xStart + (col + 0.5) * girdSize
+          const y = yStart + (row + 0.5) * girdSize
+          return mask[row][col] && RegionPDF.computePDF(pdf, [x, y])
+        })
         pdfGirdArray.push({
           type: 'gdf',
           gird,
@@ -155,12 +122,8 @@ export class Region {
       (row, col) => {
         const x = originXStart + (col + 0.5) * girdSize
         const y = originYStart + (row + 0.5) * girdSize
-        const transformX = Math.floor(
-          ((x - originXStart) / originDx) * (girdCol - 1),
-        )
-        const transformY = Math.floor(
-          ((y - originYStart) / originDy) * (girdRow - 1),
-        )
+        const transformX = Math.floor(((x - originXStart) / originDx) * (girdCol - 1))
+        const transformY = Math.floor(((y - originYStart) / originDy) * (girdRow - 1))
         return gird[transformY][transformX]
       },
     )
@@ -170,11 +133,7 @@ export class Region {
 
   private static computeRegionGrid(result: RegionResult, gridSizeSum: number) {
     const mask = result.regionMask as GeolocusGird
-    const resultGird: GeolocusGird = Gird.createGirdWithValue(
-      mask.length,
-      mask[0].length,
-      1,
-    )
+    const resultGird: GeolocusGird = Gird.createGirdWithValue(mask.length, mask[0].length, 1)
 
     const region = result.region as GeolocusObject
     const bbox = region.getGeometry().getBBox()
@@ -185,12 +144,7 @@ export class Region {
       const transformGird =
         pdfGird.type === 'gdf'
           ? tempGird
-          : this.extractRegionGird(
-              tempGird,
-              pdfGird.bbox as GeolocusBBox,
-              bbox,
-              gridSizeSum,
-            )
+          : this.extractRegionGird(tempGird, pdfGird.bbox as GeolocusBBox, bbox, gridSizeSum)
       Gird.forEach(resultGird, (_, row, col) => {
         resultGird[row][col] *= weight * transformGird[row][col]
       })
@@ -231,15 +185,9 @@ export class Region {
   static computeFuzzyPointObject(uuid: string, context: GeolocusContext) {
     // compute the order
     const route = context.getRoute()
-    const computedOrderStack = RouteAction.computeObjectOrder(
-      context,
-      uuid,
-      route.getInNodeList(),
-    )
+    const computedOrderStack = RouteAction.computeObjectOrder(context, uuid, route.getInNodeList())
     if (!computedOrderStack) {
-      throw new Error(
-        'Can not compute this object or it is not necessary be computed.',
-      )
+      throw new Error('Can not compute this object or it is not necessary be computed.')
     }
 
     // compute single object by order
@@ -268,10 +216,7 @@ export class Region {
 
       // compute grid
       console.timeLog('default', 'compute gird start')
-      result.regionMask = computeGeolocusObjectMaskGrid(
-        result.region,
-        context.getGridSize(),
-      )
+      result.regionMask = computeGeolocusObjectMaskGrid(result.region, context.getGridSize())
       result.resultGird = this.computeRegionGrid(result, context.getGridSize())
       const { coord } = this.getCoordOfMaximum(result, context.getGridSize())
       result.coord = coord
@@ -282,10 +227,7 @@ export class Region {
       const object = objectMap.getObjectByUUID(currentUUID) as GeolocusObject
       const center = object.getGeometry().getCenter()
       const offset = Vector2.sub(coord, center)
-      const translatedGeometry = GeolocusGeometryTransformation.translate(
-        object.getGeometry(),
-        ...offset,
-      )
+      const translatedGeometry = GeolocusGeometryTransformation.translate(object.getGeometry(), ...offset)
       object.setGeometry(translatedGeometry)
       object.setStatus('precise')
     }
@@ -293,10 +235,7 @@ export class Region {
     return uuidArray
   }
 
-  private static handleUnknownLineOriginObject(
-    userTriple: UserGeolocusTriple,
-    context: GeolocusContext,
-  ) {
+  private static handleUnknownLineOriginObject(userTriple: UserGeolocusTriple, context: GeolocusContext) {
     let { name, type, coord } = userTriple.origin
     if (coord == null || type == null) {
       const placePlugin = context.getPlugin('place')
@@ -311,10 +250,7 @@ export class Region {
     return object
   }
 
-  private static getLineOriginObject(
-    userTriple: UserGeolocusTriple,
-    context: GeolocusContext,
-  ) {
+  private static getLineOriginObject(userTriple: UserGeolocusTriple, context: GeolocusContext) {
     const objectMap = context.getObjectMap()
     const object = objectMap.getObjectByPlaceName(userTriple.origin.name)
     // the name is not in geolocus
@@ -365,10 +301,7 @@ export class Region {
           topology: 'contain',
         }
       }
-      const relation: GeoRelation = RelationAction.transform(
-        userTriple.relation,
-        role,
-      )
+      const relation: GeoRelation = RelationAction.transform(userTriple.relation, role)
 
       const result: RegionResult = {
         region: null,
@@ -385,10 +318,7 @@ export class Region {
       result.region = region
 
       // compute grid
-      result.regionMask = computeGeolocusObjectMaskGrid(
-        result.region,
-        context.getGridSize(),
-      )
+      result.regionMask = computeGeolocusObjectMaskGrid(result.region, context.getGridSize())
       result.resultGird = this.computeRegionGrid(result, context.getGridSize())
 
       // compute coord
@@ -418,10 +348,7 @@ export class Region {
   ): [Position2[], Position2] {
     result = result as RegionResult
     const context = triple.role.getContext()
-    const curRegion = new GeolocusGeometry(
-      'Point',
-      JTSGeometryFactory.point(result.coord as Position2),
-    )
+    const curRegion = new GeolocusGeometry('Point', JTSGeometryFactory.point(result.coord as Position2))
 
     let afterRegion: GeolocusGeometry
     if (index === resultList.length - 1) {
@@ -450,26 +377,10 @@ export class Region {
     const rowCount = Math.ceil(dy / girdSize)
     const colCount = Math.ceil(dx / girdSize)
 
-    const col0 = MathUtil.clamp(
-      Math.floor((coord0[0] - xStart) / girdSize),
-      0,
-      colCount - 1,
-    )
-    const row0 = MathUtil.clamp(
-      Math.floor((coord0[1] - yStart) / girdSize),
-      0,
-      rowCount - 1,
-    )
-    const col1 = MathUtil.clamp(
-      Math.floor((coord1[0] - xStart) / girdSize),
-      0,
-      colCount - 1,
-    )
-    const row1 = MathUtil.clamp(
-      Math.floor((coord1[1] - yStart) / girdSize),
-      0,
-      rowCount - 1,
-    )
+    const col0 = MathUtil.clamp(Math.floor((coord0[0] - xStart) / girdSize), 0, colCount - 1)
+    const row0 = MathUtil.clamp(Math.floor((coord0[1] - yStart) / girdSize), 0, rowCount - 1)
+    const col1 = MathUtil.clamp(Math.floor((coord1[0] - xStart) / girdSize), 0, colCount - 1)
+    const row1 = MathUtil.clamp(Math.floor((coord1[1] - yStart) / girdSize), 0, rowCount - 1)
 
     const gird = result.resultGird as GeolocusGird
     const gridTransform = Gird.createGirdWithFilter(
@@ -482,10 +393,7 @@ export class Region {
     })
     const start = graph.grid[row0][col0]
     const end = graph.grid[row1][col1]
-    const res: Position2[] = Astar.search(graph, start, end).map((node) => [
-      node.x,
-      node.y,
-    ])
+    const res: Position2[] = Astar.search(graph, start, end).map((node) => [node.x, node.y])
     res.unshift([row0, col0])
 
     const coordList: Position2[] = []
@@ -500,25 +408,12 @@ export class Region {
     return [coordList, coord1]
   }
 
-  static computeFuzzyLineObject(
-    lineName: string,
-    userTripleList: UserGeolocusTriple[],
-    context: GeolocusContext,
-  ) {
-    const { resultList, tripleList } = this.computeRegionOnLine(
-      userTripleList,
-      context,
-    )
+  static computeFuzzyLineObject(lineName: string, userTripleList: UserGeolocusTriple[], context: GeolocusContext) {
+    const { resultList, tripleList } = this.computeRegionOnLine(userTripleList, context)
     const coords: Position2[] = []
     let beforeCoord = resultList[0].coord as Position2
     for (let i = 0; i < resultList.length; i++) {
-      const res = this.computeFuzzyLineCoord(
-        tripleList[i],
-        resultList,
-        resultList[i],
-        i,
-        beforeCoord,
-      )
+      const res = this.computeFuzzyLineCoord(tripleList[i], resultList, resultList[i], i, beforeCoord)
       coords.push(...(res[0] as Position2[]))
       beforeCoord = res[1]
     }

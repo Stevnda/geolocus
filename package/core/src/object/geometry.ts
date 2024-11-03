@@ -59,31 +59,19 @@ export class GeolocusGeometry implements GeolocusGeometryProps {
 }
 
 export class GeolocusGeometryTransformation {
-  static translate = (
-    geometry: GeolocusGeometry,
-    x: number,
-    y: number,
-  ): GeolocusGeometry => {
+  static translate = (geometry: GeolocusGeometry, x: number, y: number): GeolocusGeometry => {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.translate(x, y)
-    const geometryTranslated = affineTransformation.transform(
-      geometry.getGeometry(),
-    )
+    const geometryTranslated = affineTransformation.transform(geometry.getGeometry())
     const type = geometry.getType()
 
     return new GeolocusGeometry(type, geometryTranslated)
   }
 
-  static rotateAroundCoord = (
-    geometry: GeolocusGeometry,
-    theta: number,
-    coord: Position2,
-  ) => {
+  static rotateAroundCoord = (geometry: GeolocusGeometry, theta: number, coord: Position2) => {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.rotate(-theta, ...coord)
-    const geometryRotated = affineTransformation.transform(
-      geometry.getGeometry(),
-    )
+    const geometryRotated = affineTransformation.transform(geometry.getGeometry())
     const type = geometry.getType()
 
     return new GeolocusGeometry(type, geometryRotated)
@@ -105,10 +93,7 @@ export class JTSGeometryFactory {
 
   static polygon = (position: Position2[][]): jsts.geom.Geometry => {
     const lineStringArray = position.map((value) => this.lineString(value))
-    return this._geometryFactory.createPolygon(
-      lineStringArray[0],
-      lineStringArray.slice(1),
-    )
+    return this._geometryFactory.createPolygon(lineStringArray[0], lineStringArray.slice(1))
   }
 
   static multiPoint = (position: Position2[]): jsts.geom.Geometry => {
@@ -149,10 +134,7 @@ export class JTSGeometryFactory {
     return factory
   }
 
-  static create(
-    type: GeolocusGeometryType,
-    coord: Position2 | Position2[] | Position2[][] | Position2[][][],
-  ) {
+  static create(type: GeolocusGeometryType, coord: Position2 | Position2[] | Position2[][] | Position2[][][]) {
     const map = {
       Point: this.point,
       LineString: this.lineString,
