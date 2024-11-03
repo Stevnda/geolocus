@@ -1,4 +1,4 @@
-import { GeolocusContext, RouteAction } from '@/context'
+import { GeolocusContext, ObjectMapAction, RouteAction } from '@/context'
 import { RegionPDFInput, RegionResult, RegionResultPdfGird } from './region.type'
 import { RegionPDF } from './pdf'
 import {
@@ -11,9 +11,8 @@ import {
   Position2,
 } from '@/object'
 import { RegionResultHandler } from './region.handler'
-import { Topology, EuclideanDistanceRange, GeoTriple, GeoRelation, Distance, RelationAction } from '@/relation'
+import { Topology, EuclideanDistanceRange, GeoTriple, Distance, RelationAction } from '@/relation'
 import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MathUtil, Vector2 } from '@/util'
-import { UserGeolocusTriple } from '..'
 import { Astar, Graph } from './aStart'
 
 export class Region {
@@ -42,7 +41,7 @@ export class Region {
       // compute pdf and region
       console.timeLog('default', 'compute region and pdf start')
       const { resultPdf, resultRegion } = this.computeRegionAndPdf(
-        context.getRelation().getTripleListOfObject(uuid) as Set<GeoTriple>,
+        <Set<GeoTriple>>context.getRelation().getTripleListMap().get(uuid),
         context,
       )
       result.pdf = resultPdf
@@ -59,7 +58,7 @@ export class Region {
 
       // update the object
       const objectMap = context.getObjectMap()
-      const object = objectMap.getObjectByUUID(currentUUID) as GeolocusObject
+      const object = ObjectMapAction.getObjectByUUID(objectMap, currentUUID) as GeolocusObject
       const center = object.getGeometry().getCenter()
       const offset = Vector2.sub(coord, center)
       const translatedGeometry = GeolocusGeometryTransformation.translate(object.getGeometry(), ...offset)
@@ -78,7 +77,7 @@ export class Region {
     const regionArray: GeolocusObject[] = []
     for (const triple of tripleSet) {
       const relation = triple.relation
-      const origin = objectMap.getObjectByUUID(triple.origin) as GeolocusObject
+      const origin = ObjectMapAction.getObjectByUUID(objectMap, triple.origin) as GeolocusObject
       const regionHandler = RegionResultHandler.getRegionHandler(relation)
       const { region, pdf } = regionHandler(origin, relation, triple.role)
       resultPdf.add(pdf)
@@ -232,12 +231,15 @@ export class Region {
     return { coord, range: [min, max] as EuclideanDistanceRange }
   }
 
-  static computeFuzzyLineObject(lineName: string, userTripleList: UserGeolocusTriple[], context: GeolocusContext) {
-    const { resultList, tripleList } = this.computeRegionOnLine(userTripleList, context)
+  static computeFuzzyLineObject(lineName: string, context: GeolocusContext) {
+    const object = <GeolocusObject>ObjectMapAction.getObjectByPlaceName(context.getObjectMap(), lineName)
+    const tripleList = RelationAction.getTripleListByUUID(context.getRelation(), object.getUUID())
+    const { regionResultList, resTripleList } = this.computeRegionOnLine(tripleList, context)
+
     const coords: Position2[] = []
-    let beforeCoord = resultList[0].coord as Position2
-    for (let i = 0; i < resultList.length; i++) {
-      const res = this.computeFuzzyLineCoord(tripleList[i], resultList, resultList[i], i, beforeCoord)
+    let beforeCoord = regionResultList[0].coord as Position2
+    for (let i = 0; i < regionResultList.length; i++) {
+      const res = this.computeLineCoord(resTripleList[i], regionResultList, regionResultList[i], i, beforeCoord)
       coords.push(...(res[0] as Position2[]))
       beforeCoord = res[1]
     }
@@ -247,78 +249,29 @@ export class Region {
 
     return {
       lineString,
-      resultList,
-      tripleList,
-    }
-  }
-
-  private static handleUnknownLineOriginObject(userTriple: UserGeolocusTriple, context: GeolocusContext) {
-    let { name, type, coord } = userTriple.origin
-    if (coord == null || type == null) {
-      const placePlugin = context.getPlugin('place')
-      // TODO place is always has result
-      const { type: resultType, coord: resultCoord } = placePlugin(name)
-      type = resultType
-      coord = resultCoord
-    }
-    const jstGeometry = JTSGeometryFactory.create(type, coord)
-    const geolocusGeometry = new GeolocusGeometry(type, jstGeometry)
-    const object = new GeolocusObject(geolocusGeometry, name)
-    return object
-  }
-
-  private static getLineOriginObject(userTriple: UserGeolocusTriple, context: GeolocusContext) {
-    const objectMap = context.getObjectMap()
-    const object = objectMap.getObjectByPlaceName(userTriple.origin.name)
-    // the name is not in geolocus
-    if (!object) return this.handleUnknownLineOriginObject(userTriple, context)
-    // the name is in geolocus
-    if (object.getStatus() === 'precise') return object
-    try {
-      this.computeFuzzyPointObject(object.getUUID(), context)
-      return object
-    } catch (error) {
-      return this.handleUnknownLineOriginObject(userTriple, context)
+      resultList: regionResultList,
+      tripleList: resTripleList,
     }
   }
 
   private static computeRegionOnLine(
-    userTripleList: UserGeolocusTriple[],
+    tripleList: GeoTriple[],
     context: GeolocusContext,
   ): {
-    tripleList: GeoTriple[]
-    resultList: RegionResult[]
+    resTripleList: GeoTriple[]
+    regionResultList: RegionResult[]
   } {
     const res: {
-      tripleList: GeoTriple[]
-      resultList: RegionResult[]
+      resTripleList: GeoTriple[]
+      regionResultList: RegionResult[]
     } = {
-      tripleList: [],
-      resultList: [],
+      resTripleList: [],
+      regionResultList: [],
     }
-    for (const userTriple of userTripleList) {
-      const role = context.getRoleMap().get(userTriple.role)
-      if (!role) throw new Error('role is not existed')
-
-      // NOTE move to transform
-      if (userTriple.relation) {
-        if (userTriple.relation.topology == null) {
-          userTriple.relation.topology = 'contain'
-        }
-      } else if (userTriple.relation == null) {
-        userTriple.relation = {
-          topology: 'contain',
-        }
-      }
-
-      const originObject = this.getLineOriginObject(userTriple, context)
-      if (userTriple.relation == null) {
-        userTriple.relation = {
-          distance: 0,
-          topology: 'contain',
-        }
-      }
-      const relation: GeoRelation = RelationAction.transform(userTriple.relation, role)
+    for (const triple of tripleList) {
+      const originObject = this.getLineOriginObject(triple, context)
+      const relation = triple.relation
+      const role = triple.role
 
       const result: RegionResult = {
         region: null,
@@ -342,21 +295,30 @@ export class Region {
       const { coord } = this.getCoordOfMaximum(result, context.getGridSize())
       result.coord = coord
 
-      const triple: GeoTriple = {
+      const resTriple: GeoTriple = {
         uuid: 'temp',
         role,
         origin: originObject.getUUID(),
         relation,
         target: 'temp',
       }
-      res.resultList.push(result)
-      res.tripleList.push(triple)
+      res.regionResultList.push(result)
+      res.resTripleList.push(resTriple)
     }
 
     return res
   }
 
-  private static computeFuzzyLineCoord(
+  private static getLineOriginObject(triple: GeoTriple, context: GeolocusContext) {
+    const objectMap = context.getObjectMap()
+    const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, triple.origin)
+    // the name is in geolocus
+    if (object.getStatus() === 'precise') return object
+    this.computeFuzzyPointObject(object.getUUID(), context)
+    return object
+  }
+
+  private static computeLineCoord(
     triple: GeoTriple,
     resultList: RegionResult[],
     result: RegionResult,

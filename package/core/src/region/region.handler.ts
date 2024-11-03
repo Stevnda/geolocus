@@ -185,7 +185,7 @@ export class RegionResultHandler {
     let distanceRegion: GeolocusObject
     const geometry = Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER) as GeolocusGeometry
     if (relation.distance === 0) {
-      distanceRegion = new GeolocusObject(geometry)
+      distanceRegion = origin
     } else if (typeof relation.distance === 'number') {
       const temp = Topology.bufferOfDistance(geometry, relation.distance)
       if (temp) {
@@ -196,6 +196,7 @@ export class RegionResultHandler {
     } else {
       const { region } = this.disjointHandler(origin, relation, role)
       relation.topology = 'contain'
+      relation.direction = undefined
       distanceRegion = region
     }
 
@@ -239,20 +240,50 @@ export class RegionResultHandler {
   }
 
   private static all = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
-    const td = this.topologyAndDistance(origin, relation, role)
-    const direction = this.directionHandler(td.region, relation, role)
-    const intersection = this.intersection(td.region, direction.region)
+    const map: Record<
+      TopologyRelation,
+      (origin: GeolocusObject, relation: GeoRelation, role: Role) => RegionHandlerResult
+    > = {
+      disjoint: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const res = this.disjointHandler(origin, relation, role)
 
-    td.region = intersection
-    td.pdf.sdf.girdRegion = intersection
-    td.pdf.type = td.pdf.type === 'sdf' ? 'sdf' : 'distanceAndAngle'
-    td.pdf.gdf = {
-      ...td.pdf.gdf,
-      azimuth: direction.pdf.gdf.azimuth,
-      azimuthDelta: direction.pdf.gdf.azimuthDelta,
+        return res
+      },
+      contain: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const res = this.containHandler(origin, relation, role)
+
+        return res
+      },
+      intersect: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const topology = this.intersectHandler(origin, relation, role)
+        return topology
+      },
+      along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const topology = this.alongHandler(origin, relation, role)
+        return topology
+      },
     }
 
-    return td
+    const distanceRegion = this.distanceHandler(origin, relation, role)
+    const topology = relation.topology
+    const td = map[topology](distanceRegion, relation, role)
+    if (relation.direction == null) {
+      return td
+    } else {
+      const direction = this.directionHandler(distanceRegion, relation, role)
+      const intersection = this.intersection(td.region, direction.region)
+
+      td.region = intersection
+      td.pdf.sdf.girdRegion = intersection
+      td.pdf.type = td.pdf.type === 'sdf' ? 'sdf' : 'distanceAndAngle'
+      td.pdf.gdf = {
+        ...td.pdf.gdf,
+        azimuth: direction.pdf.gdf.azimuth,
+        azimuthDelta: direction.pdf.gdf.azimuthDelta,
+      }
+
+      return td
+    }
   }
 
   static getRegionHandler(relation: GeoRelation) {

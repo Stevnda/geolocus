@@ -55,7 +55,8 @@
       "role": "default",
       "origin": {
         "name": "吉隆坡机场"
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
@@ -65,13 +66,15 @@
       "relation": {
         "direction": "E",
         "topology": "intersect"
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
       "origin": {
         "name": "卡里马塔海峡"
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
@@ -82,13 +85,15 @@
         "direction": "S",
         "topology": "disjoint",
         "distance": 400000
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
       "origin": {
         "name": "加里曼尼岛"
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
@@ -98,7 +103,8 @@
       "relation": {
         "direction": "SE",
         "topology": "contain"
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
@@ -109,7 +115,8 @@
         "direction": "E",
         "topology": "disjoint",
         "distance": 100000
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
@@ -120,7 +127,8 @@
         "direction": "W",
         "topology": "disjoint",
         "distance": 150000
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
@@ -130,13 +138,15 @@
       "relation": {
         "direction": "E",
         "topology": "intersect"
-      }
+      },
+      "target": "taiwan"
     },
     {
       "role": "default",
       "origin": {
         "name": "松山机场"
-      }
+      },
+      "target": "taiwan"
     }
   ]
 }

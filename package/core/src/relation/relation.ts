@@ -1,21 +1,11 @@
-import { GeolocusContext, Role, RouteAction } from '@/context'
+import { GeolocusContext, ObjectMapAction, Role, RouteAction } from '@/context'
 import { GeoRelation, GeoTriple, SemanticRelation } from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
 import { generateUUID, GEO_MAX_VALUE } from '@/util'
 import { UserGeolocusTriple, UserGeoRelation } from '..'
 import { Distance } from './distance'
 
-interface RelationProps {
-  setTripleListMap(value: Map<string, Set<GeoTriple>>): void
-  getTripleListMap(): Map<string, Set<GeoTriple>>
-  getTripleListOfObject(objectUUID: string): Set<GeoTriple> | null
-  setSemanticMap(value: Map<string, SemanticRelation>): void
-  getSemanticMap(): Map<string, SemanticRelation>
-  setContext(value: GeolocusContext): void
-  getContext(): GeolocusContext
-}
-
-export class Relation implements RelationProps {
+export class Relation {
   // the uuid of tripleListMap is the same as geolocusObject
   // the uuid of tripleList is auto generate
   private _tripleListMap: Map<string, Set<GeoTriple>>
@@ -36,10 +26,6 @@ export class Relation implements RelationProps {
     return this._tripleListMap
   }
 
-  getTripleListOfObject(objectUUID: string): Set<GeoTriple> | null {
-    return this._tripleListMap.get(objectUUID) || null
-  }
-
   setSemanticMap(value: Map<string, SemanticRelation>): void {
     this._semanticMap = value
   }
@@ -58,37 +44,11 @@ export class Relation implements RelationProps {
 }
 
 export class RelationAction {
-  static handleOrigin(triple: UserGeolocusTriple, context: GeolocusContext): string {
-    let { name, type, coord } = triple.origin
-    const objectMap = context.getObjectMap()
-    let uuid = objectMap.getObjectByPlaceName(name)?.getUUID()
-    if (uuid) return uuid
-    if (coord == null || type == null) {
-      const placePlugin = context.getPlugin('place')
-      // TODO place is always has result
-      const { type: resultType, coord: resultCoord } = placePlugin(name)
-      type = resultType
-      coord = resultCoord
-    }
-    const jstGeometry = JTSGeometryFactory.create(type, coord)
-    const geolocusGeometry = new GeolocusGeometry(type, jstGeometry)
-    const object = new GeolocusObject(geolocusGeometry, name)
-    uuid = object.getUUID()
-    objectMap.addObject(object)
-    return uuid
-  }
-
-  static handleTarget(triple: UserGeolocusTriple, context: GeolocusContext): string {
-    const name = triple.target as string
-    const objectMap = context.getObjectMap()
-    let uuid = objectMap.getObjectByPlaceName(name)?.getUUID()
-    if (uuid) return uuid
-    const jstGeometry = JTSGeometryFactory.empty('Point')
-    const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-    const object = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
-    uuid = object.getUUID()
-    objectMap.addObject(object)
-    return uuid
+  static getTripleListByUUID(relation: Relation, uuid: string): GeoTriple[] {
+    const tripleListMap = relation.getTripleListMap()
+    const res = tripleListMap.get(uuid)
+    if (res) return [...res]
+    else return []
   }
 
   // NOTE 修改逻辑关系, 布局模型目前没有搞
@@ -113,7 +73,7 @@ export class RelationAction {
     if (relation.topology) {
       res.topology = relation.topology
     } else {
-      res.topology = 'disjoint'
+      res.topology = 'contain'
     }
     // direction
     res.direction = relation.direction
@@ -138,9 +98,9 @@ export class RelationAction {
   static defineTriple(triple: UserGeolocusTriple, context: GeolocusContext) {
     const role = context.getRoleMap().get(triple.role)
     if (!role) throw new Error('role is not existed')
+
     const originUUID = this.handleOrigin(triple, context)
     const targetUUID = this.handleTarget(triple, context)
-
     const route = context.getRoute()
     route.addEdge(originUUID, targetUUID)
     const circle = RouteAction.validateRouteValidity(route)
@@ -153,12 +113,12 @@ export class RelationAction {
       uuid: generateUUID(),
       role,
       origin: originUUID,
-      relation: this.transform(triple.relation as UserGeoRelation, role),
+      relation: this.transform(triple.relation || {}, role),
       target: targetUUID,
     }
     const tripleUUID = generateUUID()
     const relation = context.getRelation()
-    const relationSet = relation.getTripleListOfObject(targetUUID)
+    const relationSet = relation.getTripleListMap().get(targetUUID)
     if (!relationSet) {
       const tripleListMap = relation.getTripleListMap()
       tripleListMap.set(targetUUID, new Set([tripleTransform]))
@@ -167,5 +127,52 @@ export class RelationAction {
     }
 
     return tripleUUID
+  }
+
+  private static handleOrigin(triple: UserGeolocusTriple, context: GeolocusContext): string {
+    let { name, type, coord } = triple.origin
+    const objectMap = context.getObjectMap()
+
+    let obj: GeolocusObject
+    if (type != null && coord != null) {
+      obj = new GeolocusObject(
+        new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)),
+        name,
+        null,
+        'precise',
+      )
+    } else {
+      name = <string>name
+      const temp = ObjectMapAction.getObjectByPlaceName(objectMap, name)
+      if (temp == null) {
+        const jstGeometry = JTSGeometryFactory.empty('Point')
+        const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
+        obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+      } else {
+        obj = temp
+      }
+    }
+
+    const uuid = obj.getUUID()
+    ObjectMapAction.addObject(objectMap, obj)
+
+    return uuid
+  }
+
+  private static handleTarget(triple: UserGeolocusTriple, context: GeolocusContext): string {
+    const name = triple.target as string
+    const objectMap = context.getObjectMap()
+
+    let uuid = ObjectMapAction.getObjectByPlaceName(objectMap, name)?.getUUID()
+    if (uuid) return uuid
+
+    const jstGeometry = JTSGeometryFactory.empty('Point')
+    const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
+    const obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+
+    uuid = obj.getUUID()
+    ObjectMapAction.addObject(objectMap, obj)
+
+    return uuid
   }
 }

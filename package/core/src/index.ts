@@ -10,31 +10,30 @@ import {
   SemanticDistance,
   RelationAction,
 } from './relation'
-import { GeolocusContext, GeolocusContextInit, Role } from './context'
-import { GeolocusPlugin, PlacePlugin } from './context/plugin'
+import { GeolocusContext, GeolocusContextInit, PlacePlugin, Role } from './context'
 import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
 import { Region, RegionResult } from './region'
 import { GeoJSON } from 'geojson'
 import { GeoJson } from './io'
+import { ObjectMapAction } from './context/objectMap'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
   direction?: AbsoluteDirection | RelativeDirection
   distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
   range?: ComputeRegionRange
-  semantic?: string
   layout?: string
 }
 
 export interface UserGeolocusTriple {
   role: string
   origin: {
-    name: string
+    name?: string
     type?: GeolocusGeometryType
     coord?: Position2 | Position2[] | Position2[][] | Position2[][][]
   }
   relation?: UserGeoRelation
-  target?: string
+  target: string
 }
 
 export interface RoleInit {
@@ -53,8 +52,12 @@ class Geolocus {
     this._context = new GeolocusContext(init)
   }
 
-  use(type: GeolocusPlugin, fn: PlacePlugin) {
-    this._context.getPluginMap().set(type, fn)
+  use(type: 'placePlugin', fn: PlacePlugin) {
+    if (type === 'placePlugin') {
+      const objectMap = this._context.getObjectMap()
+      const pluginList = objectMap.getPlacePluginList()
+      objectMap.setPlacePluginList([...pluginList, fn])
+    }
   }
 
   addRole(init: RoleInit) {
@@ -82,7 +85,7 @@ class Geolocus {
 
   computeFuzzyPointObject(placeName: string) {
     const objectMap = this._context.getObjectMap()
-    const object = objectMap.getObjectByPlaceName(placeName)
+    const object = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)
     if (object?.getStatus() === 'precise') {
       return { name: object.getName(), uuid: object.getUUID() }
     }
@@ -90,29 +93,25 @@ class Geolocus {
     if (!uuid) return null
     const uuidList = Region.computeFuzzyPointObject(uuid, this._context)
     return uuidList.map((value) => {
-      const object = objectMap.getObjectByUUID(value) as GeolocusObject
-
+      const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, value)
       return { name: object.getName(), uuid: object.getUUID() }
     })
   }
 
-  computeFuzzyLineObject(
-    lineName: string,
-    relationList: UserGeolocusTriple[],
-  ): {
+  computeFuzzyLineObject(lineName: string): {
     lineString: GeolocusObject
     resultList: RegionResult[]
     tripleList: GeoTriple[]
   } {
-    const result = Region.computeFuzzyLineObject(lineName, relationList, this._context)
+    const result = Region.computeFuzzyLineObject(lineName, this._context)
 
     return result
   }
 
   getComputeResult(placeName: string) {
     const objectMap = this._context.getObjectMap()
-    const uuid = objectMap.getObjectByPlaceName(placeName)?.getUUID() as string
-    if (!uuid) return null
+    const uuid = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)?.getUUID()
+    if (uuid == null) return null
     return this._context.getRegionResultByObjectUUID(uuid) || null
   }
 
