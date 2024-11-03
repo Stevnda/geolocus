@@ -27,9 +27,9 @@ export type RelativeDirection =
   | 'L'
   | 'FL'
 
-export type ComputeRegionRange = 'inside' | 'outside'
+export type ComputeRegionRange = 'inside' | 'outside' | 'both'
 
-export type TopologyRelation = 'contain' | 'intersect' | 'disjoint'
+export type TopologyRelation = 'contain' | 'intersect' | 'disjoint' | 'along'
 
 export interface GeoRelation {
   topology: TopologyRelation
