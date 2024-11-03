@@ -76,10 +76,7 @@ export class GeolocusObject implements GeolocusObjectProps {
   }
 }
 
-export const computeGeolocusObjectMaskGrid = (
-  object: GeolocusObject,
-  girdNum: number,
-): GeolocusGird => {
+export const computeGeolocusObjectMaskGrid = (object: GeolocusObject, girdNum: number): GeolocusGird => {
   const bbox = object.getGeometry().getBBox()
   const xStart = bbox[0]
   const xEnd = bbox[2]
@@ -91,22 +88,11 @@ export const computeGeolocusObjectMaskGrid = (
   const girdSize = dx / Math.sqrt(girdNum / ratio)
   const geometry = object.getGeometry()
 
-  const mask = Gird.createGirdWithFilter(
-    Math.ceil(dy / girdSize),
-    Math.ceil(dx / girdSize),
-    (row, col) => {
-      const tempPoint = JTSGeometryFactory.point([
-        xStart + col * girdSize,
-        yStart + row * girdSize,
-      ])
-      const result =
-        jsts.operation.distance.DistanceOp.distance(
-          geometry.getGeometry(),
-          tempPoint,
-        ) === 0
-      return +result
-    },
-  )
+  const mask = Gird.createGirdWithFilter(Math.ceil(dy / girdSize), Math.ceil(dx / girdSize), (row, col) => {
+    const tempPoint = JTSGeometryFactory.point([xStart + col * girdSize, yStart + row * girdSize])
+    const result = jsts.operation.distance.DistanceOp.distance(geometry.getGeometry(), tempPoint) === 0
+    return +result
+  })
 
   return mask
 }

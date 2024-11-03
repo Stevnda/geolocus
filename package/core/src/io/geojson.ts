@@ -8,16 +8,7 @@ export class GeoJson {
 
   static parse(geojson: GeoJSON): GeolocusGeometry {
     const type = geojson.type
-    if (
-      [
-        'Point',
-        'LineString',
-        'Polygon',
-        'MultiPoint',
-        'MultiLineString',
-        'MultiPolygon',
-      ].includes(geojson.type)
-    ) {
+    if (['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon'].includes(geojson.type)) {
       throw Error()
     }
     const geometry = this.reader.read(geojson)

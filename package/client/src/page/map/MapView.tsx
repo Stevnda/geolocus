@@ -412,8 +412,7 @@ const placeList = {
   ],
 }
 
-mapboxgl.accessToken =
-  'REDACTED_MAPBOX_TOKEN'
+mapboxgl.accessToken = 'REDACTED_MAPBOX_TOKEN'
 
 export const MapView = () => {
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement('div'))

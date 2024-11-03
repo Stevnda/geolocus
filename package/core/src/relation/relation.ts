@@ -58,10 +58,7 @@ export class Relation implements RelationProps {
 }
 
 export class RelationAction {
-  static handleOrigin(
-    triple: UserGeolocusTriple,
-    context: GeolocusContext,
-  ): string {
+  static handleOrigin(triple: UserGeolocusTriple, context: GeolocusContext): string {
     let { name, type, coord } = triple.origin
     const objectMap = context.getObjectMap()
     let uuid = objectMap.getObjectByPlaceName(name)?.getUUID()
@@ -81,10 +78,7 @@ export class RelationAction {
     return uuid
   }
 
-  static handleTarget(
-    triple: UserGeolocusTriple,
-    context: GeolocusContext,
-  ): string {
+  static handleTarget(triple: UserGeolocusTriple, context: GeolocusContext): string {
     const name = triple.target as string
     const objectMap = context.getObjectMap()
     let uuid = objectMap.getObjectByPlaceName(name)?.getUUID()
@@ -130,14 +124,8 @@ export class RelationAction {
     // distance
     // NOTE 无限距离的设置
     if (relation.distance != null) {
-      let distanceTransform = Distance.transformDistance(
-        relation.distance,
-        role.getSemanticDistanceMap(),
-      )
-      if (
-        distanceTransform instanceof Array &&
-        relation.topology !== 'disjoint'
-      ) {
+      let distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
+      if (distanceTransform instanceof Array && relation.topology !== 'disjoint') {
         distanceTransform = (distanceTransform[0] + distanceTransform[1]) / 2
       }
       res.distance = distanceTransform

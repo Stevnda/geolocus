@@ -1,8 +1,4 @@
-import {
-  AbsoluteDirection,
-  RelativeDirection,
-  SemanticDistanceMap,
-} from '@/relation'
+import { AbsoluteDirection, RelativeDirection, SemanticDistanceMap } from '@/relation'
 import { GeolocusContext } from './context'
 import { DirectionDelta } from './context.type'
 import { generateUUID } from '@/util'
@@ -81,9 +77,7 @@ export class Role {
     this._directionDelta = value
   }
 
-  getDirectionDelta(
-    value: AbsoluteDirection | RelativeDirection,
-  ): [number, number] {
+  getDirectionDelta(value: AbsoluteDirection | RelativeDirection): [number, number] {
     const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
     if (AbsoluteDirectionMap.includes(value)) {
       return this._directionDelta[value as AbsoluteDirection]

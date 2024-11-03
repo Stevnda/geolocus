@@ -14,9 +14,8 @@ const App = () => {
       </div>
       <div className="relative flex-auto ">
         <div
-          className="absolute left-4 top-4 z-10 flex h-[90vh] w-[26rem] flex-col
-            items-center rounded border border-slate-300 bg-slate-50 py-2
-            shadow-xl *:my-2"
+          className="absolute left-4 top-4 z-10 flex h-[90vh] w-[26rem] flex-col items-center rounded border
+            border-slate-300 bg-slate-50 py-2 shadow-xl *:my-2"
         >
           <Radio.Group
             onChange={(e) => {
@@ -36,8 +35,7 @@ const App = () => {
           </div>
         </div>
         <div
-          className="absolute right-4 top-20 z-10 flex h-[70vh] w-14 flex-col
-            items-center rounded bg-red-50 shadow-xl"
+          className="absolute right-4 top-20 z-10 flex h-[70vh] w-14 flex-col items-center rounded bg-red-50 shadow-xl"
         ></div>
         <MapView></MapView>
       </div>

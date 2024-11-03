@@ -17,13 +17,8 @@ export const AiText = () => {
   const clearLayer = useLayerStore((state) => state.clearLayer)
 
   return (
-    <div
-      className="flex h-full flex-col rounded border border-slate-400
-        bg-slate-100"
-    >
-      <div className="h-9 border-b border-b-slate-400 px-2 leading-9">
-        描述性地理位置
-      </div>
+    <div className="flex h-full flex-col rounded border border-slate-400 bg-slate-100">
+      <div className="h-9 border-b border-b-slate-400 px-2 leading-9">描述性地理位置</div>
       <TextArea
         rows={4}
         className="flex-1 rounded-none"
@@ -32,10 +27,7 @@ export const AiText = () => {
           setAiText(e.target.value)
         }}
       />
-      <div
-        className=" flex flex-row-reverse items-center border-t
-          border-t-slate-400 py-1 *:mx-2"
-      >
+      <div className=" flex flex-row-reverse items-center border-t border-t-slate-400 py-1 *:mx-2">
         <Button
           onClick={async () => {
             if (!aiText || !map) return

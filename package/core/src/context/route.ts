@@ -103,16 +103,10 @@ export class RouteAction {
       }
     }
 
-    return result.length === route.getNodeCount()
-      ? [true, result]
-      : [false, null]
+    return result.length === route.getNodeCount() ? [true, result] : [false, null]
   }
 
-  static computeObjectOrder(
-    context: GeolocusContext,
-    uuid: string,
-    inNode: Map<string, Set<string>>,
-  ) {
+  static computeObjectOrder(context: GeolocusContext, uuid: string, inNode: Map<string, Set<string>>) {
     // the object must be fuzzy object
     const objectMap = context.getObjectMap()
     const object = objectMap.getObjectByUUID(uuid)
