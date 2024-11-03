@@ -1,7 +1,7 @@
 import { GeolocusContext, Role, RouteAction } from '@/context'
 import { GeoRelation, GeoTriple, SemanticRelation } from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
-import { generateUUID } from '@/util'
+import { generateUUID, GEO_MAX_VALUE } from '@/util'
 import { UserGeolocusTriple, UserGeoRelation } from '..'
 import { Distance } from './distance'
 
@@ -105,12 +105,8 @@ export class RelationAction {
     // range
     if (relation.range) {
       res.range = relation.range
-    } else if (relation.topology === 'disjoint') {
-      res.range = 'outside'
-    } else if (relation.topology === 'contain') {
-      res.range = 'inside'
-    } else if (relation.topology === 'intersect') {
-      res.range = 'outside'
+    } else {
+      res.range = 'both'
     }
 
     // topology
@@ -122,16 +118,12 @@ export class RelationAction {
     // direction
     res.direction = relation.direction
     // distance
-    // NOTE 无限距离的设置
     if (relation.distance != null) {
-      let distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
-      if (distanceTransform instanceof Array && relation.topology !== 'disjoint') {
-        distanceTransform = (distanceTransform[0] + distanceTransform[1]) / 2
-      }
+      const distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
       res.distance = distanceTransform
     } else {
       if (res.topology === 'disjoint') {
-        res.distance = [0, role.getSemanticDistanceMap().VF[1]]
+        res.distance = [0, GEO_MAX_VALUE]
       } else {
         res.distance = 0
       }
