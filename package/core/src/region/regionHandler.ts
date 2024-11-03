@@ -11,7 +11,7 @@ import {
   TopologyRelation,
 } from '@/relation'
 import { RegionHandlerResult, RegionPDFInput } from './region.type'
-import { GeolocusContext, Role } from '@/context'
+import { Role } from '@/context'
 
 const MAGIC_NUMBER = 0.005
 
@@ -33,11 +33,48 @@ export class RegionResultHandler {
     return new GeolocusObject(intersection)
   }
 
+  private static disjointHandler = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ) => {
+    const distance = Distance.normalize(
+      relation.distance as EuclideanDistance | EuclideanDistanceRange,
+    )
+    const meanDistanceDelta = role.getDistanceDelta() * distance.mean
+    const minDistance =
+      distance.min - meanDistanceDelta * 1.5 < 0
+        ? 0
+        : distance.min - meanDistanceDelta * 1.5
+    const maxDistance = distance.max + meanDistanceDelta * 1.5
+    const distanceDelta = (maxDistance - minDistance) / 3
+
+    const geometry = Topology.bufferOfRange(origin.getGeometry(), [
+      minDistance,
+      maxDistance,
+    ]) as GeolocusGeometry
+    const region = new GeolocusObject(geometry)
+
+    const pdf: RegionPDFInput = {
+      type: 'distance',
+      origin,
+      gdf: {
+        distance: distance.mean,
+        distanceDelta,
+      },
+      sdf: {},
+      weight: relation.weight,
+    }
+
+    return { region, pdf }
+  }
+
   private static containHandler = (
     origin: GeolocusObject,
     relation: GeoRelation,
-    context: GeolocusContext,
+    role: Role,
   ): RegionHandlerResult => {
+    const context = role.getContext()
     const geometry = Topology.bufferOfDistance(
       origin.getGeometry(),
       MAGIC_NUMBER,
@@ -62,64 +99,96 @@ export class RegionResultHandler {
     role: Role,
   ): RegionHandlerResult => {
     const context = role.getContext()
-    const distance = relation.distance as EuclideanDistance
     const originGeometry = origin.getGeometry()
     const objectType = originGeometry.getType()
     const N = role.getSemanticDistanceMap().N
-    // NOTE 可以加入相对于物体形状百分比的概念
-    const rangeDistance = (N[0] + N[1]) / 2
+    // NOTE 这里目前用的 near, 以后可能使用对象的相对大小
+    const distance = (N[0] + N[1]) / 2
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {
-      geometry = Topology.bufferOfDistance(
-        originGeometry,
-        rangeDistance,
-      ) as GeolocusGeometry
+      geometry = <GeolocusGeometry>(
+        Topology.bufferOfDistance(originGeometry, distance)
+      )
     } else {
       const range = relation.range
-      let bufferGeometry: GeolocusGeometry = originGeometry
-      if (distance === 0) {
-        bufferGeometry = originGeometry
-      } else if (range === 'outside') {
-        bufferGeometry = Topology.union(
-          originGeometry,
-          Topology.bufferOfDistance(
-            originGeometry,
-            distance,
-          ) as GeolocusGeometry,
-        ) as GeolocusGeometry
+      const outside = <GeolocusGeometry>(
+        Topology.bufferOfDistance(originGeometry, distance)
+      )
+      const inside = Topology.bufferOfDistance(originGeometry, -distance)
+      if (inside === null) {
+        geometry = {
+          both: outside,
+          outside: <GeolocusGeometry>(
+            Topology.difference(outside, originGeometry)
+          ),
+          inside: originGeometry,
+        }[range]
       } else {
-        // inside
-        const tempGeometry = Topology.bufferOfDistance(
-          originGeometry,
-          -distance,
-        )
-        if (tempGeometry === null) {
-          bufferGeometry = new GeolocusGeometry(
-            'Point',
-            JTSGeometryFactory.point(originGeometry.getCenter()),
-          )
-        } else {
-          bufferGeometry = Topology.difference(
-            originGeometry,
-            tempGeometry,
-          ) as GeolocusGeometry
-        }
-      }
-
-      geometry = Topology.bufferOfRange(bufferGeometry as GeolocusGeometry, [
-        -rangeDistance,
-        rangeDistance,
-      ])
-      if (geometry === null) {
-        geometry = Topology.union(
-          bufferGeometry,
-          Topology.bufferOfDistance(
-            bufferGeometry,
-            rangeDistance,
-          ) as GeolocusGeometry,
-        ) as GeolocusGeometry
+        geometry = {
+          both: <GeolocusGeometry>Topology.difference(outside, inside),
+          outside: <GeolocusGeometry>(
+            Topology.difference(outside, originGeometry)
+          ),
+          inside: <GeolocusGeometry>Topology.difference(originGeometry, inside),
+        }[range]
       }
     }
+
+    const region = new GeolocusObject(geometry)
+    const pdf: RegionPDFInput = {
+      type: 'sdf',
+      origin,
+      gdf: {},
+      sdf: {
+        girdRegion: region,
+        girdNum: context.getGridSize(),
+      },
+      weight: relation.weight || 1,
+    }
+
+    return { region, pdf }
+  }
+
+  private static alongHandler = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ): RegionHandlerResult => {
+    const context = role.getContext()
+    const originGeometry = origin.getGeometry()
+    const originType = originGeometry.getType()
+    const N = role.getSemanticDistanceMap().N
+    const distance = (N[0] + N[1]) / 2
+    let geometry: GeolocusGeometry | null = null
+    if (originType === 'Point' || originType === 'LineString') {
+      geometry = <GeolocusGeometry>(
+        Topology.bufferOfDistance(originGeometry, distance)
+      )
+    } else {
+      const range = relation.range
+      const outside = <GeolocusGeometry>(
+        Topology.bufferOfDistance(originGeometry, distance)
+      )
+      const inside = Topology.bufferOfDistance(originGeometry, -distance)
+      if (inside === null) {
+        geometry = {
+          both: outside,
+          outside: <GeolocusGeometry>(
+            Topology.difference(outside, originGeometry)
+          ),
+          inside: originGeometry,
+        }[range]
+      } else {
+        geometry = {
+          both: <GeolocusGeometry>Topology.difference(outside, inside),
+          outside: <GeolocusGeometry>(
+            Topology.difference(outside, originGeometry)
+          ),
+          inside: <GeolocusGeometry>Topology.difference(originGeometry, inside),
+        }[range]
+      }
+    }
+
     const region = new GeolocusObject(geometry)
     const pdf: RegionPDFInput = {
       type: 'sdf',
@@ -165,6 +234,40 @@ export class RegionResultHandler {
     return { region, pdf }
   }
 
+  private static distanceHandler = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ) => {
+    if (relation.topology === 'disjoint') return origin
+
+    let distanceRegion: GeolocusObject
+    const geometry = Topology.bufferOfDistance(
+      origin.getGeometry(),
+      MAGIC_NUMBER,
+    ) as GeolocusGeometry
+    if (relation.distance === 0) {
+      distanceRegion = new GeolocusObject(geometry)
+    } else if (typeof relation.distance === 'number') {
+      const temp = Topology.bufferOfDistance(geometry, relation.distance)
+      if (temp) {
+        distanceRegion = new GeolocusObject(
+          <GeolocusGeometry>Topology.difference(origin.getGeometry(), temp),
+        )
+      } else {
+        distanceRegion = new GeolocusObject(
+          new GeolocusGeometry('Polygon', JTSGeometryFactory.empty('Polygon')),
+        )
+      }
+    } else {
+      const { region } = this.disjointHandler(origin, relation, role)
+      relation.topology = 'contain'
+      distanceRegion = region
+    }
+
+    return distanceRegion
+  }
+
   private static topologyAndDistance = (
     origin: GeolocusObject,
     relation: GeoRelation,
@@ -179,77 +282,14 @@ export class RegionResultHandler {
       ) => RegionHandlerResult
     > = {
       disjoint: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const distance = Distance.normalize(
-          relation.distance as EuclideanDistance | EuclideanDistanceRange,
-        )
-        const meanDistanceDelta = role.getDistanceDelta() * distance.mean
-        const minDistance =
-          distance.min - meanDistanceDelta * 1.5 < 0
-            ? 0
-            : distance.min - meanDistanceDelta * 1.5
-        const maxDistance = distance.max + meanDistanceDelta * 1.5
-        const distanceDelta = (maxDistance - minDistance) / 3
-        const geometry = Topology.bufferOfRange(origin.getGeometry(), [
-          minDistance,
-          maxDistance,
-        ]) as GeolocusGeometry
-        const region = new GeolocusObject(geometry)
-        const pdf: RegionPDFInput = {
-          type: 'distance',
-          origin,
-          gdf: {
-            distance: distance.mean,
-            distanceDelta,
-          },
-          sdf: {},
-          weight: relation.weight,
-        }
+        const res = this.disjointHandler(origin, relation, role)
 
-        return { region, pdf }
+        return res
       },
       contain: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const topology = this.containHandler(
-          origin,
-          relation,
-          role.getContext(),
-        )
+        const res = this.containHandler(origin, relation, role)
 
-        let distanceRegion: GeolocusObject
-        const geometry = Topology.bufferOfDistance(
-          origin.getGeometry(),
-          MAGIC_NUMBER,
-        ) as GeolocusGeometry
-        if (relation.distance === 0) {
-          distanceRegion = new GeolocusObject(geometry)
-        } else {
-          const tempRegion = Topology.bufferOfDistance(
-            geometry,
-            -relation.distance,
-          )
-          if (tempRegion) {
-            distanceRegion = new GeolocusObject(
-              Topology.difference(
-                origin.getGeometry(),
-                tempRegion,
-              ) as GeolocusGeometry,
-            )
-          } else {
-            distanceRegion = new GeolocusObject(
-              new GeolocusGeometry(
-                'Polygon',
-                JTSGeometryFactory.empty('Polygon'),
-              ),
-            )
-          }
-        }
-
-        const intersection = this.intersection(
-          topology.region as GeolocusObject,
-          distanceRegion as GeolocusObject,
-        )
-        topology.region = intersection
-        topology.pdf.sdf.girdRegion = intersection
-        return topology
+        return res
       },
       intersect: (
         origin: GeolocusObject,
@@ -259,10 +299,15 @@ export class RegionResultHandler {
         const topology = this.intersectHandler(origin, relation, role)
         return topology
       },
+      along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const topology = this.alongHandler(origin, relation, role)
+        return topology
+      },
     }
 
+    const distanceRegion = this.distanceHandler(origin, relation, role)
     const topology = relation.topology
-    const result = map[topology](origin, relation, role)
+    const result = map[topology](distanceRegion, relation, role)
 
     return result
   }
@@ -273,7 +318,7 @@ export class RegionResultHandler {
     role: Role,
   ): RegionHandlerResult => {
     const td = this.topologyAndDistance(origin, relation, role)
-    const direction = this.directionHandler(origin, relation, role)
+    const direction = this.directionHandler(td.region, relation, role)
     const intersection = this.intersection(td.region, direction.region)
 
     td.region = intersection
