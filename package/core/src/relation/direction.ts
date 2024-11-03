@@ -58,9 +58,11 @@ export class Direction {
     if (range === 'inside') {
       const intersection = Topology.intersection(bboxPolygon, geometry)
       return intersection as GeolocusGeometry
-    } else {
+    } else if (range === 'outside') {
       const difference = Topology.difference(bboxPolygon, geometry)
       return difference as GeolocusGeometry
+    } else {
+      return bboxPolygon as GeolocusGeometry
     }
   }
 

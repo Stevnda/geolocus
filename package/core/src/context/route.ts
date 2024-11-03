@@ -1,4 +1,5 @@
 import { GeolocusContext } from './context'
+import { ObjectMapAction } from './objectMap'
 
 export class Route {
   // the uuid of node is the same as geolocusObject
@@ -109,13 +110,13 @@ export class RouteAction {
   static computeObjectOrder(context: GeolocusContext, uuid: string, inNode: Map<string, Set<string>>) {
     // the object must be fuzzy object
     const objectMap = context.getObjectMap()
-    const object = objectMap.getObjectByUUID(uuid)
+    const object = ObjectMapAction.getObjectByUUID(objectMap, uuid)
     if (!object || object.getStatus() !== 'fuzzy') {
       return false
     }
 
     // get all fuzzy object
-    const objectUUIDMap = objectMap.getObjectUUIDMap()
+    const objectUUIDMap = objectMap.getUuidMap()
     const fuzzyObject: Set<string> = new Set()
     objectUUIDMap.forEach((value, key) => {
       if (value.getStatus() === 'fuzzy') {

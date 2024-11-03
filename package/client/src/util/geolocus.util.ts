@@ -7,7 +7,8 @@ export const temp = [
     origin: {
       name: '吉隆坡机场',
     },
-  },
+    target: 'taiwan',
+  }, // 0
   {
     role: 'default',
     origin: {
@@ -17,13 +18,15 @@ export const temp = [
       direction: 'E',
       topology: 'intersect',
     },
-  },
+    target: 'taiwan',
+  }, // 1
   {
     role: 'default',
     origin: {
       name: '卡里马塔海峡',
     },
-  },
+    target: 'taiwan',
+  }, // 2
   {
     role: 'default',
     origin: {
@@ -34,13 +37,15 @@ export const temp = [
       topology: 'disjoint',
       distance: 400000,
     },
-  },
+    target: 'taiwan',
+  }, // 3
   {
     role: 'default',
     origin: {
       name: '加里曼尼岛',
     },
-  },
+    target: 'taiwan',
+  }, // 4
   {
     role: 'default',
     origin: {
@@ -50,7 +55,8 @@ export const temp = [
       direction: 'SE',
       topology: 'contain',
     },
-  },
+    target: 'taiwan',
+  }, // 5
   {
     role: 'default',
     origin: {
@@ -61,7 +67,8 @@ export const temp = [
       topology: 'disjoint',
       distance: 100000,
     },
-  },
+    target: 'taiwan',
+  }, // 6
   {
     role: 'default',
     origin: {
@@ -72,7 +79,8 @@ export const temp = [
       topology: 'disjoint',
       distance: 150000,
     },
-  },
+    target: 'taiwan',
+  }, // 7
   {
     role: 'default',
     origin: {
@@ -82,19 +90,28 @@ export const temp = [
       direction: 'E',
       topology: 'intersect',
     },
-  },
+    target: 'taiwan',
+  }, // 8
   {
     role: 'default',
     origin: {
       name: '松山机场',
     },
-  },
+    target: 'taiwan',
+  }, // 9
 ]
 
 export const geolocusContext = geolocus.createContext({
   maxDistance: 1000000,
   name: 'test',
   gridSize: 128 * 128,
+  region: [
+    [-99999999, -99999999],
+    [99999999, -99999999],
+    [99999999, 99999999],
+    [-99999999, 99999999],
+    [-99999999, -99999999],
+  ],
 })
 
 geolocusContext.addRole({
@@ -112,7 +129,7 @@ geolocusContext.addRole({
   weight: 1,
 })
 
-geolocusContext.use('place', getPlaceDataByName)
+geolocusContext.use('placePlugin', getPlaceDataByName)
 
 export const computePointTest = (text: string) => {
   const tripleList = JSON.parse(text) as UserGeolocusTriple[]
@@ -125,7 +142,8 @@ export const computePointTest = (text: string) => {
 
 export const computeLineTest = (text: string) => {
   const tripleList = JSON.parse(text) as UserGeolocusTriple[]
-  const res = geolocusContext.computeFuzzyLineObject('taiwan', tripleList)
+  geolocusContext.defineRelation(tripleList)
+  const res = geolocusContext.computeFuzzyLineObject('taiwan')
   console.log(res)
   return res
 }

@@ -1,4 +1,4 @@
-import { PlacePluginOutput } from '@geolocus/core'
+import { PlaceOutput } from '@geolocus/core'
 
 const placeDataBase = {
   type: 'FeatureCollection',
@@ -412,17 +412,15 @@ const placeDataBase = {
   ],
 }
 
-export const getPlaceDataByName = (name: string): PlacePluginOutput => {
+export const getPlaceDataByName = (name: string): PlaceOutput | null => {
   for (const feature of placeDataBase.features) {
     if (feature.properties && feature.properties.name === name) {
       return {
         type: feature.geometry.type,
         coord: feature.geometry.coordinates,
-      } as PlacePluginOutput
+      } as PlaceOutput
     }
   }
-  return {
-    type: 'Point',
-    coord: [0, 0],
-  }
+
+  return null
 }

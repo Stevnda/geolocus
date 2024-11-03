@@ -2,7 +2,6 @@
 import { Route } from './route'
 import { Role } from './role'
 import { Relation } from '@/relation'
-import { GeolocusPlugin, PlacePlugin } from './plugin'
 import { GeolocusContextInit } from './context.type'
 import { RegionResult } from '@/region'
 import { ObjectMap } from './objectMap'
@@ -14,7 +13,6 @@ export class GeolocusContext {
   private _uuid: string
   private _name: string
   private _regionRange: GeolocusObject
-  private _pluginMap: Map<GeolocusPlugin, Function>
   private _roleMap: Map<string, Role>
   private _maxDistance: number
   private _gridSize: number
@@ -30,7 +28,6 @@ export class GeolocusContext {
     this._name = init.name || 'default'
     this._regionRange = new GeolocusObject(new GeolocusGeometry('Polygon', JTSGeometryFactory.polygon([init.region])))
     this._objectMap = new ObjectMap(this)
-    this._pluginMap = new Map()
     this._relation = new Relation(this)
     this._route = new Route(this)
     this._roleMap = new Map() // the key is the name of role
@@ -69,23 +66,6 @@ export class GeolocusContext {
 
   getObjectMap(): ObjectMap {
     return this._objectMap
-  }
-
-  setPluginMap(value: Map<GeolocusPlugin, Function>): void {
-    this._pluginMap = value
-  }
-
-  getPluginMap(): Map<GeolocusPlugin, Function> {
-    return this._pluginMap
-  }
-
-  getPlugin(type: 'place'): PlacePlugin
-  getPlugin(type: GeolocusPlugin): Function | null {
-    if (type === 'place') {
-      const plugin = this._pluginMap.get(type) as PlacePlugin
-      return plugin
-    }
-    return null
   }
 
   setRelation(value: Relation): void {
