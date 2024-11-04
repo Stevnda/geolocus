@@ -53,6 +53,7 @@ export const AiText = () => {
               } else {
                 return {
                   role: 'default',
+                  target: 'taiwan',
                   ...value,
                 }
               }
