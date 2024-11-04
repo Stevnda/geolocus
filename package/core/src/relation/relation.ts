@@ -162,16 +162,19 @@ export class RelationAction {
   private static handleTarget(triple: UserGeolocusTriple, context: GeolocusContext): string {
     const name = triple.target as string
     const objectMap = context.getObjectMap()
+    const pluginList = objectMap.getPlacePluginList()
+    const defaultPlugin = pluginList[0]
 
-    let uuid = ObjectMapAction.getObjectByPlaceName(objectMap, name)?.getUUID()
-    if (uuid) return uuid
+    const res = defaultPlugin(name)
+    if (res?.object != null) return res.object.getUUID()
 
     const jstGeometry = JTSGeometryFactory.empty('Point')
     const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
     const obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
 
-    uuid = obj.getUUID()
+    const uuid = obj.getUUID()
     ObjectMapAction.addObject(objectMap, obj)
+    console.log(uuid)
 
     return uuid
   }

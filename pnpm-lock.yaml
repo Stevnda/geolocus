@@ -104,6 +104,9 @@ importers:
       '@turf/projection':
         specifier: ^7.1.0
         version: 7.1.0
+      '@turf/simplify':
+        specifier: ^7.1.0
+        version: 7.1.0
       '@uiw/react-codemirror':
         specifier: ^4.23.2
         version: 4.23.2(@babel/runtime@7.25.6)(@codemirror/autocomplete@6.18.1(@codemirror/language@6.10.2)(@codemirror/state@6.4.1)(@codemirror/view@6.33.0)(@lezer/common@1.2.1))(@codemirror/language@6.10.2)(@codemirror/lint@6.8.1)(@codemirror/search@6.5.6)(@codemirror/state@6.4.1)(@codemirror/theme-one-dark@6.1.2)(@codemirror/view@6.33.0)(codemirror@6.0.1(@lezer/common@1.2.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -1323,17 +1326,26 @@ packages:
   '@tsconfig/node16@1.0.4':
     resolution: {integrity: sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA==}
 
+  '@turf/clean-coords@7.1.0':
+    resolution: {integrity: sha512-q1U8UbRVL5cRdwOlNjD8mad8pWjFGe0s4ihg1pSiVNq7i47WASJ3k20yZiUFvuAkyNjV0rZ/A7Jd7WzjcierFg==}
+
   '@turf/clone@7.1.0':
     resolution: {integrity: sha512-5R9qeWvL7FDdBIbEemd0eCzOStr09oburDvJ1hRiPCFX6rPgzcZBQ0gDmZzoF4AFcNLb5IwknbLZjVLaUGWtFA==}
 
   '@turf/helpers@7.1.0':
     resolution: {integrity: sha512-dTeILEUVeNbaEeoZUOhxH5auv7WWlOShbx7QSd4s0T4Z0/iz90z9yaVCtZOLbU89umKotwKaJQltBNO9CzVgaQ==}
 
+  '@turf/invariant@7.1.0':
+    resolution: {integrity: sha512-OCLNqkItBYIP1nE9lJGuIUatWGtQ4rhBKAyTfFu0z8npVzGEYzvguEeof8/6LkKmTTEHW53tCjoEhSSzdRh08Q==}
+
   '@turf/meta@7.1.0':
     resolution: {integrity: sha512-ZgGpWWiKz797Fe8lfRj7HKCkGR+nSJ/5aKXMyofCvLSc2PuYJs/qyyifDPWjASQQCzseJ7AlF2Pc/XQ/3XkkuA==}
 
   '@turf/projection@7.1.0':
     resolution: {integrity: sha512-3wHluMoOvXnTe7dfi0kcluTyLNG5MwGsSsK5OA98vkkLH6a1xvItn8e9GcesuT07oB2km/bgefxYEIvjQG5JCA==}
+
+  '@turf/simplify@7.1.0':
+    resolution: {integrity: sha512-JypymaoiSiFzGHwEoUkK0OPW1KQSnH3hEsEW3UIRS+apzltJ4HdFovYjsfqQgGZJZ+NJ9+dv7h8pgGLYuqcBUQ==}
 
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
@@ -5320,6 +5332,13 @@ snapshots:
 
   '@tsconfig/node16@1.0.4': {}
 
+  '@turf/clean-coords@7.1.0':
+    dependencies:
+      '@turf/helpers': 7.1.0
+      '@turf/invariant': 7.1.0
+      '@types/geojson': 7946.0.14
+      tslib: 2.7.0
+
   '@turf/clone@7.1.0':
     dependencies:
       '@turf/helpers': 7.1.0
@@ -5331,6 +5350,12 @@ snapshots:
       '@types/geojson': 7946.0.14
       tslib: 2.7.0
 
+  '@turf/invariant@7.1.0':
+    dependencies:
+      '@turf/helpers': 7.1.0
+      '@types/geojson': 7946.0.14
+      tslib: 2.7.0
+
   '@turf/meta@7.1.0':
     dependencies:
       '@turf/helpers': 7.1.0
@@ -5338,6 +5363,15 @@ snapshots:
 
   '@turf/projection@7.1.0':
     dependencies:
+      '@turf/clone': 7.1.0
+      '@turf/helpers': 7.1.0
+      '@turf/meta': 7.1.0
+      '@types/geojson': 7946.0.14
+      tslib: 2.7.0
+
+  '@turf/simplify@7.1.0':
+    dependencies:
+      '@turf/clean-coords': 7.1.0
       '@turf/clone': 7.1.0
       '@turf/helpers': 7.1.0
       '@turf/meta': 7.1.0

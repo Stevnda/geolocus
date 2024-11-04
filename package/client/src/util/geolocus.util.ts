@@ -1,5 +1,5 @@
 import { geolocus, GeolocusGird, UserGeolocusTriple } from '@geolocus/core'
-import { getPlaceDataByName } from './place.plugin'
+import { getPlaceDataByName, nominatim } from './place.plugin'
 
 export const temp = [
   {
@@ -130,6 +130,7 @@ geolocusContext.addRole({
 })
 
 geolocusContext.use('placePlugin', getPlaceDataByName)
+geolocusContext.use('placePlugin', nominatim)
 
 export const computePointTest = (text: string) => {
   const tripleList = JSON.parse(text) as UserGeolocusTriple[]

@@ -13,6 +13,7 @@
     "lint": "eslint src/**/* --max-warnings 0",
     "prettier": "prettier src/**/* --write",
     "format": "pnpm prettier && pnpm lint",
+    "check": "tsc --noEmit",
     "test": "vitest --config ./vitest.config.ts",
     "test:coverage": "vitest run --config ./vitest.config.ts --coverage",
     "bench": "vitest bench --config ./vitest.config.ts"
@@ -26,6 +27,7 @@
     "@mapbox/mapbox-gl-language": "^1.0.1",
     "@sinclair/typebox": "^0.32.35",
     "@turf/projection": "^7.1.0",
+    "@turf/simplify": "^7.1.0",
     "@uiw/react-codemirror": "^4.23.2",
     "antd": "^5.20.6",
     "echarts": "^5.5.1",

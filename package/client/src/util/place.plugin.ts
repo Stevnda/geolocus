@@ -1,4 +1,5 @@
 import { PlaceOutput } from '@geolocus/core'
+import { toMercator } from '@turf/projection'
 
 const placeDataBase = {
   type: 'FeatureCollection',
@@ -419,6 +420,34 @@ export const getPlaceDataByName = (name: string): PlaceOutput | null => {
         type: feature.geometry.type,
         coord: feature.geometry.coordinates,
       } as PlaceOutput
+    }
+  }
+
+  return null
+}
+
+export const nominatim = (name: string): PlaceOutput | null => {
+  const base = `https://nominatim.openstreetmap.org/search.php`
+  const params = new URLSearchParams({
+    q: name,
+    format: 'geojson',
+    polygon_geojson: '1',
+    polygon_threshold: '0.02',
+  })
+  const url = `${base}?${params.toString()}`
+
+  const xhr = new XMLHttpRequest()
+  xhr.open('GET', url, false)
+  xhr.send()
+  if (xhr.status === 200) {
+    const featureCollection = toMercator(JSON.parse(xhr.responseText))
+    for (const feature of featureCollection.features) {
+      if (feature.properties.category === 'boundary') {
+        return {
+          type: feature.geometry.type,
+          coord: feature.geometry.coordinates,
+        } as PlaceOutput
+      }
     }
   }
 

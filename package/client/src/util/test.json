@@ -148,5 +148,40 @@
       },
       "target": "taiwan"
     }
+  ],
+  "ddd": "飞机从北京市出发, 经过济南市, 最后达到南京市",
+  "123": [
+    {
+      "role": "default",
+      "origin": {
+        "name": "北京市"
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "origin": {
+        "name": "济南市"
+      },
+      "relation": {
+        "direction": "S",
+        "topology": "intersect"
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "origin": {
+        "name": "南京市"
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "target": "taiwan",
+      "origin": {
+        "name": "广州市"
+      }
+    }
   ]
 }
