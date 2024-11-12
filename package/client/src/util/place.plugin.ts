@@ -426,6 +426,7 @@ export const getPlaceDataByName = (name: string): PlaceOutput | null => {
   return null
 }
 
+// NOTE 简单多边形处理
 export const nominatim = (name: string): PlaceOutput | null => {
   const base = `https://nominatim.openstreetmap.org/search.php`
   const params = new URLSearchParams({
