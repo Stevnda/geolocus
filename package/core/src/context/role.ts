@@ -1,6 +1,5 @@
-import { AbsoluteDirection, RelativeDirection, SemanticDistanceMap } from '@/relation'
+import { SemanticDistanceMap } from '@/relation'
 import { GeolocusContext } from './context'
-import { DirectionDelta } from './context.type'
 import { generateUUID } from '@/util'
 
 export class Role {
@@ -8,7 +7,7 @@ export class Role {
   private _name: string
   private _context: GeolocusContext
   private _orientation: number
-  private _directionDelta: DirectionDelta
+  private _directionDelta: number
   private _distanceDelta: number
   private _semanticDistanceMap: SemanticDistanceMap
   private _weight: number
@@ -25,17 +24,8 @@ export class Role {
     this._uuid = generateUUID()
     this._name = name
     this._context = context
-    this._orientation = orientation
-    this._directionDelta = {
-      N: [0, directionDelta],
-      NE: [Math.PI / 4, directionDelta],
-      E: [Math.PI / 2, directionDelta],
-      SE: [(Math.PI / 4) * 3, directionDelta],
-      S: [Math.PI, directionDelta],
-      SW: [(Math.PI / 4) * 5, directionDelta],
-      W: [(Math.PI / 2) * 3, directionDelta],
-      NW: [(Math.PI / 4) * 7, directionDelta],
-    }
+    this._orientation = orientation // azimuth, N=0, [0, 2pi]
+    this._directionDelta = directionDelta
     this._distanceDelta = distanceDelta
     this._semanticDistanceMap = semanticDistanceMap
     this._weight = weight
@@ -73,25 +63,12 @@ export class Role {
     return this._orientation
   }
 
-  setDirectionDelta(value: DirectionDelta): void {
+  setDirectionDelta(value: number): void {
     this._directionDelta = value
   }
 
-  getDirectionDelta(value: AbsoluteDirection | RelativeDirection): [number, number] {
-    const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-    if (AbsoluteDirectionMap.includes(value)) {
-      return this._directionDelta[value as AbsoluteDirection]
-    } else {
-      // relativeDirection to TAbsoluteDirection
-      const directionTransform = value
-        .replace('F', 'N')
-        .replace('B', 'S')
-        .replace('R', 'E')
-        .replace('L', 'W') as AbsoluteDirection
-      const delta = this._directionDelta[directionTransform]
-      // add offset of angle
-      return [delta[0] + this._orientation, delta[1]]
-    }
+  getDirectionDelta() {
+    return this._directionDelta
   }
 
   setDistanceDelta(value: number): void {

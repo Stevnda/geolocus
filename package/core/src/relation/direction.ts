@@ -1,7 +1,8 @@
 import { GeolocusBBox, GeolocusGeometry, JTSGeometryFactory, GeolocusGeometryTransformation, Position2 } from '@/object'
 import { GEO_MAX_VALUE } from '@/util'
-import { AbsoluteDirection, RelativeDirection, ComputeRegionRange } from './relation.type'
+import { AbsoluteDirection, ComputeRegionRange, SeManticDirection } from './relation.type'
 import { Topology } from './topology'
+import { Role } from '@/context'
 
 export class Direction {
   // radian from [1,0] (N)
@@ -11,71 +12,42 @@ export class Direction {
     return angle
   }
 
-  static computeRegion = (
-    geometry: GeolocusGeometry,
-    direction: AbsoluteDirection | RelativeDirection,
-    range: ComputeRegionRange,
-    orientation = 0,
-  ) => {
-    const AbsoluteDirectionMap = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW']
-    if (AbsoluteDirectionMap.includes(direction)) {
-      const region = this.computeAbsoluteDirection(geometry, direction, range)
-      return region
+  static transform(direction: SeManticDirection | number, role: Role) {
+    if (typeof direction === 'number') return (direction / 360) * 2 * Math.PI
+
+    const AbsoluteDirectionMap = {
+      N: 0,
+      NE: Math.PI / 4,
+      E: Math.PI / 2,
+      SE: (3 * Math.PI) / 4,
+      S: Math.PI,
+      SW: (5 * Math.PI) / 4,
+      W: (3 * Math.PI) / 2,
+      NW: (7 * Math.PI) / 4,
     }
-    const region = this.computeRelativeDirection(geometry, direction, range, orientation)
-    return region
+    if (direction in AbsoluteDirectionMap) return AbsoluteDirectionMap[<AbsoluteDirection>direction]
+
+    const transformDirection = <AbsoluteDirection>(
+      direction.replace('F', 'N').replace('B', 'S').replace('R', 'E').replace('L', 'W')
+    )
+
+    return AbsoluteDirectionMap[transformDirection] + role.getOrientation()
   }
 
-  private static computeAbsoluteDirection(geometry: GeolocusGeometry, direction: string, range: ComputeRegionRange) {
-    const n = (source: Position2, target: GeolocusBBox) => {
-      target[1] = source[1]
-    }
-    const s = (source: Position2, target: GeolocusBBox) => {
-      target[3] = source[1]
-    }
-    const e = (source: Position2, target: GeolocusBBox) => {
-      target[0] = source[0]
-    }
-    const w = (source: Position2, target: GeolocusBBox) => {
-      target[2] = source[0]
-    }
-    const fnMap = new Map([
-      ['N', n],
-      ['S', s],
-      ['E', e],
-      ['W', w],
-    ])
-
+  static computeRegion(geometry: GeolocusGeometry, direction: number, range: ComputeRegionRange) {
     const center = geometry.getCenter()
-    const target: GeolocusBBox = [-GEO_MAX_VALUE, -GEO_MAX_VALUE, GEO_MAX_VALUE, GEO_MAX_VALUE]
-    fnMap.forEach((fn, key) => {
-      if (direction.includes(key)) {
-        fn(center, target)
-      }
-    })
-    const bboxPolygon = new GeolocusGeometry('Polygon', JTSGeometryFactory.bbox(target))
+    const target: GeolocusBBox = [-GEO_MAX_VALUE, center[1], GEO_MAX_VALUE, GEO_MAX_VALUE]
+    const bbox = new GeolocusGeometry('Polygon', JTSGeometryFactory.bbox(target))
+    const bboxRotated = GeolocusGeometryTransformation.rotateAroundCoord(bbox, direction, geometry.getCenter())
 
     if (range === 'inside') {
-      const intersection = Topology.intersection(bboxPolygon, geometry)
+      const intersection = Topology.intersection(bboxRotated, geometry)
       return intersection as GeolocusGeometry
     } else if (range === 'outside') {
-      const difference = Topology.difference(bboxPolygon, geometry)
+      const difference = Topology.difference(bboxRotated, geometry)
       return difference as GeolocusGeometry
     } else {
-      return bboxPolygon as GeolocusGeometry
+      return bboxRotated as GeolocusGeometry
     }
-  }
-
-  private static computeRelativeDirection(
-    geometry: GeolocusGeometry,
-    direction: string,
-    range: ComputeRegionRange,
-    orientation: number,
-  ) {
-    const directionTransform = direction.replace('F', 'N').replace('B', 'S').replace('R', 'E').replace('L', 'W')
-    const region = this.computeAbsoluteDirection(geometry, directionTransform, range)
-    const regionRotated = GeolocusGeometryTransformation.rotateAroundCoord(region, orientation, geometry.getCenter())
-
-    return regionRotated
   }
 }
