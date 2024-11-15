@@ -327,22 +327,25 @@ export class Region {
   ): [Position2[], Position2] {
     result = result as RegionResult
     const context = triple.role.getContext()
-    const curRegion = new GeolocusGeometry('Point', JTSGeometryFactory.point(result.coord as Position2))
+    const curRegion = <GeolocusGeometry>result.region?.getGeometry()
+    const curPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(<Position2>result.coord))
 
-    let afterRegion: GeolocusGeometry
-    if (index === resultList.length - 1) {
-      afterRegion = result.region?.getGeometry() as GeolocusGeometry
-    } else {
-      const afterResult = resultList[index + 1]
-      if (afterResult instanceof GeolocusObject) {
-        afterRegion = afterResult.getGeometry()
-      } else {
-        afterRegion = afterResult.region?.getGeometry() as GeolocusGeometry
-      }
-    }
+    const afterResult = index === resultList.length - 1 ? result : resultList[index + 1]
+    const afterRegion = <GeolocusGeometry>afterResult.region?.getGeometry()
+    const afterPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(<Position2>afterResult.coord))
 
+    // 根据 curPoint 和 afterPoint 计算距离 afterRegion 和 curRegion 的最近点 pointOfCurPoint 和 coordOfAfterPoint
+    // 计算对应最近点距离 curPoint 和 afterPoint 的距离之和, 选择其中的较小值作为最终最近点
+    const [coordOfCurPoint] = Distance.nearestPoints(afterRegion, curPoint)
+    const pointOfCurPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(coordOfCurPoint))
+    const [coordOfAfterPoint] = Distance.nearestPoints(curRegion, afterPoint)
+    const pointOfAfterPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(coordOfAfterPoint))
+    const distanceOfCurPoint =
+      Distance.distance(pointOfCurPoint, curPoint) + Distance.distance(pointOfCurPoint, afterPoint)
+    const distanceOfAfterPoint =
+      Distance.distance(pointOfAfterPoint, curPoint) + Distance.distance(pointOfAfterPoint, afterPoint)
     const coord0 = beforeCoord
-    const [coord1] = Distance.nearestPoints(afterRegion, curRegion)
+    const coord1 = distanceOfCurPoint < distanceOfAfterPoint ? coordOfCurPoint : coordOfAfterPoint
 
     const bbox = result.region?.getGeometry().getBBox() as GeolocusBBox
     const xStart = bbox[0]
@@ -356,17 +359,20 @@ export class Region {
     const rowCount = Math.ceil(dy / girdSize)
     const colCount = Math.ceil(dx / girdSize)
 
+    // 计算 coord0 和 coord1 在 grid 中的位置, 避免超出外接矩形范围
     const col0 = MathUtil.clamp(Math.floor((coord0[0] - xStart) / girdSize), 0, colCount - 1)
     const row0 = MathUtil.clamp(Math.floor((coord0[1] - yStart) / girdSize), 0, rowCount - 1)
     const col1 = MathUtil.clamp(Math.floor((coord1[0] - xStart) / girdSize), 0, colCount - 1)
     const row1 = MathUtil.clamp(Math.floor((coord1[1] - yStart) / girdSize), 0, rowCount - 1)
 
+    // 栅格概率值反转, 转换为最小距离之和
     const gird = result.resultGird as GeolocusGird
     const gridTransform = Gird.createGirdWithFilter(
       gird.length,
       gird[0].length,
       (row, col) => 1 / (gird[row][col] + 0.1),
     )
+
     const graph = new Graph(gridTransform, {
       diagonal: true,
     })
@@ -379,6 +385,7 @@ export class Region {
     for (let i = 0; i < res.length; i++) {
       const col = res[i][1]
       const row = res[i][0]
+      // 栅格中心点坐标
       const x = xStart + (col + 0.5) * girdSize
       const y = yStart + (row + 0.5) * girdSize
       coordList.push([x, y])
