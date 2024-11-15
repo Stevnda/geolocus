@@ -99,7 +99,6 @@ export class ObjectMapAction {
     const pluginList = objectMap.getPlacePluginList()
     for (const plugin of pluginList) {
       const res = plugin(name)
-      console.log(name, res)
       if (res == null) continue
       if (res.object != null) {
         return res.object

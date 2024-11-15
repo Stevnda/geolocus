@@ -1,9 +1,10 @@
 import { GeolocusContext, ObjectMapAction, Role, RouteAction } from '@/context'
-import { GeoRelation, GeoTriple, SemanticRelation } from './relation.type'
+import { GeoRelation, GeoTriple, RelationMode, SemanticRelation } from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
 import { generateUUID, GEO_MAX_VALUE } from '@/util'
 import { UserGeolocusTriple, UserGeoRelation } from '..'
 import { Distance } from './distance'
+import { Direction } from './direction'
 
 export class Relation {
   // the uuid of tripleListMap is the same as geolocusObject
@@ -51,51 +52,7 @@ export class RelationAction {
     else return []
   }
 
-  // NOTE 修改逻辑关系, 布局模型目前没有搞
-  static transform(relation: UserGeoRelation, role: Role): GeoRelation {
-    const res: GeoRelation = {
-      topology: 'disjoint',
-      direction: undefined,
-      distance: 0,
-      range: 'outside',
-      semantic: undefined,
-      weight: 1,
-    }
-
-    // range
-    if (relation.range) {
-      res.range = relation.range
-    } else {
-      res.range = 'both'
-    }
-
-    // topology
-    if (relation.topology) {
-      res.topology = relation.topology
-    } else {
-      res.topology = 'contain'
-    }
-    // direction
-    res.direction = relation.direction
-    // distance
-    if (relation.distance != null) {
-      const distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
-      res.distance = distanceTransform
-    } else {
-      if (res.topology === 'disjoint') {
-        res.distance = [0, GEO_MAX_VALUE]
-      } else {
-        res.distance = 0
-      }
-    }
-
-    // weight
-    res.weight = role.getWeight()
-
-    return res
-  }
-
-  static defineTriple(triple: UserGeolocusTriple, context: GeolocusContext) {
+  static defineTriple(triple: UserGeolocusTriple, context: GeolocusContext, mode: RelationMode) {
     const role = context.getRoleMap().get(triple.role)
     if (!role) throw new Error('role is not existed')
 
@@ -113,7 +70,7 @@ export class RelationAction {
       uuid: generateUUID(),
       role,
       origin: originUUID,
-      relation: this.transform(triple.relation || {}, role),
+      relation: this.transform(triple.relation || {}, role, mode),
       target: targetUUID,
     }
     const tripleUUID = generateUUID()
@@ -177,5 +134,53 @@ export class RelationAction {
     console.log(uuid)
 
     return uuid
+  }
+
+  static transform(relation: UserGeoRelation, role: Role, mode: RelationMode): GeoRelation {
+    const res: GeoRelation = {
+      topology: 'disjoint',
+      direction: undefined,
+      distance: 0,
+      range: 'outside',
+      weight: 1,
+    }
+
+    // NOTE 布局模型
+
+    // range
+    if (relation.range) {
+      res.range = relation.range
+    } else {
+      res.range = 'both'
+    }
+
+    // topology
+    if (relation.topology) {
+      res.topology = relation.topology
+    } else if (mode === 'point') {
+      res.topology = 'disjoint'
+    } else {
+      res.topology = 'contain'
+    }
+
+    // direction
+    if (relation.direction) {
+      res.direction = Direction.transform(relation.direction, role)
+    }
+
+    // distance
+    if (relation.distance != null) {
+      const distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
+      res.distance = distanceTransform
+    } else if (res.topology === 'disjoint') {
+      res.distance = [0, GEO_MAX_VALUE]
+    } else {
+      res.distance = 0
+    }
+
+    // weight
+    res.weight = role.getWeight()
+
+    return res
   }
 }

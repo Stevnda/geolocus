@@ -1,14 +1,14 @@
 import {
-  AbsoluteDirection,
   ComputeRegionRange,
   EuclideanDistance,
   EuclideanDistanceRange,
-  RelativeDirection,
   SemanticDistanceMap,
   TopologyRelation,
   GeoTriple,
   SemanticDistance,
   RelationAction,
+  SeManticDirection,
+  RelationMode,
 } from './relation'
 import { GeolocusContext, GeolocusContextInit, PlacePlugin, Role } from './context'
 import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
@@ -19,7 +19,7 @@ import { ObjectMapAction } from './context/objectMap'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
-  direction?: AbsoluteDirection | RelativeDirection
+  direction?: SeManticDirection | number // [0,360], N=0
   distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
   range?: ComputeRegionRange
   layout?: string
@@ -77,9 +77,9 @@ class Geolocus {
     roleMap.set(init.name, role)
   }
 
-  defineRelation(tripleList: UserGeolocusTriple[]) {
+  defineRelation(tripleList: UserGeolocusTriple[], mode: RelationMode) {
     for (const triple of tripleList) {
-      RelationAction.defineTriple(triple, this._context)
+      RelationAction.defineTriple(triple, this._context, mode)
     }
   }
 

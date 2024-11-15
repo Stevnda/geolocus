@@ -6,8 +6,6 @@ import {
   Topology,
   EuclideanDistance,
   EuclideanDistanceRange,
-  AbsoluteDirection,
-  RelativeDirection,
   TopologyRelation,
 } from '@/relation'
 import { RegionHandlerResult, RegionPDFInput } from './region.type'
@@ -161,16 +159,16 @@ export class RegionResultHandler {
     relation: GeoRelation,
     role: Role,
   ): RegionHandlerResult => {
-    const direction = relation.direction as AbsoluteDirection | RelativeDirection
-    const directionDelta = role.getDirectionDelta(direction)
-    const geometry = Direction.computeRegion(origin.getGeometry(), direction, relation.range, role.getOrientation())
+    const direction = <number>relation.direction
+    const directionDelta = role.getDirectionDelta()
+    const geometry = Direction.computeRegion(origin.getGeometry(), direction, relation.range)
     const region = new GeolocusObject(geometry)
     const pdf: RegionPDFInput = {
       type: 'angle',
       origin,
       gdf: {
-        azimuth: directionDelta[0],
-        azimuthDelta: directionDelta[1],
+        azimuth: direction,
+        azimuthDelta: directionDelta,
       },
       sdf: {},
       weight: relation.weight,
