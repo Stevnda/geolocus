@@ -25,11 +25,11 @@ export class RegionResultHandler {
   private static disjointHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
     const distance = Distance.normalize(relation.distance as EuclideanDistance | EuclideanDistanceRange)
     const meanDistanceDelta = role.getDistanceDelta() * distance.mean
-    const minDistance = distance.min - meanDistanceDelta * 1.5 < 0 ? 0 : distance.min - meanDistanceDelta * 1.5
+    const minDistance = distance.min - meanDistanceDelta * 1.5 >= 0 ? distance.min - meanDistanceDelta * 1.5 : 0
     const maxDistance = distance.max + meanDistanceDelta * 1.5
     const distanceDelta = (maxDistance - minDistance) / 3
 
-    const geometry = Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance]) as GeolocusGeometry
+    const geometry = <GeolocusGeometry>Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance])
     const region = new GeolocusObject(geometry)
 
     const pdf: RegionPDFInput = {
@@ -71,54 +71,16 @@ export class RegionResultHandler {
     const context = role.getContext()
     const originGeometry = origin.getGeometry()
     const objectType = originGeometry.getType()
+
+    // 取外接矩形对角线的十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
     const N = role.getSemanticDistanceMap().N
-    // NOTE 这里目前用的 near, 以后可能使用对象的相对大小
-    const distance = (N[0] + N[1]) / 2
+    const bbox = originGeometry.getBBox()
+    const dx = bbox[2] - bbox[0]
+    const dy = bbox[3] - bbox[1]
+    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 10)
+
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {
-      geometry = <GeolocusGeometry>Topology.bufferOfDistance(originGeometry, distance)
-    } else {
-      const range = relation.range
-      const outside = <GeolocusGeometry>Topology.bufferOfDistance(originGeometry, distance)
-      const inside = Topology.bufferOfDistance(originGeometry, -distance)
-      if (inside === null) {
-        geometry = {
-          both: outside,
-          outside: <GeolocusGeometry>Topology.difference(outside, originGeometry),
-          inside: originGeometry,
-        }[range]
-      } else {
-        geometry = {
-          both: <GeolocusGeometry>Topology.difference(outside, inside),
-          outside: <GeolocusGeometry>Topology.difference(outside, originGeometry),
-          inside: <GeolocusGeometry>Topology.difference(originGeometry, inside),
-        }[range]
-      }
-    }
-
-    const region = new GeolocusObject(geometry)
-    const pdf: RegionPDFInput = {
-      type: 'sdf',
-      origin,
-      gdf: {},
-      sdf: {
-        girdRegion: region,
-        girdNum: context.getGridSize(),
-      },
-      weight: relation.weight || 1,
-    }
-
-    return { region, pdf }
-  }
-
-  private static alongHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
-    const context = role.getContext()
-    const originGeometry = origin.getGeometry()
-    const originType = originGeometry.getType()
-    const N = role.getSemanticDistanceMap().N
-    const distance = (N[0] + N[1]) / 2
-    let geometry: GeolocusGeometry | null = null
-    if (originType === 'Point' || originType === 'LineString') {
       geometry = <GeolocusGeometry>Topology.bufferOfDistance(originGeometry, distance)
     } else {
       const range = relation.range
@@ -178,20 +140,24 @@ export class RegionResultHandler {
   }
 
   private static distanceHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+    // 相离关系直接返回 origin
     if (relation.topology === 'disjoint') return origin
 
     let distanceRegion: GeolocusObject
     const geometry = Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER) as GeolocusGeometry
+    // 如果 distance=0, origin 不变
     if (relation.distance === 0) {
       distanceRegion = origin
-    } else if (typeof relation.distance === 'number') {
+    } // 如果 distance 为数值, origin 放缩
+    else if (typeof relation.distance === 'number') {
       const temp = Topology.bufferOfDistance(geometry, relation.distance)
       if (temp) {
         distanceRegion = new GeolocusObject(<GeolocusGeometry>Topology.difference(origin.getGeometry(), temp))
       } else {
         distanceRegion = new GeolocusObject(new GeolocusGeometry('Polygon', JTSGeometryFactory.empty('Polygon')))
       }
-    } else {
+    } // 如果 distance 为数值范围, 根据 disjoint 算出目标区域, 然后 topology 强制为 contain
+    else {
       const { region } = this.disjointHandler(origin, relation, role)
       relation.topology = 'contain'
       relation.direction = undefined
@@ -225,7 +191,7 @@ export class RegionResultHandler {
         return topology
       },
       along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const topology = this.alongHandler(origin, relation, role)
+        const topology = this.intersectHandler(origin, relation, role)
         return topology
       },
     }
@@ -257,7 +223,7 @@ export class RegionResultHandler {
         return topology
       },
       along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const topology = this.alongHandler(origin, relation, role)
+        const topology = this.intersectHandler(origin, relation, role)
         return topology
       },
     }

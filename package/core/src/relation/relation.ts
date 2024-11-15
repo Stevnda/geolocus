@@ -1,7 +1,7 @@
 import { GeolocusContext, ObjectMapAction, Role, RouteAction } from '@/context'
 import { GeoRelation, GeoTriple, RelationMode, SemanticRelation } from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
-import { generateUUID, GEO_MAX_VALUE } from '@/util'
+import { generateUUID } from '@/util'
 import { UserGeolocusTriple, UserGeoRelation } from '..'
 import { Distance } from './distance'
 import { Direction } from './direction'
@@ -169,11 +169,18 @@ export class RelationAction {
     }
 
     // distance
+    const maxDistance = role.getContext().getMaxDistance()
     if (relation.distance != null) {
       const distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
-      res.distance = distanceTransform
+      // 最大距离处理
+      if (typeof distanceTransform === 'number') {
+        res.distance = distanceTransform <= maxDistance ? distanceTransform : maxDistance
+      } else {
+        const [min, max] = distanceTransform
+        res.distance = max <= maxDistance ? distanceTransform : [min, maxDistance]
+      }
     } else if (res.topology === 'disjoint') {
-      res.distance = [0, GEO_MAX_VALUE]
+      res.distance = [0, maxDistance]
     } else {
       res.distance = 0
     }
