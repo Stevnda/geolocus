@@ -14,7 +14,7 @@ interface textStore {
 }
 
 export const useTextStore = create<textStore>((set, get) => ({
-  type: 'point',
+  type: 'line',
   aiText: null,
   jsonText: null,
   setType: (value) => {

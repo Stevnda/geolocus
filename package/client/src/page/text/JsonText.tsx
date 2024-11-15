@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { Button } from 'antd'
@@ -10,6 +10,106 @@ import { useMapStore } from '@/store/mapStore'
 import { GeolocusGird, GeolocusObject, Position2 } from '@geolocus/core'
 import { useLayerStore } from '@/store/layerStore'
 import { generatePointByCoord } from '@/util/geojson.util'
+
+const text = [
+  {
+    role: 'default',
+    origin: {
+      name: '吉隆坡机场',
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '马六甲海峡',
+    },
+    relation: {
+      direction: 'E',
+      topology: 'intersect',
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '卡里马塔海峡',
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '九段线',
+    },
+    relation: {
+      direction: 'S',
+      topology: 'disjoint',
+      distance: 400000,
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '加里曼尼岛',
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '苏拉威西海',
+    },
+    relation: {
+      direction: 'SE',
+      topology: 'contain',
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '菲律宾',
+    },
+    relation: {
+      direction: 'E',
+      topology: 'disjoint',
+      distance: 100000,
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '巴士海峡',
+    },
+    relation: {
+      direction: 'W',
+      topology: 'disjoint',
+      distance: 150000,
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '台湾',
+    },
+    relation: {
+      direction: 'E',
+      topology: 'intersect',
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '松山机场',
+    },
+    target: 'taiwan',
+  },
+]
 
 export const JsonText = () => {
   const textRef = useRef<null>(null)
@@ -63,6 +163,10 @@ export const JsonText = () => {
       addLayer(line.getName() as string)
     }
   }
+
+  useEffect(() => {
+    setJsonText(JSON.stringify(text, null, 2))
+  }, [])
 
   return (
     <div className="flex h-full flex-col rounded border border-slate-400 bg-slate-100">
