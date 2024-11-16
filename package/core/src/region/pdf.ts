@@ -1,7 +1,7 @@
 import { computeGeolocusObjectMaskGrid, GeolocusGeometry, GeolocusObject, Position2 } from '@/object'
 import { Distance } from '@/relation'
 import { GeolocusGird, Gird, Vector2 } from '@/util'
-import { RegionPDFInput } from './region.type'
+import { PDFInput } from './region.type'
 import { JTSGeometryFactory } from '@/object/geometry'
 
 export class RegionPDF {
@@ -85,7 +85,7 @@ export class RegionPDF {
     }
   }
 
-  private static getUnsignedInternalDistanceField(pdf: RegionPDFInput, azimuth?: number, deltaAzimuth?: number) {
+  private static getUnsignedInternalDistanceField(pdf: PDFInput, azimuth?: number, deltaAzimuth?: number) {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const mask = computeGeolocusObjectMaskGrid(pdf.sdf.girdRegion as GeolocusObject, pdf.sdf.girdNum as number)
     const tempGird = Gird.createGirdWithFilter(mask.length + 4, mask[0].length + 4, (row, col) => {
@@ -140,9 +140,9 @@ export class RegionPDF {
     }
   }
 
-  static computePDF(pdf: RegionPDFInput): GeolocusGird
-  static computePDF(pdf: RegionPDFInput, target?: Position2): number
-  static computePDF(pdf: RegionPDFInput, target?: Position2): number | GeolocusGird {
+  static computePDF(pdf: PDFInput): GeolocusGird
+  static computePDF(pdf: PDFInput, target?: Position2): number
+  static computePDF(pdf: PDFInput, target?: Position2): number | GeolocusGird {
     const type = pdf.type
     const origin = pdf.origin
     let targetObject = null

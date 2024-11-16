@@ -1,7 +1,8 @@
 import { GeolocusBBox, GeolocusObject, Position2 } from '@/object'
+import { GeoTriple } from '@/relation'
 import { GeolocusGird } from '@/util'
 
-export interface RegionPDFInput {
+export interface PDFInput {
   type: 'distance' | 'angle' | 'distanceAndAngle' | 'sdf'
   origin: GeolocusObject
   gdf: {
@@ -19,21 +20,37 @@ export interface RegionPDFInput {
 
 export interface RegionHandlerResult {
   region: GeolocusObject
-  pdf: RegionPDFInput
+  pdf: PDFInput
 }
 
-export interface RegionResultPdfGird {
+export interface PdfGird {
   type: 'gdf' | 'sdf' | null
   gird: GeolocusGird | null
   bbox: GeolocusBBox | null
   weight: number
 }
 
-export interface RegionResult {
-  region: GeolocusObject | null
-  pdf: Set<RegionPDFInput>
+export interface GeoTripleResult {
   coord: Position2 | null
-  pdfGird: RegionResultPdfGird[]
-  resultGird: GeolocusGird | null
-  regionMask: GeolocusGird | null
+  region: GeolocusObject | null
+  pdfInput: PDFInput | null
+  pdfGird: PdfGird | null
 }
+
+export interface PointResult {
+  geoTripleList: GeoTriple[]
+  geoTripleResultList: GeoTripleResult[]
+  region: GeolocusObject | null
+  regionPdfGird: GeolocusGird | null
+  result: GeolocusObject | null
+}
+
+export interface LineResult {
+  geoTripleList: GeoTriple[]
+  geoTripleResultList: GeoTripleResult[]
+  region: GeolocusObject | null
+  regionPdfGird: GeolocusGird | null
+  result: GeolocusObject | null
+}
+
+export type RegionResult = PointResult | LineResult

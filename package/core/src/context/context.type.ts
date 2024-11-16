@@ -8,6 +8,6 @@ export interface RouteNode {
 export interface GeolocusContextInit {
   maxDistance: number
   name?: string
-  gridSize?: number
+  gridSum?: number
   region: Position2[]
 }

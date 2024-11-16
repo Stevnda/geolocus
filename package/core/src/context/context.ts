@@ -15,7 +15,7 @@ export class GeolocusContext {
   private _regionRange: GeolocusObject
   private _roleMap: Map<string, Role>
   private _maxDistance: number
-  private _gridSize: number
+  private _gridSum: number
 
   // runtime
   private _objectMap: ObjectMap
@@ -33,7 +33,7 @@ export class GeolocusContext {
     this._roleMap = new Map() // the key is the name of role
     this._resultMap = new Map() // the uuid of resultMap is the same as geolocusObject
     this._maxDistance = init.maxDistance
-    this._gridSize = init.gridSize || 128
+    this._gridSum = init.gridSum || 128
   }
 
   setUUID(value: string): void {
@@ -112,11 +112,11 @@ export class GeolocusContext {
     return this._maxDistance
   }
 
-  setGridSize(value: number): void {
-    this._gridSize = value
+  setGridSum(value: number): void {
+    this._gridSum = value
   }
 
-  getGridSize(): number {
-    return this._gridSize
+  getGridSum(): number {
+    return this._gridSum
   }
 }

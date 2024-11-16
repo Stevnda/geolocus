@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { useEffect, useRef } from 'react'
 import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
@@ -125,7 +126,7 @@ export const JsonText = () => {
     if (typeof jsonText === 'string') {
       if (!map) return
       const res = computeLineTest(jsonText)
-      const regionList = res.resultList.map((res) => res.region)
+      const regionList = res!.geoTripleResultList.map((res) => res.region)
       regionList.forEach((region) => {
         const polygon = region as GeolocusObject
         const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
@@ -138,11 +139,11 @@ export const JsonText = () => {
         addLayer(id)
       })
 
-      const resultGirdList = res.resultList.map((res) => res.resultGird)
+      const resultGirdList = res!.geoTripleResultList.map((res) => res.pdfGird)
       resultGirdList.forEach((item, index) => {
         const region = regionList[index]
         if (!item || !region) return
-        const pngBlob = generateBlobPng(item)
+        const pngBlob = generateBlobPng(item.gird!)
         const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
           convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
         )
@@ -151,7 +152,7 @@ export const JsonText = () => {
         addLayer(id)
       })
 
-      const line = res.lineString
+      const line = res?.result as GeolocusObject
       const line84 = toWgs84(geolocusContext.toGeoJSON(line))
       // const coords = line84.coordinates as Position2[]
       // const coordsTransform = chaikin(coords, 0.4, 1)
@@ -190,8 +191,8 @@ export const JsonText = () => {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const res = computePointTest(jsonText)!
                 const region = res.region as GeolocusObject
-                const pdfGird = res.resultGird as GeolocusGird
-                const coord = res.coord as Position2
+                const pdfGird = res.regionPdfGird as GeolocusGird
+                const coord = res.region?.getGeometry().getCenter() as Position2
 
                 const polygon = region
                 const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
