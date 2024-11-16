@@ -131,7 +131,6 @@ export class RelationAction {
 
     const uuid = obj.getUUID()
     ObjectMapAction.addObject(objectMap, obj)
-    console.log(uuid)
 
     return uuid
   }
@@ -148,14 +147,14 @@ export class RelationAction {
     // NOTE 布局模型
 
     // range
-    if (relation.range) {
+    if (relation.range != null) {
       res.range = relation.range
     } else {
       res.range = 'both'
     }
 
     // topology
-    if (relation.topology) {
+    if (relation.topology != null) {
       res.topology = relation.topology
     } else if (mode === 'point') {
       res.topology = 'disjoint'
@@ -164,7 +163,7 @@ export class RelationAction {
     }
 
     // direction
-    if (relation.direction) {
+    if (relation.direction != null) {
       res.direction = Direction.transform(relation.direction, role)
     }
 

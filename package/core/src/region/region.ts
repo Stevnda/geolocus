@@ -1,22 +1,287 @@
-import { GeolocusContext, ObjectMapAction, RouteAction } from '@/context'
-import { RegionPDFInput, RegionResult, RegionResultPdfGird } from './region.type'
+import { GeolocusContext, ObjectMapAction, Role, RouteAction } from '@/context'
+import {
+  PDFInput,
+  GeoTripleResult,
+  PdfGird,
+  RegionHandlerResult,
+  PointResult,
+  RegionResult,
+  LineResult,
+} from './region.type'
 import { RegionPDF } from './pdf'
 import {
   computeGeolocusObjectMaskGrid,
   GeolocusBBox,
   GeolocusGeometry,
-  GeolocusGeometryTransformation,
   GeolocusObject,
   JTSGeometryFactory,
   Position2,
 } from '@/object'
-import { RegionResultHandler } from './region.handler'
-import { Topology, EuclideanDistanceRange, GeoTriple, Distance, RelationAction } from '@/relation'
-import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MathUtil, Vector2 } from '@/util'
-import { Astar, Graph } from './aStart'
+import {
+  Topology,
+  EuclideanDistanceRange,
+  GeoTriple,
+  Distance,
+  RelationAction,
+  Direction,
+  EuclideanDistance,
+  GeoRelation,
+  TopologyRelation,
+} from '@/relation'
+import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MathUtil } from '@/util'
+import { AStar, Graph } from './aStart'
+
+const MAGIC_NUMBER = 0.005
+
+export class GeoTripleHandler {
+  private static intersection = (object0: GeolocusObject, object1: GeolocusObject) => {
+    let intersection = Topology.intersection(object0.getGeometry(), object1.getGeometry())
+    if (!intersection) {
+      intersection = new GeolocusGeometry('Polygon', JTSGeometryFactory.empty('Polygon'))
+    }
+    return new GeolocusObject(intersection)
+  }
+
+  private static disjointHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+    const distance = Distance.normalize(relation.distance as EuclideanDistance | EuclideanDistanceRange)
+    const meanDistanceDelta = role.getDistanceDelta() * distance.mean
+    const minDistance = distance.min - meanDistanceDelta * 1.5 >= 0 ? distance.min - meanDistanceDelta * 1.5 : 0
+    const maxDistance = distance.max + meanDistanceDelta * 1.5
+    const distanceDelta = (maxDistance - minDistance) / 3
+
+    const geometry = <GeolocusGeometry>Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance])
+    const region = new GeolocusObject(geometry)
+
+    const pdf: PDFInput = {
+      type: 'distance',
+      origin,
+      gdf: {
+        distance: distance.mean,
+        distanceDelta,
+      },
+      sdf: {},
+      weight: relation.weight,
+    }
+
+    return { region, pdf }
+  }
+
+  private static containHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
+    const context = role.getContext()
+    const geometry = Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER) as GeolocusGeometry
+    const region = new GeolocusObject(geometry) as GeolocusObject
+    const pdf: PDFInput = {
+      type: 'sdf',
+      origin,
+      gdf: {},
+      sdf: {
+        girdRegion: region,
+        girdNum: context.getGridSum(),
+      },
+      weight: relation.weight || 1,
+    }
+    return { region, pdf }
+  }
+
+  private static intersectHandler = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ): RegionHandlerResult => {
+    const context = role.getContext()
+    const originGeometry = origin.getGeometry()
+    const objectType = originGeometry.getType()
+
+    // 取外接矩形对角线的十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
+    const N = role.getSemanticDistanceMap().N
+    const bbox = originGeometry.getBBox()
+    const dx = bbox[2] - bbox[0]
+    const dy = bbox[3] - bbox[1]
+    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 10)
+
+    let geometry: GeolocusGeometry | null = null
+    if (objectType === 'Point' || objectType === 'LineString') {
+      geometry = <GeolocusGeometry>Topology.bufferOfDistance(originGeometry, distance)
+    } else {
+      const range = relation.range
+      const outside = <GeolocusGeometry>Topology.bufferOfDistance(originGeometry, distance)
+      const inside = Topology.bufferOfDistance(originGeometry, -distance)
+      if (inside === null) {
+        geometry = {
+          both: outside,
+          outside: <GeolocusGeometry>Topology.difference(outside, originGeometry),
+          inside: originGeometry,
+        }[range]
+      } else {
+        geometry = {
+          both: <GeolocusGeometry>Topology.difference(outside, inside),
+          outside: <GeolocusGeometry>Topology.difference(outside, originGeometry),
+          inside: <GeolocusGeometry>Topology.difference(originGeometry, inside),
+        }[range]
+      }
+    }
+
+    const region = new GeolocusObject(geometry)
+    const pdf: PDFInput = {
+      type: 'sdf',
+      origin,
+      gdf: {},
+      sdf: {
+        girdRegion: region,
+        girdNum: context.getGridSum(),
+      },
+      weight: relation.weight || 1,
+    }
+
+    return { region, pdf }
+  }
+
+  private static directionHandler = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ): RegionHandlerResult => {
+    const direction = <number>relation.direction
+    const directionDelta = role.getDirectionDelta()
+    const geometry = Direction.computeRegion(origin.getGeometry(), direction, relation.range)
+    const region = new GeolocusObject(geometry)
+    const pdf: PDFInput = {
+      type: 'angle',
+      origin,
+      gdf: {
+        azimuth: direction,
+        azimuthDelta: directionDelta,
+      },
+      sdf: {},
+      weight: relation.weight,
+    }
+
+    return { region, pdf }
+  }
+
+  private static distanceHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+    // 相离关系直接返回 origin
+    if (relation.topology === 'disjoint') return origin
+
+    let distanceRegion: GeolocusObject
+    const geometry = Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER) as GeolocusGeometry
+    // 如果 distance=0, origin 不变
+    if (relation.distance === 0) {
+      distanceRegion = origin
+    } // 如果 distance 为数值, origin 放缩
+    else if (typeof relation.distance === 'number') {
+      const temp = Topology.bufferOfDistance(geometry, relation.distance)
+      if (temp) {
+        distanceRegion = new GeolocusObject(<GeolocusGeometry>Topology.difference(origin.getGeometry(), temp))
+      } else {
+        distanceRegion = new GeolocusObject(new GeolocusGeometry('Polygon', JTSGeometryFactory.empty('Polygon')))
+      }
+    } // 如果 distance 为数值范围, 根据 disjoint 算出目标区域, 然后 topology 强制为 contain
+    else {
+      const { region } = this.disjointHandler(origin, relation, role)
+      relation.topology = 'contain'
+      relation.direction = undefined
+      distanceRegion = region
+    }
+
+    return distanceRegion
+  }
+
+  private static topologyAndDistance = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ): RegionHandlerResult => {
+    const map: Record<
+      TopologyRelation,
+      (origin: GeolocusObject, relation: GeoRelation, role: Role) => RegionHandlerResult
+    > = {
+      disjoint: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const res = this.disjointHandler(origin, relation, role)
+
+        return res
+      },
+      contain: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const res = this.containHandler(origin, relation, role)
+
+        return res
+      },
+      intersect: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const topology = this.intersectHandler(origin, relation, role)
+        return topology
+      },
+      along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const topology = this.intersectHandler(origin, relation, role)
+        return topology
+      },
+    }
+
+    const distanceRegion = this.distanceHandler(origin, relation, role)
+    const topology = relation.topology
+    const result = map[topology](distanceRegion, relation, role)
+
+    return result
+  }
+
+  private static all = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
+    const map: Record<
+      TopologyRelation,
+      (origin: GeolocusObject, relation: GeoRelation, role: Role) => RegionHandlerResult
+    > = {
+      disjoint: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const res = this.disjointHandler(origin, relation, role)
+
+        return res
+      },
+      contain: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const res = this.containHandler(origin, relation, role)
+
+        return res
+      },
+      intersect: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const topology = this.intersectHandler(origin, relation, role)
+        return topology
+      },
+      along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+        const topology = this.intersectHandler(origin, relation, role)
+        return topology
+      },
+    }
+
+    const distanceRegion = this.distanceHandler(origin, relation, role)
+    const topology = relation.topology
+    const td = map[topology](distanceRegion, relation, role)
+    if (relation.direction == null) {
+      return td
+    } else {
+      const direction = this.directionHandler(distanceRegion, relation, role)
+      const intersection = this.intersection(td.region, direction.region)
+
+      td.region = intersection
+      td.pdf.sdf.girdRegion = intersection
+      td.pdf.type = td.pdf.type === 'sdf' ? 'sdf' : 'distanceAndAngle'
+      td.pdf.gdf = {
+        ...td.pdf.gdf,
+        azimuth: direction.pdf.gdf.azimuth,
+        azimuthDelta: direction.pdf.gdf.azimuthDelta,
+      }
+
+      return td
+    }
+  }
+
+  static getRegionHandler(relation: GeoRelation) {
+    if (relation.direction != null) {
+      return this.all
+    } else {
+      return this.topologyAndDistance
+    }
+  }
+}
 
 export class Region {
-  static computeFuzzyPointObject(uuid: string, context: GeolocusContext) {
+  // point object
+  static computeFuzzyPointObject(uuid: string, context: GeolocusContext): PointResult {
     // compute the order
     const route = context.getRoute()
     const computedOrderStack = RouteAction.computeObjectOrder(context, uuid, route.getInNodeList())
@@ -24,127 +289,86 @@ export class Region {
       throw new Error('Can not compute this object or it is not necessary be computed.')
     }
 
+    let result: PointResult | null = null
     // compute single object by order
-    const uuidArray = computedOrderStack.slice()
     while (computedOrderStack.length > 0) {
       const currentUUID = computedOrderStack.pop() as string
-      const result: RegionResult = {
+      const currentResult: PointResult = {
+        geoTripleList: RelationAction.getTripleListByUUID(context.getRelation(), currentUUID),
+        geoTripleResultList: [],
         region: null,
-        pdf: new Set(),
-        coord: null,
-        pdfGird: [],
-        resultGird: null,
-        regionMask: null,
+        regionPdfGird: null,
+        result: null,
       }
-      context.getResultMap().set(currentUUID, result)
+      context.getResultMap().set(currentUUID, currentResult)
+      if (currentUUID === uuid) result = currentResult
 
-      // compute pdf and region
-      console.timeLog('default', 'compute region and pdf start')
-      const { resultPdf, resultRegion } = this.computeRegionAndPdf(
-        <Set<GeoTriple>>context.getRelation().getTripleListMap().get(uuid),
-        context,
-      )
-      result.pdf = resultPdf
-      result.region = new GeolocusObject(resultRegion)
-      console.timeLog('default', 'compute region and pdf end')
+      // compute pdf and region of per geoTriple
+      const geoTripleResultList = []
+      for (const geoTriple of currentResult.geoTripleList) {
+        const geoTripleResult = this.computePdfAndRegionOfGeoTriple(geoTriple, context)
+        geoTripleResultList.push(geoTripleResult)
+      }
+      currentResult.geoTripleResultList = geoTripleResultList
 
-      // compute grid
-      console.timeLog('default', 'compute gird start')
-      result.regionMask = computeGeolocusObjectMaskGrid(result.region, context.getGridSize())
-      result.resultGird = this.computeRegionGrid(result, context.getGridSize())
-      const { coord } = this.getCoordOfMaximum(result, context.getGridSize())
-      result.coord = coord
-      console.timeLog('default', 'compute gird end')
+      // compute the region of result, the intersection of all region
+      let resultRegion = context.getRegionRange().getGeometry()
+      for (const geoTripleResult of geoTripleResultList) {
+        const tempRegion = Topology.intersection(resultRegion, <GeolocusGeometry>geoTripleResult.region?.getGeometry())
+        if (!tempRegion) {
+          throw new Error("Can't compute the fuzzy region, the intersection is empty.")
+        }
+        resultRegion = tempRegion
+      }
+      currentResult.region = new GeolocusObject(resultRegion)
+      // compute the pdfGird of result, the dot of all pdfGird
+      currentResult.regionPdfGird = this.computePointResultPDFGird(currentResult, context)
+      // compute the coord of result, the coord of maximum of pdfGird
+      const { coord } = this.getCoordOfMaximumOfGeolocusGird(currentResult.regionPdfGird, currentResult.region, context)
 
-      // update the object
+      // update the point object
       const objectMap = context.getObjectMap()
-      const object = ObjectMapAction.getObjectByUUID(objectMap, currentUUID) as GeolocusObject
-      const center = object.getGeometry().getCenter()
-      const offset = Vector2.sub(coord, center)
-      const translatedGeometry = GeolocusGeometryTransformation.translate(object.getGeometry(), ...offset)
-      object.setGeometry(translatedGeometry)
+      const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, currentUUID)
+      const geometry = new GeolocusGeometry('Point', JTSGeometryFactory.point(coord))
+      object.setGeometry(geometry)
       object.setStatus('precise')
+      currentResult.result = object
     }
 
-    return uuidArray
+    return <PointResult>result
   }
 
-  private static computeRegionAndPdf(tripleSet: Set<GeoTriple>, context: GeolocusContext) {
-    const resultPdf: Set<RegionPDFInput> = new Set()
-    const objectMap = context.getObjectMap()
-
-    // compute region and pdf
-    const regionArray: GeolocusObject[] = []
-    for (const triple of tripleSet) {
-      const relation = triple.relation
-      const origin = ObjectMapAction.getObjectByUUID(objectMap, triple.origin) as GeolocusObject
-      const regionHandler = RegionResultHandler.getRegionHandler(relation)
-      const { region, pdf } = regionHandler(origin, relation, triple.role)
-      resultPdf.add(pdf)
-      regionArray.push(region)
-    }
-
-    // compute the intersection of all region
-    let resultRegion = context.getRegionRange().getGeometry()
-    for (const currentRegion of regionArray) {
-      const tempRegion = Topology.intersection(resultRegion, currentRegion.getGeometry())
-      if (!tempRegion) {
-        throw new Error("Can't compute the fuzzy region.")
-      }
-      resultRegion = tempRegion
-    }
-
-    return { resultPdf, resultRegion }
-  }
-
-  private static computePdfGird(
-    mask: GeolocusGird,
-    pdfArray: Set<RegionPDFInput>,
-    region: GeolocusObject,
-    gridSizeSum: number,
-  ) {
+  private static computePointResultPDFGird(result: RegionResult, context: GeolocusContext) {
+    const gridSum = context.getGridSum()
+    const mask = computeGeolocusObjectMaskGrid(<GeolocusObject>result?.region, gridSum)
+    const resultGird: GeolocusGird = Gird.createGirdWithValue(mask.length, mask[0].length, 1)
+    const region = <GeolocusObject>result.region
     const bbox = region.getGeometry().getBBox()
-    const xStart = bbox[0]
-    const xEnd = bbox[2]
-    const dx = xEnd - xStart
-    const yStart = bbox[1]
-    const yEnd = bbox[3]
-    const dy = yEnd - yStart
-    const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(gridSizeSum / ratio)
-    const pdfGirdArray: RegionResultPdfGird[] = []
-    const rowCount = Math.ceil(dy / girdSize)
-    const colCount = Math.ceil(dx / girdSize)
-    pdfArray.forEach((pdf) => {
-      if (pdf.type === 'sdf') {
-        pdfGirdArray.push({
-          type: 'sdf',
-          gird: RegionPDF.computePDF(pdf),
-          bbox: (pdf.sdf.girdRegion as GeolocusObject).getGeometry().getBBox(),
-          weight: pdf.weight,
-        })
-      } else {
-        const gird = Gird.createGirdWithFilter(rowCount, colCount, (row, col) => {
-          const x = xStart + (col + 0.5) * girdSize
-          const y = yStart + (row + 0.5) * girdSize
-          return mask[row][col] && RegionPDF.computePDF(pdf, [x, y])
-        })
-        pdfGirdArray.push({
-          type: 'gdf',
-          gird,
-          bbox: null,
-          weight: pdf.weight,
-        })
-      }
+
+    for (const geoTripleResult of result.geoTripleResultList) {
+      geoTripleResult.pdfGird = this.computePdfGird(region, <PDFInput>geoTripleResult.pdfInput, context)
+    }
+
+    result.geoTripleResultList.forEach((geoTripleResult) => {
+      const pdfGird = <PdfGird>geoTripleResult.pdfGird
+      const tempGird = <GeolocusGird>pdfGird.gird
+      const weight = pdfGird.weight
+      const transformGird =
+        pdfGird.type === 'gdf' ? tempGird : this.extractRegionGird(tempGird, <GeolocusBBox>pdfGird.bbox, bbox, gridSum)
+      Gird.forEach(resultGird, (_, row, col) => {
+        resultGird[row][col] *= weight * transformGird[row][col]
+      })
     })
-    return pdfGirdArray
+
+    const transformGird = Gird.normalize(resultGird)
+    return transformGird
   }
 
   private static extractRegionGird(
     gird: GeolocusGird,
     originBBox: GeolocusBBox,
     targetBBox: GeolocusBBox,
-    gridSizeSum: number,
+    gridSum: number,
   ): GeolocusGird {
     const girdRow = gird.length
     const girdCol = gird[0].length
@@ -163,7 +387,7 @@ export class Region {
     const targetYEnd = targetBBox[3]
     const targetDy = targetYEnd - targetYStart
     const ratio = targetDy / targetDx
-    const girdSize = targetDx / Math.sqrt(gridSizeSum / ratio)
+    const girdSize = targetDx / Math.sqrt(gridSum / ratio)
 
     const resultGird = Gird.createGirdWithFilter(
       Math.ceil(targetDy / girdSize),
@@ -180,157 +404,87 @@ export class Region {
     return resultGird
   }
 
-  private static computeRegionGrid(result: RegionResult, gridSizeSum: number) {
-    const mask = result.regionMask as GeolocusGird
-    const resultGird: GeolocusGird = Gird.createGirdWithValue(mask.length, mask[0].length, 1)
+  // line object
+  static computeFuzzyLineObject(uuid: string, context: GeolocusContext): LineResult {
+    const geoTripleList = RelationAction.getTripleListByUUID(context.getRelation(), uuid)
+    const objectMap = context.getObjectMap()
+    const result: LineResult = {
+      geoTripleList,
+      geoTripleResultList: [],
+      region: null,
+      regionPdfGird: null,
+      result: null,
+    }
+    context.getResultMap().set(uuid, result)
 
-    const region = result.region as GeolocusObject
-    const bbox = region.getGeometry().getBBox()
-    result.pdfGird = this.computePdfGird(mask, result.pdf, region, gridSizeSum)
-    result.pdfGird.forEach((pdfGird) => {
-      const tempGird = pdfGird.gird as GeolocusGird
-      const weight = pdfGird.weight
-      const transformGird =
-        pdfGird.type === 'gdf'
-          ? tempGird
-          : this.extractRegionGird(tempGird, pdfGird.bbox as GeolocusBBox, bbox, gridSizeSum)
-      Gird.forEach(resultGird, (_, row, col) => {
-        resultGird[row][col] *= weight * transformGird[row][col]
-      })
-    })
+    // preHandler fuzzy origin of tripleList
+    for (const geoTriple of geoTripleList) {
+      this.preHandleGeoTripleOfLine(geoTriple, context)
+    }
 
-    const transformGird = Gird.normalize(resultGird)
-    return transformGird
-  }
+    // compute pdf and region of per geoTriple
+    const geoTripleResultList = []
+    for (const geoTriple of geoTripleList) {
+      const geoTripleResult = this.computePdfAndRegionOfGeoTriple(geoTriple, context)
+      geoTripleResultList.push(geoTripleResult)
+    }
+    result.geoTripleResultList = geoTripleResultList
 
-  private static getCoordOfMaximum(result: RegionResult, gridSizeSum: number) {
-    const resultGrid = result.resultGird as GeolocusGird
-    const region = result.region as GeolocusObject
-    const bbox = region.getGeometry().getBBox()
-    const xStart = bbox[0]
-    const xEnd = bbox[2]
-    const dx = xEnd - xStart
-    const yStart = bbox[1]
-    const yEnd = bbox[3]
-    const dy = yEnd - yStart
-    const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(gridSizeSum / ratio)
+    // compute regionPdfGrid and coord of per geoTriple
+    for (const geoTripleResult of geoTripleResultList) {
+      geoTripleResult.pdfGird = this.computePdfGird(
+        <GeolocusObject>geoTripleResult.region,
+        <PDFInput>geoTripleResult.pdfInput,
+        context,
+      )
+      geoTripleResult.pdfGird.gird = Gird.normalize(<GeolocusGird>geoTripleResult.pdfGird.gird)
+      geoTripleResult.coord = this.getCoordOfMaximumOfGeolocusGird(
+        <GeolocusGird>geoTripleResult.pdfGird.gird,
+        <GeolocusObject>geoTripleResult.region,
+        context,
+      ).coord
+    }
 
-    let max = -GEO_MAX_VALUE
-    let min = GEO_MAX_VALUE
-    let coord: Position2 = [0, 0]
-    Gird.forEach(resultGrid, (value, row, col) => {
-      const x = xStart + (col + 0.5) * girdSize
-      const y = yStart + (row + 0.5) * girdSize
-      if (Compare.GE(resultGrid[row][col], max)) {
-        max = value
-        coord = [x, y]
-      }
-      if (Compare.LE(resultGrid[row][col], min)) min = value
-    })
-    return { coord, range: [min, max] as EuclideanDistanceRange }
-  }
-
-  static computeFuzzyLineObject(lineName: string, context: GeolocusContext) {
-    const object = <GeolocusObject>ObjectMapAction.getObjectByPlaceName(context.getObjectMap(), lineName)
-    const tripleList = RelationAction.getTripleListByUUID(context.getRelation(), object.getUUID())
-    const { regionResultList, resTripleList } = this.computeRegionOnLine(tripleList, context)
-
+    // compute the coord of result
     const coords: Position2[] = []
-    let beforeCoord = regionResultList[0].coord as Position2
-    for (let i = 0; i < regionResultList.length; i++) {
-      const res = this.computeLineCoord(resTripleList[i], regionResultList, regionResultList[i], i, beforeCoord)
+    let beforeCoord = geoTripleResultList[0].coord as Position2
+    for (let i = 0; i < geoTripleResultList.length; i++) {
+      const res = this.computeLineCoord(geoTripleList[i], geoTripleResultList, geoTripleResultList[i], i, beforeCoord)
       coords.push(...(res[0] as Position2[]))
       beforeCoord = res[1]
     }
+
+    // update the object
+    const object = ObjectMapAction.getObjectByUUID(objectMap, uuid) as GeolocusObject
     const jstGeometry = JTSGeometryFactory.lineString(coords)
     const geolocusGeometry = new GeolocusGeometry('LineString', jstGeometry)
-    const lineString = new GeolocusObject(geolocusGeometry, lineName)
+    object.setGeometry(geolocusGeometry)
+    object.setStatus('precise')
+    result.result = object
 
-    return {
-      lineString,
-      resultList: regionResultList,
-      tripleList: resTripleList,
-    }
+    return result
   }
 
-  private static computeRegionOnLine(
-    tripleList: GeoTriple[],
-    context: GeolocusContext,
-  ): {
-    resTripleList: GeoTriple[]
-    regionResultList: RegionResult[]
-  } {
-    const res: {
-      resTripleList: GeoTriple[]
-      regionResultList: RegionResult[]
-    } = {
-      resTripleList: [],
-      regionResultList: [],
-    }
-    for (const triple of tripleList) {
-      const originObject = this.getLineOriginObject(triple, context)
-      const relation = triple.relation
-      const role = triple.role
-
-      const result: RegionResult = {
-        region: null,
-        pdf: new Set(),
-        coord: null,
-        pdfGird: [],
-        resultGird: null,
-        regionMask: null,
-      }
-      // compute pdf and region
-      const regionHandler = RegionResultHandler.getRegionHandler(relation)
-      const { region, pdf } = regionHandler(originObject, relation, role)
-      result.pdf = new Set([pdf])
-      result.region = region
-
-      // compute grid
-      result.regionMask = computeGeolocusObjectMaskGrid(result.region, context.getGridSize())
-      result.resultGird = this.computeRegionGrid(result, context.getGridSize())
-
-      // compute coord
-      const { coord } = this.getCoordOfMaximum(result, context.getGridSize())
-      result.coord = coord
-
-      const resTriple: GeoTriple = {
-        uuid: 'temp',
-        role,
-        origin: originObject.getUUID(),
-        relation,
-        target: 'temp',
-      }
-      res.regionResultList.push(result)
-      res.resTripleList.push(resTriple)
-    }
-
-    return res
-  }
-
-  private static getLineOriginObject(triple: GeoTriple, context: GeolocusContext) {
+  private static preHandleGeoTripleOfLine(triple: GeoTriple, context: GeolocusContext) {
     const objectMap = context.getObjectMap()
     const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, triple.origin)
-    // the name is in geolocus
-    if (object.getStatus() === 'precise') return object
+    if (object.getStatus() === 'precise') return
     this.computeFuzzyPointObject(object.getUUID(), context)
-    return object
   }
 
   private static computeLineCoord(
-    triple: GeoTriple,
-    resultList: RegionResult[],
-    result: RegionResult,
+    geoTriple: GeoTriple,
+    geoTripleResultList: GeoTripleResult[],
+    geoTripleResult: GeoTripleResult,
     index: number,
     beforeCoord: Position2,
   ): [Position2[], Position2] {
-    result = result as RegionResult
-    const context = triple.role.getContext()
-    const curRegion = <GeolocusGeometry>result.region?.getGeometry()
-    const curPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(<Position2>result.coord))
+    geoTripleResult = geoTripleResult as GeoTripleResult
+    const context = geoTriple.role.getContext()
+    const curRegion = <GeolocusGeometry>geoTripleResult.region?.getGeometry()
+    const curPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(<Position2>geoTripleResult.coord))
 
-    const afterResult = index === resultList.length - 1 ? result : resultList[index + 1]
+    const afterResult = index === geoTripleResultList.length - 1 ? geoTripleResult : geoTripleResultList[index + 1]
     const afterRegion = <GeolocusGeometry>afterResult.region?.getGeometry()
     const afterPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(<Position2>afterResult.coord))
 
@@ -347,7 +501,7 @@ export class Region {
     const coord0 = beforeCoord
     const coord1 = distanceOfCurPoint < distanceOfAfterPoint ? coordOfCurPoint : coordOfAfterPoint
 
-    const bbox = result.region?.getGeometry().getBBox() as GeolocusBBox
+    const bbox = geoTripleResult.region?.getGeometry().getBBox() as GeolocusBBox
     const xStart = bbox[0]
     const xEnd = bbox[2]
     const dx = xEnd - xStart
@@ -355,7 +509,7 @@ export class Region {
     const yEnd = bbox[3]
     const dy = yEnd - yStart
     const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(context.getGridSize() / ratio)
+    const girdSize = dx / Math.sqrt(context.getGridSum() / ratio)
     const rowCount = Math.ceil(dy / girdSize)
     const colCount = Math.ceil(dx / girdSize)
 
@@ -366,7 +520,7 @@ export class Region {
     const row1 = MathUtil.clamp(Math.floor((coord1[1] - yStart) / girdSize), 0, rowCount - 1)
 
     // 栅格概率值反转, 转换为最小距离之和
-    const gird = result.resultGird as GeolocusGird
+    const gird = <GeolocusGird>geoTripleResult.pdfGird?.gird
     const gridTransform = Gird.createGirdWithFilter(
       gird.length,
       gird[0].length,
@@ -378,7 +532,7 @@ export class Region {
     })
     const start = graph.grid[row0][col0]
     const end = graph.grid[row1][col1]
-    const res: Position2[] = Astar.search(graph, start, end).map((node) => [node.x, node.y])
+    const res: Position2[] = AStar.search(graph, start, end).map((node) => [node.x, node.y])
     res.unshift([row0, col0])
 
     const coordList: Position2[] = []
@@ -392,5 +546,91 @@ export class Region {
     }
 
     return [coordList, coord1]
+  }
+
+  private static computePdfAndRegionOfGeoTriple(geoTriple: GeoTriple, context: GeolocusContext): GeoTripleResult {
+    const result: GeoTripleResult = {
+      coord: null,
+      region: null,
+      pdfInput: null,
+      pdfGird: null,
+    }
+    const relation = geoTriple.relation
+    const objectMap = context.getObjectMap()
+    const origin = ObjectMapAction.getObjectByUUID(objectMap, geoTriple.origin) as GeolocusObject
+    const regionHandler = GeoTripleHandler.getRegionHandler(relation)
+    const { region, pdf } = regionHandler(origin, relation, geoTriple.role)
+    result.pdfInput = pdf
+    result.region = region
+
+    return result
+  }
+
+  private static computePdfGird(region: GeolocusObject, pdfInput: PDFInput, context: GeolocusContext) {
+    const gridSum = context.getGridSum()
+    const mask = computeGeolocusObjectMaskGrid(region, gridSum)
+
+    const bbox = region.getGeometry().getBBox()
+    const xStart = bbox[0]
+    const xEnd = bbox[2]
+    const dx = xEnd - xStart
+    const yStart = bbox[1]
+    const yEnd = bbox[3]
+    const dy = yEnd - yStart
+    const ratio = dy / dx
+    const girdSize = dx / Math.sqrt(gridSum / ratio)
+    const rowCount = Math.ceil(dy / girdSize)
+    const colCount = Math.ceil(dx / girdSize)
+
+    let pdfGird: PdfGird
+    if (pdfInput.type === 'sdf') {
+      pdfGird = {
+        type: 'sdf',
+        gird: RegionPDF.computePDF(pdfInput),
+        bbox: <GeolocusBBox>pdfInput.sdf?.girdRegion?.getGeometry().getBBox(),
+        weight: pdfInput.weight,
+      }
+    } else {
+      const gird = Gird.createGirdWithFilter(rowCount, colCount, (row, col) => {
+        const x = xStart + (col + 0.5) * girdSize
+        const y = yStart + (row + 0.5) * girdSize
+        return mask[row][col] && RegionPDF.computePDF(pdfInput, [x, y])
+      })
+      pdfGird = {
+        type: 'gdf',
+        gird,
+        bbox: region.getGeometry().getBBox(),
+        weight: pdfInput.weight,
+      }
+    }
+
+    return pdfGird
+  }
+
+  private static getCoordOfMaximumOfGeolocusGird(gird: GeolocusGird, region: GeolocusObject, context: GeolocusContext) {
+    const gridSum = context.getGridSum()
+    const bbox = region.getGeometry().getBBox()
+    const xStart = bbox[0]
+    const xEnd = bbox[2]
+    const dx = xEnd - xStart
+    const yStart = bbox[1]
+    const yEnd = bbox[3]
+    const dy = yEnd - yStart
+    const ratio = dy / dx
+    const girdSize = dx / Math.sqrt(gridSum / ratio)
+
+    let max = -GEO_MAX_VALUE
+    let min = GEO_MAX_VALUE
+    let coord: Position2 = [0, 0]
+    Gird.forEach(gird, (value, row, col) => {
+      const x = xStart + (col + 0.5) * girdSize
+      const y = yStart + (row + 0.5) * girdSize
+      if (Compare.GE(gird[row][col], max)) {
+        max = value
+        coord = [x, y]
+      }
+      if (Compare.LE(gird[row][col], min)) min = value
+    })
+    return { coord, range: [min, max] as EuclideanDistanceRange }
   }
 }

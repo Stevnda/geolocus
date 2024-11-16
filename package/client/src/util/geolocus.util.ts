@@ -104,7 +104,7 @@ export const temp = [
 export const geolocusContext = geolocus.createContext({
   maxDistance: 1000000,
   name: 'test',
-  gridSize: 128 * 128,
+  gridSum: 128 * 128,
   region: [
     [-99999999, -99999999],
     [99999999, -99999999],
@@ -134,7 +134,7 @@ geolocusContext.use('placePlugin', nominatim)
 
 export const computePointTest = (text: string) => {
   const tripleList = JSON.parse(text) as UserGeolocusTriple[]
-  geolocusContext.defineRelation(tripleList)
+  geolocusContext.defineRelation(tripleList, 'point')
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   geolocusContext.computeFuzzyPointObject(tripleList[0].target!)
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -143,7 +143,7 @@ export const computePointTest = (text: string) => {
 
 export const computeLineTest = (text: string) => {
   const tripleList = JSON.parse(text) as UserGeolocusTriple[]
-  geolocusContext.defineRelation(tripleList)
+  geolocusContext.defineRelation(tripleList, 'line')
   const res = geolocusContext.computeFuzzyLineObject('taiwan')
   console.log(res)
   return res

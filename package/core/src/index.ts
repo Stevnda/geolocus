@@ -4,18 +4,16 @@ import {
   EuclideanDistanceRange,
   SemanticDistanceMap,
   TopologyRelation,
-  GeoTriple,
   SemanticDistance,
   RelationAction,
   SeManticDirection,
   RelationMode,
 } from './relation'
-import { GeolocusContext, GeolocusContextInit, PlacePlugin, Role } from './context'
+import { GeolocusContext, GeolocusContextInit, PlacePlugin, Role, ObjectMapAction } from './context'
 import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
-import { Region, RegionResult } from './region'
+import { LineResult, PointResult, Region } from './region'
 import { GeoJSON } from 'geojson'
 import { GeoJson } from './io'
-import { ObjectMapAction } from './context/objectMap'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
@@ -83,27 +81,29 @@ class Geolocus {
     }
   }
 
-  computeFuzzyPointObject(placeName: string) {
+  computeFuzzyPointObject(placeName: string): PointResult | null {
     const objectMap = this._context.getObjectMap()
     const object = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)
     if (object?.getStatus() === 'precise') {
-      return { name: object.getName(), uuid: object.getUUID() }
+      return null
     }
     const uuid = object?.getUUID()
     if (!uuid) return null
-    const uuidList = Region.computeFuzzyPointObject(uuid, this._context)
-    return uuidList.map((value) => {
-      const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, value)
-      return { name: object.getName(), uuid: object.getUUID() }
-    })
+    const res = Region.computeFuzzyPointObject(uuid, this._context)
+
+    return res
   }
 
-  computeFuzzyLineObject(lineName: string): {
-    lineString: GeolocusObject
-    resultList: RegionResult[]
-    tripleList: GeoTriple[]
-  } {
-    const result = Region.computeFuzzyLineObject(lineName, this._context)
+  computeFuzzyLineObject(placeName: string): LineResult | null {
+    const objectMap = this._context.getObjectMap()
+    const object = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)
+    if (object?.getStatus() === 'precise') {
+      return null
+    }
+
+    const uuid = object?.getUUID()
+    if (!uuid) return null
+    const result = Region.computeFuzzyLineObject(uuid, this._context)
 
     return result
   }

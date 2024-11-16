@@ -17,7 +17,7 @@ function getHeap() {
   })
 }
 
-export class Astar {
+export class AStar {
   static heuristics = {
     manhattan: function (pos0: GridNode, pos1: GridNode) {
       const d1 = Math.abs(pos1.x - pos0.x)
@@ -47,7 +47,7 @@ export class Astar {
   ) {
     graph.cleanDirty()
     options = options || {}
-    const heuristic = options.heuristic || Astar.heuristics.manhattan
+    const heuristic = options.heuristic || AStar.heuristics.manhattan
     const closest = options.closest || false
 
     const openHeap = getHeap()
@@ -140,13 +140,13 @@ export class Graph {
     }
     this.dirtyNodes = []
     for (let i = 0; i < this.nodes.length; i++) {
-      Astar.cleanNode(this.nodes[i])
+      AStar.cleanNode(this.nodes[i])
     }
   }
 
   cleanDirty() {
     for (let i = 0; i < this.dirtyNodes.length; i++) {
-      Astar.cleanNode(this.dirtyNodes[i])
+      AStar.cleanNode(this.dirtyNodes[i])
     }
     this.dirtyNodes = []
   }
