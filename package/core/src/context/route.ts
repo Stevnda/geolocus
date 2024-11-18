@@ -1,32 +1,48 @@
 import { GeolocusContext } from './context'
 import { ObjectMapAction } from './objectMap'
 
+class RouteNode {
+  private _outNodeList: Set<string>
+  private _inNodeList: Set<string>
+
+  constructor() {
+    this._outNodeList = new Set()
+    this._inNodeList = new Set()
+  }
+
+  setOutNodeList(outNodeList: Set<string>) {
+    this._outNodeList = outNodeList
+  }
+
+  getOutNodeList(): Set<string> {
+    return this._outNodeList
+  }
+
+  setInNodeList(inNodeList: Set<string>) {
+    this._inNodeList = inNodeList
+  }
+
+  getInNodeList(): Set<string> {
+    return this._inNodeList
+  }
+}
+
 export class Route {
   // the uuid of node is the same as geolocusObject
-  private _outNodeList: Map<string, Set<string>>
-  private _inNodeList: Map<string, Set<string>>
+  private _nodeList: Map<string, RouteNode>
   private _context: GeolocusContext
 
   constructor(context: GeolocusContext) {
-    this._outNodeList = new Map()
-    this._inNodeList = new Map()
+    this._nodeList = new Map()
     this._context = context
   }
 
-  setInNodeList(value: Map<string, Set<string>>): void {
-    this._inNodeList = value
+  setNodeList(value: Map<string, RouteNode>): void {
+    this._nodeList = value
   }
 
-  getInNodeList(): Map<string, Set<string>> {
-    return this._inNodeList
-  }
-
-  setOutNodeList(value: Map<string, Set<string>>): void {
-    this._outNodeList = value
-  }
-
-  getOutNodeList(): Map<string, Set<string>> {
-    return this._outNodeList
+  getNodeList(): Map<string, RouteNode> {
+    return this._nodeList
   }
 
   setContext(value: GeolocusContext): void {
@@ -37,47 +53,41 @@ export class Route {
     return this._context
   }
 
-  getNodeCount = () => {
-    return this._outNodeList.size || 0
+  getNodeCount(): number {
+    return this._nodeList.size || 0
   }
 
-  addEdge = (parent: string, child: string) => {
+  addEdge(parent: string, child: string): void {
     this.addVertex(parent)
     this.addVertex(child)
-    const childrenSet = this._outNodeList.get(parent) as Set<string>
-    const parentSet = this._inNodeList.get(child) as Set<string>
-    childrenSet.add(child)
-    parentSet.add(parent)
+    const childrenNode = <RouteNode>this.getNodeList().get(child)
+    const parentNode = <RouteNode>this.getNodeList().get(parent)
+    childrenNode.getInNodeList().add(parent)
+    parentNode.getOutNodeList().add(child)
   }
 
-  removeEdge = (parent: string, child: string) => {
-    const childrenSet = this._outNodeList.get(parent)
-    const parentSet = this._inNodeList.get(child)
-    if (childrenSet) {
-      childrenSet.delete(child)
-    }
-    if (parentSet) {
-      parentSet.delete(parent)
-    }
+  removeEdge(parent: string, child: string): void {
+    const childrenNode = <RouteNode>this.getNodeList().get(child)
+    const parentNode = <RouteNode>this.getNodeList().get(parent)
+    childrenNode.getInNodeList().delete(parent)
+    parentNode.getOutNodeList().delete(child)
   }
 
-  private addVertex = (uuid: string) => {
-    const children = this._outNodeList.get(uuid)
-    if (!children) {
-      this._outNodeList.set(uuid, new Set())
-      this._inNodeList.set(uuid, new Set())
+  private addVertex(uuid: string): void {
+    const node = this.getNodeList().get(uuid)
+    if (!node) {
+      this.getNodeList().set(uuid, new RouteNode())
     }
   }
 }
 
 export class RouteAction {
   static validateRouteValidity(route: Route) {
-    const outNodeList = route.getOutNodeList()
-    const inNodeList = route.getInNodeList()
+    const nodeList = route.getNodeList()
     // generate inDegree of graph
     const inDegree: Record<string, number> = {}
-    for (const key of outNodeList.keys()) {
-      inDegree[key] = (inNodeList.get(key) as Set<string>).size
+    for (const [key, node] of nodeList.entries()) {
+      inDegree[key] = node.getInNodeList().size
     }
 
     // traversal the node that its inDegree is 0
@@ -93,7 +103,7 @@ export class RouteAction {
     while (queue.length > 0) {
       const node = queue.shift() as string
       result.push(node)
-      const children = outNodeList.get(node)
+      const children = nodeList.get(node)?.getOutNodeList()
       if (children) {
         for (const child of children) {
           inDegree[child] -= 1
@@ -107,7 +117,13 @@ export class RouteAction {
     return result.length === route.getNodeCount() ? [true, result] : [false, null]
   }
 
-  static computeObjectOrder(context: GeolocusContext, uuid: string, inNode: Map<string, Set<string>>) {
+  static computeObjectOrder(context: GeolocusContext, uuid: string, route: Route) {
+    // generate inNode map
+    const inNode: Map<string, Set<string>> = new Map()
+    for (const [key, node] of route.getNodeList().entries()) {
+      inNode.set(key, node.getInNodeList())
+    }
+
     // the object must be fuzzy object
     const objectMap = context.getObjectMap()
     const object = ObjectMapAction.getObjectByUUID(objectMap, uuid)
@@ -145,10 +161,12 @@ export class RouteAction {
         computedOrderStack.push(currentUUID)
       }
     }
+
     // No need to calculate other fuzzy object
     if (computedOrderStack[0] === computedOrderStack[1]) {
       computedOrderStack.shift()
     }
+
     return computedOrderStack
   }
 }
