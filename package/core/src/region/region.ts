@@ -280,7 +280,7 @@ export class Region {
   static computeFuzzyPointObject(uuid: string, context: GeolocusContext): PointResult {
     // compute the order
     const route = context.getRoute()
-    const computedOrderStack = RouteAction.computeObjectOrder(context, uuid, route.getInNodeList())
+    const computedOrderStack = RouteAction.computeObjectOrder(context, uuid, route)
     if (!computedOrderStack) {
       throw new Error('Can not compute this object or it is not necessary be computed.')
     }
