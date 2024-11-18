@@ -121,4 +121,22 @@ export class ObjectMapAction {
     const res = map.get(type)
     return res != null ? [...res] : []
   }
+
+  static deleteObject(objectMap: ObjectMap, object: GeolocusObject): void {
+    const uuidMap = objectMap.getUuidMap()
+    const nameMap = objectMap.getNameMap()
+    const typeMap = objectMap.getTypeMap()
+
+    uuidMap.delete(object.getUUID())
+
+    const name = object.getName()
+    if (name) {
+      nameMap.delete(name)
+    }
+
+    const type = object.getType()
+    if (type) {
+      typeMap.get(type)?.delete(object)
+    }
+  }
 }

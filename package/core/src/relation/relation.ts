@@ -56,14 +56,19 @@ export class RelationAction {
     const role = context.getRoleMap().get(triple.role)
     if (!role) throw new Error('role is not existed')
 
-    const originUUID = this.handleOrigin(triple, context)
+    const originUUID = (() => {
+      if (triple.origin == null && mode === 'line') return null
+      else return this.handleOrigin(triple, context)
+    })()
     const targetUUID = this.handleTarget(triple, context)
-    const route = context.getRoute()
-    route.addEdge(originUUID, targetUUID)
-    const circle = RouteAction.validateRouteValidity(route)
-    if (!circle[0]) {
-      route.removeEdge(originUUID, targetUUID)
-      throw new Error('Route contains a cycle.')
+    if (originUUID != null) {
+      const route = context.getRoute()
+      route.addEdge(originUUID, targetUUID)
+      const circle = RouteAction.validateRouteValidity(route)
+      if (!circle[0]) {
+        route.removeEdge(originUUID, targetUUID)
+        throw new Error('Route contains a cycle.')
+      }
     }
 
     const tripleTransform: GeoTriple = {
@@ -73,7 +78,6 @@ export class RelationAction {
       relation: this.transform(triple.relation || {}, role, mode),
       target: targetUUID,
     }
-    const tripleUUID = generateUUID()
     const relation = context.getRelation()
     const relationSet = relation.getTripleListMap().get(targetUUID)
     if (!relationSet) {
@@ -82,12 +86,11 @@ export class RelationAction {
     } else {
       relationSet.add(tripleTransform)
     }
-
-    return tripleUUID
   }
 
   private static handleOrigin(triple: UserGeolocusTriple, context: GeolocusContext): string {
-    let { name, type, coord } = triple.origin
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    let { name, type, coord } = triple.origin!
     const objectMap = context.getObjectMap()
 
     let obj: GeolocusObject

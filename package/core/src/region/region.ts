@@ -92,12 +92,12 @@ export class GeoTripleHandler {
     const originGeometry = origin.getGeometry()
     const objectType = originGeometry.getType()
 
-    // 取外接矩形对角线的十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
+    // 取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
     const N = role.getSemanticDistanceMap().N
     const bbox = originGeometry.getBBox()
     const dx = bbox[2] - bbox[0]
     const dy = bbox[3] - bbox[1]
-    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 10)
+    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 20)
 
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {
@@ -171,11 +171,7 @@ export class GeoTripleHandler {
     } // 如果 distance 为数值, origin 放缩
     else if (typeof relation.distance === 'number') {
       const temp = Topology.bufferOfDistance(geometry, relation.distance)
-      if (temp) {
-        distanceRegion = new GeolocusObject(<GeolocusGeometry>Topology.difference(origin.getGeometry(), temp))
-      } else {
-        distanceRegion = new GeolocusObject(new GeolocusGeometry('Polygon', JTSGeometryFactory.empty('Polygon')))
-      }
+      distanceRegion = new GeolocusObject(temp || new GeolocusGeometry('Polygon', JTSGeometryFactory.empty('Polygon')))
     } // 如果 distance 为数值范围, 根据 disjoint 算出目标区域, 然后 topology 强制为 contain
     else {
       const { region } = this.disjointHandler(origin, relation, role)
@@ -422,16 +418,17 @@ export class Region {
       this.preHandleGeoTripleOfLine(geoTriple, context)
     }
 
-    // compute pdf and region of per geoTriple
+    // compute pdf, region, regionPdfGrid and coord of per geoTriple together because of toward relation
     const geoTripleResultList = []
+    let beforeRegion = new GeolocusObject(new GeolocusGeometry('Point', JTSGeometryFactory.empty('Point')))
     for (const geoTriple of geoTripleList) {
+      const tag = geoTriple.origin == null
+      // handle null origin of line, the before region of geoTriple as origin
+      if (tag) {
+        ObjectMapAction.addObject(objectMap, beforeRegion)
+        geoTriple.origin = beforeRegion.getUUID()
+      }
       const geoTripleResult = this.computePdfAndRegionOfGeoTriple(geoTriple, context)
-      geoTripleResultList.push(geoTripleResult)
-    }
-    result.geoTripleResultList = geoTripleResultList
-
-    // compute regionPdfGrid and coord of per geoTriple
-    for (const geoTripleResult of geoTripleResultList) {
       geoTripleResult.pdfGird = this.computePdfGird(
         <GeolocusObject>geoTripleResult.region,
         <PDFInput>geoTripleResult.pdfInput,
@@ -443,7 +440,15 @@ export class Region {
         <GeolocusObject>geoTripleResult.region,
         context,
       ).coord
+      geoTripleResultList.push(geoTripleResult)
+      // handle null origin of line, remove the before region of geoTriple in objectMap
+      if (tag) {
+        ObjectMapAction.deleteObject(objectMap, beforeRegion)
+      }
+
+      beforeRegion = <GeolocusObject>geoTripleResult.region
     }
+    result.geoTripleResultList = geoTripleResultList
 
     // compute the coord of result
     const coords: Position2[] = []
@@ -466,6 +471,7 @@ export class Region {
   }
 
   private static preHandleGeoTripleOfLine(triple: GeoTriple, context: GeolocusContext) {
+    if (triple.origin == null) return
     const objectMap = context.getObjectMap()
     const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, triple.origin)
     if (object.getStatus() === 'precise') return
@@ -555,9 +561,10 @@ export class Region {
       pdfInput: null,
       pdfGird: null,
     }
+
     const relation = geoTriple.relation
     const objectMap = context.getObjectMap()
-    const origin = ObjectMapAction.getObjectByUUID(objectMap, geoTriple.origin) as GeolocusObject
+    const origin = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, <string>geoTriple.origin)
     const regionHandler = GeoTripleHandler.getRegionHandler(relation)
     const { region, pdf } = regionHandler(origin, relation, geoTriple.role)
     result.pdfInput = pdf

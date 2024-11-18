@@ -75,7 +75,7 @@ const text = [
     },
     relation: {
       direction: 'E',
-      topology: 'disjoint',
+      topology: 'along',
       distance: 100000,
     },
     target: 'taiwan',
@@ -107,6 +107,31 @@ const text = [
     role: 'default',
     origin: {
       name: '松山机场',
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    relation: {
+      topology: 'disjoint',
+      direction: 'N',
+      distance: 800000,
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    relation: {
+      topology: 'disjoint',
+      direction: 'NE',
+      distance: 300000,
+    },
+    target: 'taiwan',
+  },
+  {
+    role: 'default',
+    origin: {
+      name: '首尔',
     },
     target: 'taiwan',
   },
