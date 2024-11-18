@@ -25,7 +25,7 @@ export interface UserGeoRelation {
 
 export interface UserGeolocusTriple {
   role: string
-  origin: {
+  origin?: {
     name?: string
     type?: GeolocusGeometryType
     coord?: Position2 | Position2[] | Position2[][] | Position2[][][]

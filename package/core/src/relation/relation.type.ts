@@ -28,7 +28,7 @@ export interface GeoRelation {
 export interface GeoTriple {
   uuid: string
   role: Role
-  origin: string
+  origin: string | null
   relation: GeoRelation
   target: string
 }
