@@ -172,7 +172,9 @@ export class RelationAction {
 
     // distance
     const maxDistance = role.getContext().getMaxDistance()
-    if (relation.distance != null) {
+    if (relation.topology === 'within') {
+      relation.distance = 0
+    } else if (relation.distance != null) {
       const distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
       // 最大距离处理
       if (typeof distanceTransform === 'number') {
