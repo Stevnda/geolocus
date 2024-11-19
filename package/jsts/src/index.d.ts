@@ -10,6 +10,11 @@ declare namespace jsts {
       constructor()
       static getCentroid(geom: Geometry): Coordinate
     }
+
+    export class ConvexHull {
+      constructor(geom: Geometry)
+      getConvexHull(): Geometry
+    }
   }
 
   namespace geom {

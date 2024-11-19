@@ -1,4 +1,4 @@
-import { GeolocusBBox, GeolocusGeometry, JTSGeometryFactory, GeolocusGeometryTransformation, Position2 } from '@/object'
+import { GeolocusBBox, GeolocusGeometry, JTSGeometryFactory, GeolocusGeometryAction, Position2 } from '@/object'
 import { GEO_MAX_VALUE } from '@/util'
 import { AbsoluteDirection, ComputeRegionRange, SeManticDirection } from './relation.type'
 import { Topology } from './topology'
@@ -38,7 +38,7 @@ export class Direction {
     const center = geometry.getCenter()
     const target: GeolocusBBox = [-GEO_MAX_VALUE, center[1], GEO_MAX_VALUE, GEO_MAX_VALUE]
     const bbox = new GeolocusGeometry('Polygon', JTSGeometryFactory.bbox(target))
-    const bboxRotated = GeolocusGeometryTransformation.rotateAroundCoord(bbox, direction, geometry.getCenter())
+    const bboxRotated = GeolocusGeometryAction.rotateAroundCoord(bbox, direction, geometry.getCenter())
 
     if (range === 'inside') {
       const intersection = Topology.intersection(bboxRotated, geometry)

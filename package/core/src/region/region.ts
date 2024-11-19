@@ -28,10 +28,8 @@ import {
   GeoRelation,
   TopologyRelation,
 } from '@/relation'
-import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MathUtil } from '@/util'
+import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MAGIC_NUMBER, MathUtil } from '@/util'
 import { AStar, Graph } from './aStart'
-
-const MAGIC_NUMBER = 0.005
 
 export class GeoTripleHandler {
   private static intersection = (object0: GeolocusObject, object1: GeolocusObject) => {
