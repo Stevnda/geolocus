@@ -13,7 +13,7 @@ export type SeManticDirection = AbsoluteDirection | RelativeDirection
 
 export type ComputeRegionRange = 'inside' | 'outside' | 'both'
 
-export type TopologyRelation = 'contain' | 'intersect' | 'disjoint' | 'along'
+export type TopologyRelation = 'disjoint' | 'contain' | 'within' | 'intersect' | 'along'
 
 export interface GeoRelation {
   topology: TopologyRelation

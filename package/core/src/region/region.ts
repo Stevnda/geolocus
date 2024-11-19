@@ -81,6 +81,10 @@ export class GeoTripleHandler {
     return { region, pdf }
   }
 
+  private static withinHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
+    return this.containHandler(origin, relation, role)
+  }
+
   private static intersectHandler = (
     origin: GeolocusObject,
     relation: GeoRelation,
@@ -134,6 +138,10 @@ export class GeoTripleHandler {
     return { region, pdf }
   }
 
+  private static alongHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
+    return this.intersectHandler(origin, relation, role)
+  }
+
   private static directionHandler = (
     origin: GeolocusObject,
     relation: GeoRelation,
@@ -181,70 +189,47 @@ export class GeoTripleHandler {
     return distanceRegion
   }
 
+  private static topologyHandleMap: Record<
+    TopologyRelation,
+    (origin: GeolocusObject, relation: GeoRelation, role: Role) => RegionHandlerResult
+  > = {
+    disjoint: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+      const res = this.disjointHandler(origin, relation, role)
+      return res
+    },
+    contain: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+      const res = this.containHandler(origin, relation, role)
+      return res
+    },
+    within: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+      return this.withinHandler(origin, relation, role)
+    },
+    intersect: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+      const topology = this.intersectHandler(origin, relation, role)
+      return topology
+    },
+    along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+      const topology = this.alongHandler(origin, relation, role)
+      return topology
+    },
+  }
+
   private static topologyAndDistance = (
     origin: GeolocusObject,
     relation: GeoRelation,
     role: Role,
   ): RegionHandlerResult => {
-    const map: Record<
-      TopologyRelation,
-      (origin: GeolocusObject, relation: GeoRelation, role: Role) => RegionHandlerResult
-    > = {
-      disjoint: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const res = this.disjointHandler(origin, relation, role)
-
-        return res
-      },
-      contain: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const res = this.containHandler(origin, relation, role)
-
-        return res
-      },
-      intersect: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const topology = this.intersectHandler(origin, relation, role)
-        return topology
-      },
-      along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const topology = this.intersectHandler(origin, relation, role)
-        return topology
-      },
-    }
-
     const distanceRegion = this.distanceHandler(origin, relation, role)
     const topology = relation.topology
-    const result = map[topology](distanceRegion, relation, role)
+    const result = this.topologyHandleMap[topology](distanceRegion, relation, role)
 
     return result
   }
 
   private static all = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
-    const map: Record<
-      TopologyRelation,
-      (origin: GeolocusObject, relation: GeoRelation, role: Role) => RegionHandlerResult
-    > = {
-      disjoint: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const res = this.disjointHandler(origin, relation, role)
-
-        return res
-      },
-      contain: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const res = this.containHandler(origin, relation, role)
-
-        return res
-      },
-      intersect: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const topology = this.intersectHandler(origin, relation, role)
-        return topology
-      },
-      along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
-        const topology = this.intersectHandler(origin, relation, role)
-        return topology
-      },
-    }
-
     const distanceRegion = this.distanceHandler(origin, relation, role)
     const topology = relation.topology
-    const td = map[topology](distanceRegion, relation, role)
+    const td = this.topologyHandleMap[topology](distanceRegion, relation, role)
     if (relation.direction == null) {
       return td
     } else {
