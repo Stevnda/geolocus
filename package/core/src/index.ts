@@ -13,7 +13,7 @@ import { GeolocusContext, GeolocusContextInit, PlacePlugin, Role, ObjectMapActio
 import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
 import { LineResult, PointResult, Region } from './region'
 import { GeoJSON } from 'geojson'
-import { GeoJson } from './io'
+import { IO } from './io'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
@@ -117,7 +117,7 @@ class Geolocus {
 
   toGeoJSON(object: GeolocusObject): GeoJSON {
     const geometry = object.getGeometry()
-    return GeoJson.stringify(geometry)
+    return IO.geomToGeoJSON(geometry)
   }
 }
 

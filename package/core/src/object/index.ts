@@ -4,5 +4,5 @@ export {
   GeolocusGeometry,
   JTSGeometryFactory,
   JTSGeometryAction as GeolocusGeometryMeta,
-  GeolocusGeometryTransformation,
+  GeolocusGeometryAction,
 } from './geometry'

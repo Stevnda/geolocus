@@ -1,1 +1,1 @@
-export { GeoJson } from './geojson'
+export { IO } from './geojson'

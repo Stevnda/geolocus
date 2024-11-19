@@ -1,5 +1,7 @@
 import jsts from '@geolocus/jsts'
 import { GeolocusBBox, GeolocusGeometryType, Position2 } from './object.type'
+import { MAGIC_NUMBER } from '@/util'
+import { Topology } from '@/relation'
 
 interface GeolocusGeometryProps {
   setType(value: GeolocusGeometryType): void
@@ -58,8 +60,8 @@ export class GeolocusGeometry implements GeolocusGeometryProps {
   }
 }
 
-export class GeolocusGeometryTransformation {
-  static translate = (geometry: GeolocusGeometry, x: number, y: number): GeolocusGeometry => {
+export class GeolocusGeometryAction {
+  static translate(geometry: GeolocusGeometry, x: number, y: number): GeolocusGeometry {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.translate(x, y)
     const geometryTranslated = affineTransformation.transform(geometry.getGeometry())
@@ -68,13 +70,25 @@ export class GeolocusGeometryTransformation {
     return new GeolocusGeometry(type, geometryTranslated)
   }
 
-  static rotateAroundCoord = (geometry: GeolocusGeometry, theta: number, coord: Position2) => {
+  static rotateAroundCoord(geometry: GeolocusGeometry, theta: number, coord: Position2) {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.rotate(-theta, ...coord)
     const geometryRotated = affineTransformation.transform(geometry.getGeometry())
     const type = geometry.getType()
 
     return new GeolocusGeometry(type, geometryRotated)
+  }
+
+  static getConvexHullOfGeometryList(geometryList: GeolocusGeometry[]) {
+    const convexHullArray = geometryList.map((geometry) => {
+      geometry = <GeolocusGeometry>Topology.bufferOfDistance(geometry, MAGIC_NUMBER)
+      return JTSGeometryAction.getConvexHull(geometry.getGeometry())
+    })
+
+    const multiPolygon = JTSGeometryFactory.multiPolygonByPolygonList(convexHullArray)
+    const convexHull = JTSGeometryAction.getConvexHull(multiPolygon)
+
+    return new GeolocusGeometry('Polygon', convexHull)
   }
 }
 
@@ -108,6 +122,10 @@ export class JTSGeometryFactory {
 
   static multiPolygon = (position: Position2[][][]): jsts.geom.Geometry => {
     const polygonArray = position.map((value) => this.polygon(value))
+    return this._geometryFactory.createMultiPolygon(polygonArray)
+  }
+
+  static multiPolygonByPolygonList(polygonArray: jsts.geom.Geometry[]) {
     return this._geometryFactory.createMultiPolygon(polygonArray)
   }
 
@@ -165,5 +183,10 @@ export class JTSGeometryAction {
     if (geometry.isEmpty()) return [0, 0]
     const center = jsts.algorithm.Centroid.getCentroid(geometry)
     return [center.x, center.y]
+  }
+
+  static getConvexHull(geometry: jsts.geom.Geometry): jsts.geom.Geometry {
+    const convexHull = new jsts.algorithm.ConvexHull(geometry)
+    return convexHull.getConvexHull()
   }
 }
