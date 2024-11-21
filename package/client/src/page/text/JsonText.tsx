@@ -151,11 +151,15 @@ export const JsonText = () => {
     if (typeof jsonText === 'string') {
       if (!map) return
       const res = computeLineTest(jsonText)
-      const regionList = res!.geoTripleResultList.map((res) => res.region)
+      const regionList = res!.geoTripleResultList.map((res) => [res.region, res.coord])
       regionList.forEach((region) => {
-        const polygon = region as GeolocusObject
+        const [polygon, coord] = region as [GeolocusObject, Position2]
+        const point84 = toWgs84(generatePointByCoord(coord))
         const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
         const id = (Date.now() + Math.random()).toString()
+        addGeoJSONToMap(map, id + 'point', point84, 'circle', {
+          'circle-color': '#403877',
+        })
         addGeoJSONToMap(map, id, polygon84, 'fill', {
           'fill-outline-color': '#15803d',
           'fill-color': '#4ade80',
@@ -166,7 +170,7 @@ export const JsonText = () => {
 
       const resultGirdList = res!.geoTripleResultList.map((res) => res.pdfGird)
       resultGirdList.forEach((item, index) => {
-        const region = regionList[index]
+        const region = regionList[index][0] as GeolocusObject
         if (!item || !region) return
         const pngBlob = generateBlobPng(item.gird!)
         const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
@@ -179,9 +183,6 @@ export const JsonText = () => {
 
       const line = res?.result as GeolocusObject
       const line84 = toWgs84(geolocusContext.toGeoJSON(line))
-      // const coords = line84.coordinates as Position2[]
-      // const coordsTransform = chaikin(coords, 0.4, 1)
-      // const lineJson = generateLineStringByCoordList(coordsTransform)
       addGeoJSONToMap(map, line.getName() as string, line84, 'line', {
         'line-color': '#dc2626',
         'line-width': 2,

@@ -95,7 +95,7 @@ export class GeoTripleHandler {
     const bbox = originGeometry.getBBox()
     const dx = bbox[2] - bbox[0]
     const dy = bbox[3] - bbox[1]
-    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 20)
+    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
 
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {
@@ -146,7 +146,7 @@ export class GeoTripleHandler {
     const bbox = originGeometry.getBBox()
     const dx = bbox[2] - bbox[0]
     const dy = bbox[3] - bbox[1]
-    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 20)
+    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
     relation.distance = distance
     const region = this.distanceHandler(origin, relation, role)
 
@@ -491,8 +491,8 @@ export class Region {
     // 根据 curPoint 和 afterPoint 计算距离 afterRegion 和 curRegion 的最近点 pointOfCurPoint 和 coordOfAfterPoint
     // 计算对应最近点距离 curPoint 和 afterPoint 的距离之和, 选择其中的较小值作为最终最近点
     const [coordOfCurPoint] = Distance.nearestPoints(afterRegion, curPoint)
-    const pointOfCurPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(coordOfCurPoint))
     const [coordOfAfterPoint] = Distance.nearestPoints(curRegion, afterPoint)
+    const pointOfCurPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(coordOfCurPoint))
     const pointOfAfterPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(coordOfAfterPoint))
     const distanceOfCurPoint =
       Distance.distance(pointOfCurPoint, curPoint) + Distance.distance(pointOfCurPoint, afterPoint)
@@ -620,18 +620,36 @@ export class Region {
     const ratio = dy / dx
     const girdSize = dx / Math.sqrt(gridSum / ratio)
 
-    let max = -GEO_MAX_VALUE
-    let min = GEO_MAX_VALUE
-    let coord: Position2 = [0, 0]
+    // 分别存储概率值最大值对应坐标, 概率值大于 0.8 且距离 region 中心点最近的坐标
+    let maxValue = -GEO_MAX_VALUE
+    let minDistance = GEO_MAX_VALUE
+    let maxCoord: Position2 = [0, 0]
+    let minCoord: Position2 = [0, 0]
+    const center = region.getGeometry().getCenter()
     Gird.forEach(gird, (value, row, col) => {
       const x = xStart + (col + 0.5) * girdSize
       const y = yStart + (row + 0.5) * girdSize
-      if (Compare.GE(gird[row][col], max)) {
-        max = value
-        coord = [x, y]
+
+      if (Compare.GE(gird[row][col], maxValue)) {
+        maxValue = value
+        maxCoord = [x, y]
       }
-      if (Compare.LE(gird[row][col], min)) min = value
+      const curDistance = Math.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2)
+      if (Compare.LE(curDistance, minDistance) && Compare.GE(gird[row][col], 0.8)) {
+        minDistance = curDistance
+        minCoord = [x, y]
+      }
     })
-    return { coord, range: [min, max] as EuclideanDistanceRange }
+
+    // 计算最大值坐标和最小距离坐标作为对角线构成的矩形的面积
+    // 如果构成矩形面积小于等于外接矩形面积的 1/5 (凭感觉的二八法则的魔法数字), 则取最大值坐标, 否则取最小距离坐标
+    let coord: Position2
+    if (Math.abs((maxCoord[0] - minCoord[0]) * (maxCoord[1] - minCoord[1])) <= (dx * dy) / 5) {
+      coord = maxCoord
+    } else {
+      coord = minCoord
+    }
+
+    return { coord }
   }
 }
