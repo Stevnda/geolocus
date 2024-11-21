@@ -85,11 +85,7 @@ export class GeoTripleHandler {
     return this.containHandler(origin, relation, role)
   }
 
-  private static intersectHandler = (
-    origin: GeolocusObject,
-    relation: GeoRelation,
-    role: Role,
-  ): RegionHandlerResult => {
+  private static alongHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
     const context = role.getContext()
     const originGeometry = origin.getGeometry()
     const objectType = originGeometry.getType()
@@ -138,8 +134,23 @@ export class GeoTripleHandler {
     return { region, pdf }
   }
 
-  private static alongHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
-    return this.intersectHandler(origin, relation, role)
+  private static intersectHandler = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ): RegionHandlerResult => {
+    const originGeometry = origin.getGeometry()
+
+    // 取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
+    const N = role.getSemanticDistanceMap().N
+    const bbox = originGeometry.getBBox()
+    const dx = bbox[2] - bbox[0]
+    const dy = bbox[3] - bbox[1]
+    const distance = Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 20)
+    relation.distance = distance
+    const region = this.distanceHandler(origin, relation, role)
+
+    return this.containHandler(region, relation, role)
   }
 
   private static directionHandler = (
@@ -513,7 +524,7 @@ export class Region {
     const gridTransform = Gird.createGirdWithFilter(
       gird.length,
       gird[0].length,
-      (row, col) => 1 / (gird[row][col] + 0.1),
+      (row, col) => 1 / (gird[row][col] + 0.01),
     )
 
     const graph = new Graph(gridTransform, {
