@@ -13,6 +13,7 @@ import {
   computeGeolocusObjectMaskGrid,
   GeolocusBBox,
   GeolocusGeometry,
+  GeolocusGeometryAction,
   GeolocusObject,
   JTSGeometryFactory,
   Position2,
@@ -28,7 +29,7 @@ import {
   GeoRelation,
   TopologyRelation,
 } from '@/relation'
-import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MAGIC_NUMBER, MathUtil } from '@/util'
+import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MAGIC_NUMBER, MathUtil, Vector2 } from '@/util'
 import { AStar, Graph } from './aStart'
 
 export class GeoTripleHandler {
@@ -416,11 +417,11 @@ export class Region {
     const geoTripleResultList = []
     let beforeRegion = new GeolocusObject(new GeolocusGeometry('Point', JTSGeometryFactory.empty('Point')))
     for (const geoTriple of geoTripleList) {
-      const tag = geoTriple.origin == null
+      const tag = geoTriple.originUUIDList == null
       // handle null origin of line, the before region of geoTriple as origin
       if (tag) {
         ObjectMapAction.addObject(objectMap, beforeRegion)
-        geoTriple.origin = beforeRegion.getUUID()
+        geoTriple.originUUIDList = [beforeRegion.getUUID()]
       }
       const geoTripleResult = this.computePdfAndRegionOfGeoTriple(geoTriple, context)
       geoTripleResult.pdfGird = this.computePdfGird(
@@ -465,11 +466,13 @@ export class Region {
   }
 
   private static preHandleGeoTripleOfLine(triple: GeoTriple, context: GeolocusContext) {
-    if (triple.origin == null) return
-    const objectMap = context.getObjectMap()
-    const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, triple.origin)
-    if (object.getStatus() === 'precise') return
-    this.computeFuzzyPointObject(object.getUUID(), context)
+    if (triple.originUUIDList == null) return
+    for (const originUUID of triple.originUUIDList) {
+      const objectMap = context.getObjectMap()
+      const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, originUUID)
+      if (object.getStatus() === 'precise') return
+      this.computeFuzzyPointObject(object.getUUID(), context)
+    }
   }
 
   private static computeLineCoord(
@@ -488,6 +491,7 @@ export class Region {
     const afterRegion = <GeolocusGeometry>afterResult.region?.getGeometry()
     const afterPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(<Position2>afterResult.coord))
 
+    const coord0 = beforeCoord
     // 根据 curPoint 和 afterPoint 计算距离 afterRegion 和 curRegion 的最近点 pointOfCurPoint 和 coordOfAfterPoint
     // 计算对应最近点距离 curPoint 和 afterPoint 的距离之和, 选择其中的较小值作为最终最近点
     const [coordOfCurPoint] = Distance.nearestPoints(afterRegion, curPoint)
@@ -498,8 +502,12 @@ export class Region {
       Distance.distance(pointOfCurPoint, curPoint) + Distance.distance(pointOfCurPoint, afterPoint)
     const distanceOfAfterPoint =
       Distance.distance(pointOfAfterPoint, curPoint) + Distance.distance(pointOfAfterPoint, afterPoint)
-    const coord0 = beforeCoord
-    const coord1 = distanceOfCurPoint < distanceOfAfterPoint ? coordOfCurPoint : coordOfAfterPoint
+    let coord1 = distanceOfCurPoint < distanceOfAfterPoint ? coordOfCurPoint : coordOfAfterPoint
+    // 如果选择 coordOfAfterPoint, 判断是否会绕路
+    const [afterOfAfter] = Distance.nearestPoints(afterRegion, pointOfAfterPoint)
+    const v1 = Vector2.sub(coordOfAfterPoint, <Position2>geoTripleResult.coord)
+    const v2 = Vector2.sub(afterOfAfter, coordOfAfterPoint)
+    if (Vector2.dot(v1, v2) < 0) coord1 = coordOfCurPoint
 
     const bbox = geoTripleResult.region?.getGeometry().getBBox() as GeolocusBBox
     const xStart = bbox[0]
@@ -558,11 +566,62 @@ export class Region {
 
     const relation = geoTriple.relation
     const objectMap = context.getObjectMap()
-    const origin = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, <string>geoTriple.origin)
+    let unionOrigin: GeolocusGeometry | null = null
+    for (const originUUID of <string[]>geoTriple.originUUIDList) {
+      const origin = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, originUUID)
+      const buffer = new GeolocusObject(<GeolocusGeometry>Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER))
+      if (unionOrigin != null) {
+        unionOrigin = <GeolocusGeometry>Topology.union(unionOrigin, origin.getGeometry())
+      } else {
+        unionOrigin = buffer.getGeometry()
+      }
+    }
+    unionOrigin = GeolocusGeometryAction.getConcaveHull(<GeolocusGeometry>unionOrigin)
     const regionHandler = GeoTripleHandler.getRegionHandler(relation)
-    const { region, pdf } = regionHandler(origin, relation, geoTriple.role)
+    const { region, pdf } = regionHandler(new GeolocusObject(<GeolocusGeometry>unionOrigin), relation, geoTriple.role)
     result.pdfInput = pdf
     result.region = region
+
+    // const regionList: GeolocusObject[] = []
+    // const originList: GeolocusObject[] = []
+    // const girdRegionList: GeolocusObject[] = []
+    // for (const originUUID of <string[]>geoTriple.originUUIDList) {
+    //   const origin = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, originUUID)
+    //   const regionHandler = GeoTripleHandler.getRegionHandler(relation)
+    //   const { region, pdf } = regionHandler(origin, relation, geoTriple.role)
+    //   regionList.push(region)
+    //   originList.push(origin)
+    //   if (pdf.sdf.girdRegion != null) girdRegionList.push(pdf.sdf.girdRegion)
+    //   result.pdfInput = pdf
+    // }
+
+    // let resultRegion = context.getRegionRange().getGeometry()
+    // for (const region of regionList) {
+    //   const tempRegion = Topology.intersection(resultRegion, region.getGeometry())
+    //   if (!tempRegion) {
+    //     throw new Error("Can't compute the fuzzy region, the intersection is empty.")
+    //   }
+    //   resultRegion = tempRegion
+    // }
+    // result.region = new GeolocusObject(resultRegion)
+
+    // let resultOrigin = originList[0].getGeometry()
+    // for (let i = 1; i < originList.length; i++) {
+    //   const origin = originList[i]
+    //   resultOrigin = <GeolocusGeometry>Topology.union(resultOrigin, origin.getGeometry())
+    // }
+    // resultOrigin = GeolocusGeometryAction.getConcaveHull(resultOrigin)
+    // ;(<PDFInput>result.pdfInput).origin = new GeolocusObject(resultOrigin)
+
+    // let resultGirdRegion = context.getRegionRange().getGeometry()
+    // for (const girdRegion of girdRegionList) {
+    //   const tempRegion = Topology.intersection(resultRegion, girdRegion.getGeometry())
+    //   if (!tempRegion) {
+    //     throw new Error("Can't compute the fuzzy region, the intersection is empty.")
+    //   }
+    //   resultGirdRegion = tempRegion
+    // }
+    // ;(<PDFInput>result.pdfInput).sdf.girdRegion = new GeolocusObject(resultGirdRegion)
 
     return result
   }

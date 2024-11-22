@@ -4,9 +4,11 @@
     {
       "role": "default",
       "target": "kxh",
-      "origin": {
-        "name": "台湾"
-      },
+      "origin": [
+        {
+          "name": "台湾"
+        }
+      ],
       "relation": {
         "direction": "SE",
         "topology": "disjoint",
@@ -16,9 +18,11 @@
     {
       "role": "default",
       "target": "kxh",
-      "origin": {
-        "name": "巴士海峡"
-      },
+      "origin": [
+        {
+          "name": "巴士海峡"
+        }
+      ],
       "relation": {
         "topology": "contain"
       }
@@ -29,9 +33,11 @@
     {
       "role": "default",
       "target": "kxh1727274277362",
-      "origin": {
-        "name": "台湾"
-      },
+      "origin": [
+        {
+          "name": "台湾"
+        }
+      ],
       "relation": {
         "direction": "N",
         "topology": "contain"
@@ -40,9 +46,11 @@
     {
       "role": "default",
       "target": "kxh1727274277362",
-      "origin": {
-        "name": "松山机场"
-      },
+      "origin": [
+        {
+          "name": "松山机场"
+        }
+      ],
       "relation": {
         "distance": 20000,
         "range": "outside"
@@ -53,16 +61,20 @@
   "lineData": [
     {
       "role": "default",
-      "origin": {
-        "name": "吉隆坡机场"
-      },
+      "origin": [
+        {
+          "name": "吉隆坡机场"
+        }
+      ],
       "target": "taiwan"
     },
     {
       "role": "default",
-      "origin": {
-        "name": "马六甲海峡"
-      },
+      "origin": [
+        {
+          "name": "马六甲海峡"
+        }
+      ],
       "relation": {
         "direction": "E",
         "topology": "intersect"
@@ -71,16 +83,20 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "卡里马塔海峡"
-      },
+      "origin": [
+        {
+          "name": "卡里马塔海峡"
+        }
+      ],
       "target": "taiwan"
     },
     {
       "role": "default",
-      "origin": {
-        "name": "九段线"
-      },
+      "origin": [
+        {
+          "name": "九段线"
+        }
+      ],
       "relation": {
         "direction": "S",
         "topology": "disjoint",
@@ -90,16 +106,20 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "加里曼尼岛"
-      },
+      "origin": [
+        {
+          "name": "加里曼尼岛"
+        }
+      ],
       "target": "taiwan"
     },
     {
       "role": "default",
-      "origin": {
-        "name": "苏拉威西海"
-      },
+      "origin": [
+        {
+          "name": "苏拉威西海"
+        }
+      ],
       "relation": {
         "direction": "SE",
         "topology": "contain"
@@ -108,9 +128,11 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "菲律宾"
-      },
+      "origin": [
+        {
+          "name": "菲律宾"
+        }
+      ],
       "relation": {
         "direction": "E",
         "topology": "along",
@@ -120,9 +142,11 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "巴士海峡"
-      },
+      "origin": [
+        {
+          "name": "巴士海峡"
+        }
+      ],
       "relation": {
         "direction": "W",
         "topology": "disjoint",
@@ -132,9 +156,11 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "台湾"
-      },
+      "origin": [
+        {
+          "name": "台湾"
+        }
+      ],
       "relation": {
         "direction": "E",
         "topology": "intersect"
@@ -143,9 +169,11 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "松山机场"
-      },
+      "origin": [
+        {
+          "name": "松山机场"
+        }
+      ],
       "target": "taiwan"
     },
     {
@@ -168,9 +196,11 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "首尔"
-      },
+      "origin": [
+        {
+          "name": "首尔"
+        }
+      ],
       "target": "taiwan"
     }
   ],
@@ -178,16 +208,20 @@
   "123": [
     {
       "role": "default",
-      "origin": {
-        "name": "北京市"
-      },
+      "origin": [
+        {
+          "name": "北京市"
+        }
+      ],
       "target": "taiwan"
     },
     {
       "role": "default",
-      "origin": {
-        "name": "济南市"
-      },
+      "origin": [
+        {
+          "name": "济南市"
+        }
+      ],
       "relation": {
         "direction": "S",
         "topology": "intersect"
@@ -196,17 +230,21 @@
     },
     {
       "role": "default",
-      "origin": {
-        "name": "南京市"
-      },
+      "origin": [
+        {
+          "name": "南京市"
+        }
+      ],
       "target": "taiwan"
     },
     {
       "role": "default",
       "target": "taiwan",
-      "origin": {
-        "name": "广州市"
-      }
+      "origin": [
+        {
+          "name": "广州市"
+        }
+      ]
     }
   ]
 }

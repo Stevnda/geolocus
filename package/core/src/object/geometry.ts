@@ -106,8 +106,10 @@ export class GeolocusGeometryAction {
   }
 
   static getConcaveHull(geometry: GeolocusGeometry): GeolocusGeometry {
-    const jtsGeometry = geometry.getGeometry()
+    const geometryType = geometry.getType()
+    if (geometryType === 'Point' || geometryType === 'LineString') return geometry
 
+    const jtsGeometry = geometry.getGeometry()
     const pointList = JTSGeometryAction.getCoordList(jtsGeometry)
     if (pointList.length === 1) return new GeolocusGeometry('Point', JTSGeometryFactory.point(pointList[0]))
     if (pointList.length === 2) return new GeolocusGeometry('LineString', JTSGeometryFactory.lineString(pointList))
