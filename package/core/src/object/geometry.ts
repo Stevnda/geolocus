@@ -2,6 +2,7 @@ import jsts from '@geolocus/jsts'
 import { GeolocusBBox, GeolocusGeometryType, Position2 } from './object.type'
 import { MAGIC_NUMBER } from '@/util'
 import { Topology } from '@/relation'
+import { computeConcaveHull } from '@geolocus/concave'
 
 interface GeolocusGeometryProps {
   setType(value: GeolocusGeometryType): void
@@ -58,6 +59,14 @@ export class GeolocusGeometry implements GeolocusGeometryProps {
   getCenter(): Position2 {
     return this._center
   }
+
+  getArea(): number {
+    return JTSGeometryAction.getArea(this._geometry)
+  }
+
+  getCoordList(): Position2[] {
+    return JTSGeometryAction.getCoordList(this._geometry)
+  }
 }
 
 export class GeolocusGeometryAction {
@@ -79,7 +88,12 @@ export class GeolocusGeometryAction {
     return new GeolocusGeometry(type, geometryRotated)
   }
 
-  static getConvexHullOfGeometryList(geometryList: GeolocusGeometry[]) {
+  static getConvexHull(geometry: GeolocusGeometry) {
+    geometry = <GeolocusGeometry>Topology.bufferOfDistance(geometry, MAGIC_NUMBER)
+    return new GeolocusGeometry('Polygon', JTSGeometryAction.getConvexHull(geometry.getGeometry()))
+  }
+
+  static getConvexHullByGeometryList(geometryList: GeolocusGeometry[]) {
     const convexHullArray = geometryList.map((geometry) => {
       geometry = <GeolocusGeometry>Topology.bufferOfDistance(geometry, MAGIC_NUMBER)
       return JTSGeometryAction.getConvexHull(geometry.getGeometry())
@@ -89,6 +103,18 @@ export class GeolocusGeometryAction {
     const convexHull = JTSGeometryAction.getConvexHull(multiPolygon)
 
     return new GeolocusGeometry('Polygon', convexHull)
+  }
+
+  static getConcaveHull(geometry: GeolocusGeometry): GeolocusGeometry {
+    const jtsGeometry = geometry.getGeometry()
+
+    const pointList = JTSGeometryAction.getCoordList(jtsGeometry)
+    if (pointList.length === 1) return new GeolocusGeometry('Point', JTSGeometryFactory.point(pointList[0]))
+    if (pointList.length === 2) return new GeolocusGeometry('LineString', JTSGeometryFactory.lineString(pointList))
+
+    const hull = <Position2[]>computeConcaveHull(pointList)
+
+    return new GeolocusGeometry('Polygon', JTSGeometryFactory.polygon([hull]))
   }
 }
 
@@ -169,6 +195,15 @@ export class JTSGeometryFactory {
 }
 
 export class JTSGeometryAction {
+  static getArea(geometry: jsts.geom.Geometry): number {
+    return geometry.getArea()
+  }
+
+  static getCoordList(geometry: jsts.geom.Geometry): Position2[] {
+    const coordList = geometry.getCoordinates()
+    return coordList.map((coord) => [coord.x, coord.y])
+  }
+
   static getBBox(geometry: jsts.geom.Geometry): GeolocusBBox {
     const envelope = geometry.getEnvelopeInternal()
     const minX = envelope.getMinX()

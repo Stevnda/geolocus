@@ -1,37 +1,43 @@
 import { GeolocusObject } from '@/object'
 
-export interface UniformLayout {
+export interface ArrangementLayout {
   region: GeolocusObject
-  type: 'tri' | 'rect' | 'hex' | 'voronoi'
   space: {
-    type: 'gap' | 'number'
-    value: number
+    type: 'uniform' | 'random' | 'between'
+    number: number
+  }
+}
+
+export interface LinearLayout {
+  region: GeolocusObject
+  space: {
+    type: 'straight'
+    number: number
+  }
+  init: {
+    length: number
   }
 }
 
 export interface CircularLayout {
   region: GeolocusObject
-  type: 'circle' | 'ellipse' | 'annulus'
   space: {
-    type: 'gap' | 'number'
-    value: number
+    type: 'solid' | 'hollow' | 'annulus'
+    number: number
   }
   init: {
-    fill: boolean
     radius0: number
-    radius1?: number
+    radius1: number
   }
 }
 
 export interface TriangularLayout {
   region: GeolocusObject
-  type: 'tri' | 'vFormation'
   space: {
-    type: 'gap' | 'number'
-    value: number
+    type: 'solid' | 'hollow' | 'vFormation'
+    number: number
   }
   init: {
-    fill: boolean
     angle: number
     sideLength: number
   }
@@ -39,13 +45,11 @@ export interface TriangularLayout {
 
 export interface RectangularLayout {
   region: GeolocusObject
-  type: 'rect' | 'square'
   space: {
-    type: 'gap' | 'number'
-    value: number
+    type: 'solid' | 'hollow'
+    number: number
   }
   init: {
-    fill: boolean
     width: number
     height: number
   }
@@ -53,36 +57,31 @@ export interface RectangularLayout {
 
 export interface HexagonalLayout {
   region: GeolocusObject
-  type: 'hex'
   space: {
-    type: 'gap' | 'number'
-    value: number
+    type: 'solid' | 'hollow'
+    number: number
   }
   init: {
-    fill: boolean
     sideLength: number
   }
 }
 
 export interface RegularPolygonLayout {
   region: GeolocusObject
-  type: number
   space: {
-    type: 'gap' | 'number'
-    value: number
+    type: number
+    number: number
   }
   init: {
-    fill: boolean
     sideLength: number
   }
 }
 
 export interface CustomLayout {
   region: GeolocusObject
-  type: number
   space: {
-    type: 'gap' | 'number'
-    value: number
+    type: string
+    number: number
   }
   init: object
 }

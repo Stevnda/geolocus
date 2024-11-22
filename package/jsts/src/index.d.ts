@@ -103,6 +103,7 @@ declare namespace jsts {
     export class Geometry {
       constructor(factory?: any)
       envelope: Envelope
+      getArea(): number
       getGeometryType(): string
       getCoordinate(): Coordinate
       getCoordinates(): Coordinate[]
