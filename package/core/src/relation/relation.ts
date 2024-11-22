@@ -56,27 +56,29 @@ export class RelationAction {
     const role = context.getRoleMap().get(triple.role)
     if (!role) throw new Error('role is not existed')
 
-    const originUUID = (() => {
+    const targetUUID = this.handleTarget(triple, context)
+    const originUUIDList = (() => {
       if (triple.origin == null && mode === 'line') return null
       else return this.handleOrigin(triple, context)
     })()
-    const targetUUID = this.handleTarget(triple, context)
-    if (originUUID != null) {
+    if (originUUIDList != null) {
       const route = context.getRoute()
-      route.addEdge(originUUID, targetUUID)
-      const circle = RouteAction.validateRouteValidity(route)
-      if (!circle[0]) {
-        route.removeEdge(originUUID, targetUUID)
-        throw new Error('Route contains a cycle.')
+      for (const originUUID of originUUIDList) {
+        route.addEdge(originUUID, targetUUID)
+        const circle = RouteAction.validateRouteValidity(route)
+        if (!circle[0]) {
+          route.removeEdge(originUUID, targetUUID)
+          throw new Error('Route contains a cycle.')
+        }
       }
     }
 
     const tripleTransform: GeoTriple = {
       uuid: generateUUID(),
       role,
-      origin: originUUID,
+      originUUIDList,
       relation: this.transform(triple.relation || {}, role, mode),
-      target: targetUUID,
+      targetUUID,
     }
     const relation = context.getRelation()
     const relationSet = relation.getTripleListMap().get(targetUUID)
@@ -88,35 +90,37 @@ export class RelationAction {
     }
   }
 
-  private static handleOrigin(triple: UserGeolocusTriple, context: GeolocusContext): string {
+  private static handleOrigin(triple: UserGeolocusTriple, context: GeolocusContext): string[] {
+    const uuidList: string[] = []
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    let { name, type, coord } = triple.origin!
-    const objectMap = context.getObjectMap()
-
-    let obj: GeolocusObject
-    if (type != null && coord != null) {
-      obj = new GeolocusObject(
-        new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)),
-        name,
-        null,
-        'precise',
-      )
-    } else {
-      name = <string>name
-      const temp = ObjectMapAction.getObjectByPlaceName(objectMap, name)
-      if (temp == null) {
-        const jstGeometry = JTSGeometryFactory.empty('Point')
-        const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-        obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+    for (let { name, type, coord } of triple.origin!) {
+      const objectMap = context.getObjectMap()
+      let obj: GeolocusObject
+      if (type != null && coord != null) {
+        obj = new GeolocusObject(
+          new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)),
+          name,
+          null,
+          'precise',
+        )
       } else {
-        obj = temp
+        name = <string>name
+        const temp = ObjectMapAction.getObjectByPlaceName(objectMap, name)
+        if (temp == null) {
+          const jstGeometry = JTSGeometryFactory.empty('Point')
+          const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
+          obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+        } else {
+          obj = temp
+        }
       }
+
+      const uuid = obj.getUUID()
+      ObjectMapAction.addObject(objectMap, obj)
+      uuidList.push(uuid)
     }
 
-    const uuid = obj.getUUID()
-    ObjectMapAction.addObject(objectMap, obj)
-
-    return uuid
+    return uuidList
   }
 
   private static handleTarget(triple: UserGeolocusTriple, context: GeolocusContext): string {

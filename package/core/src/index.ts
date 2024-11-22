@@ -29,7 +29,7 @@ export interface UserGeolocusTriple {
     name?: string
     type?: GeolocusGeometryType
     coord?: Position2 | Position2[] | Position2[][] | Position2[][][]
-  }
+  }[]
   relation?: UserGeoRelation
   target: string
 }

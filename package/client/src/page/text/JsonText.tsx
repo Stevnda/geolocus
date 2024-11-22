@@ -15,16 +15,20 @@ import { generatePointByCoord } from '@/util/geojson.util'
 const text = [
   {
     role: 'default',
-    origin: {
-      name: '吉隆坡机场',
-    },
+    origin: [
+      {
+        name: '吉隆坡机场',
+      },
+    ],
     target: 'taiwan',
   },
   {
     role: 'default',
-    origin: {
-      name: '马六甲海峡',
-    },
+    origin: [
+      {
+        name: '马六甲海峡',
+      },
+    ],
     relation: {
       direction: 'E',
       topology: 'intersect',
@@ -33,16 +37,20 @@ const text = [
   },
   {
     role: 'default',
-    origin: {
-      name: '卡里马塔海峡',
-    },
+    origin: [
+      {
+        name: '卡里马塔海峡',
+      },
+    ],
     target: 'taiwan',
   },
   {
     role: 'default',
-    origin: {
-      name: '九段线',
-    },
+    origin: [
+      {
+        name: '九段线',
+      },
+    ],
     relation: {
       direction: 'S',
       topology: 'disjoint',
@@ -52,16 +60,20 @@ const text = [
   },
   {
     role: 'default',
-    origin: {
-      name: '加里曼尼岛',
-    },
+    origin: [
+      {
+        name: '加里曼尼岛',
+      },
+    ],
     target: 'taiwan',
   },
   {
     role: 'default',
-    origin: {
-      name: '苏拉威西海',
-    },
+    origin: [
+      {
+        name: '苏拉威西海',
+      },
+    ],
     relation: {
       direction: 'SE',
       topology: 'contain',
@@ -70,9 +82,11 @@ const text = [
   },
   {
     role: 'default',
-    origin: {
-      name: '菲律宾',
-    },
+    origin: [
+      {
+        name: '菲律宾',
+      },
+    ],
     relation: {
       direction: 'E',
       topology: 'along',
@@ -82,9 +96,11 @@ const text = [
   },
   {
     role: 'default',
-    origin: {
-      name: '巴士海峡',
-    },
+    origin: [
+      {
+        name: '巴士海峡',
+      },
+    ],
     relation: {
       direction: 'W',
       topology: 'disjoint',
@@ -94,9 +110,11 @@ const text = [
   },
   {
     role: 'default',
-    origin: {
-      name: '台湾',
-    },
+    origin: [
+      {
+        name: '台湾',
+      },
+    ],
     relation: {
       direction: 'E',
       topology: 'intersect',
@@ -105,9 +123,11 @@ const text = [
   },
   {
     role: 'default',
-    origin: {
-      name: '松山机场',
-    },
+    origin: [
+      {
+        name: '松山机场',
+      },
+    ],
     target: 'taiwan',
   },
   {
@@ -130,9 +150,11 @@ const text = [
   },
   {
     role: 'default',
-    origin: {
-      name: '首尔',
-    },
+    origin: [
+      {
+        name: '首尔',
+      },
+    ],
     target: 'taiwan',
   },
 ]

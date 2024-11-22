@@ -28,9 +28,9 @@ export interface GeoRelation {
 export interface GeoTriple {
   uuid: string
   role: Role
-  origin: string | null
+  originUUIDList: string[] | null
   relation: GeoRelation
-  target: string
+  targetUUID: string
 }
 
 export type SemanticRelation = Omit<GeoRelation, 'weight'>
