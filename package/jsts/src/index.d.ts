@@ -105,6 +105,7 @@ declare namespace jsts {
       envelope: Envelope
       getGeometryType(): string
       getCoordinate(): Coordinate
+      getCoordinates(): Coordinate[]
       isEmpty(): boolean
       getEnvelopeInternal(): Envelope
       equal(a: Coordinate, b: Coordinate, tolerance: number): boolean
