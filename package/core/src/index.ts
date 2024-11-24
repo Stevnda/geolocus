@@ -14,13 +14,14 @@ import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
 import { LineResult, PointResult, Region } from './region'
 import { GeoJSON } from 'geojson'
 import { IO } from './io'
+import { GeoLayout } from './relation/layout.type'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
   direction?: SeManticDirection | number // [0,360], N=0
   distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
   range?: ComputeRegionRange
-  layout?: string
+  layout?: GeoLayout
 }
 
 export interface UserGeolocusTriple {

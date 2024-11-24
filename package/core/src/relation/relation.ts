@@ -148,10 +148,9 @@ export class RelationAction {
       direction: undefined,
       distance: 0,
       range: 'outside',
+      layout: undefined,
       weight: 1,
     }
-
-    // NOTE 布局模型
 
     // range
     if (relation.range != null) {
@@ -192,6 +191,9 @@ export class RelationAction {
     } else {
       res.distance = 0
     }
+
+    // layout
+    res.layout = relation.layout
 
     // weight
     res.weight = role.getWeight()
