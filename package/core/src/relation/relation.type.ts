@@ -1,4 +1,5 @@
 import { Role } from '@/context'
+import { GeoLayout } from './layout.type'
 
 export type RelationMode = 'point' | 'line' | 'plygon'
 
@@ -20,8 +21,7 @@ export interface GeoRelation {
   direction?: number
   distance: EuclideanDistance | EuclideanDistanceRange
   range: ComputeRegionRange
-  // NOTE layout model
-  layout?: string
+  layout?: GeoLayout
   weight: number
 }
 

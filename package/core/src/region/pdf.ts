@@ -86,8 +86,7 @@ export class RegionPDF {
   }
 
   private static getUnsignedInternalDistanceField(pdf: PDFInput, azimuth?: number, deltaAzimuth?: number) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const mask = computeGeolocusObjectMaskGrid(pdf.sdf.girdRegion as GeolocusObject, pdf.sdf.girdNum as number)
+    const mask = computeGeolocusObjectMaskGrid(pdf.sdf.girdRegion as GeolocusObject, pdf.sdf.girdSum as number)
     const tempGird = Gird.createGirdWithFilter(mask.length + 4, mask[0].length + 4, (row, col) => {
       if (row <= 1 || col <= 1 || row >= mask.length + 2 || col >= mask[0].length + 2) {
         return 0
@@ -140,6 +139,71 @@ export class RegionPDF {
     }
   }
 
+  static generateSpreadGrid(pdf: PDFInput) {
+    const directions = [
+      [-1, 0],
+      [-1, 1],
+      [-1, -1],
+      [0, 1],
+      [0, -1],
+      [1, 0],
+      [1, 1],
+      [1, -1],
+    ]
+    const bbox = (<GeolocusObject>pdf.spread.girdRegion).getGeometry().getBBox()
+    const xStart = bbox[0]
+    const xEnd = bbox[2]
+    const dx = xEnd - xStart
+    const yStart = bbox[1]
+    const yEnd = bbox[3]
+    const dy = yEnd - yStart
+    const ratio = dy / dx
+    const girdSize = dx / Math.sqrt(<number>pdf.spread.girdSum / ratio)
+    const mask = computeGeolocusObjectMaskGrid(<GeolocusObject>pdf.spread.girdRegion, <number>pdf.spread.girdSum)
+    const m = mask.length
+    const n = mask[0].length
+    const spreadGrid = Gird.createGirdWithValue(m, n, -1)
+
+    const queue: Position2[] = []
+    const startPointList = <Position2[]>pdf.spread.spreadPointList?.getGeometry().getCoordList()
+    for (const [x, y] of startPointList) {
+      const col = Math.floor((x - xStart) / girdSize)
+      const row = Math.floor((y - yStart) / girdSize)
+      spreadGrid[row][col] = m * n
+      queue.push([row, col])
+    }
+
+    let min = m * n
+    while (queue.length > 0) {
+      const [row, col] = <Position2>queue.shift()
+      const girdValue = spreadGrid[row][col]
+
+      for (const [dx, dy] of directions) {
+        const curRow = row + dx
+        const curCol = col + dy
+
+        if (curRow >= 0 && curRow < m && curCol >= 0 && curCol < n && mask[curRow][curCol] === 1) {
+          const value = girdValue - Math.sqrt(dx * dx + dy * dy)
+          if (spreadGrid[curRow][curCol] === -1 || value > spreadGrid[curRow][curCol]) {
+            spreadGrid[curRow][curCol] = value
+            min = Math.min(min, spreadGrid[curRow][curCol])
+            queue.push([curRow, curCol])
+          }
+        }
+      }
+    }
+
+    Gird.forEach(spreadGrid, (value, row, col, grid) => {
+      if (value === -1) {
+        grid[row][col] = 0
+      } else {
+        grid[row][col] = value - min + 1
+      }
+    })
+
+    return spreadGrid
+  }
+
   static computePDF(pdf: PDFInput): GeolocusGird
   static computePDF(pdf: PDFInput, target?: Position2): number
   static computePDF(pdf: PDFInput, target?: Position2): number | GeolocusGird {
@@ -171,6 +235,7 @@ export class RegionPDF {
           pdf.gdf.azimuthDelta as number,
         ),
       sdf: () => this.getUnsignedInternalDistanceField(pdf, pdf.gdf.azimuth, pdf.gdf.azimuthDelta),
+      spread: () => this.generateSpreadGrid(pdf),
     }
 
     return map[type]()

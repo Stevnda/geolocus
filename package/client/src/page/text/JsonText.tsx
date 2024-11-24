@@ -240,7 +240,8 @@ export const JsonText = () => {
                 const res = computePointTest(jsonText)!
                 const region = res.region as GeolocusObject
                 const pdfGird = res.regionPdfGird as GeolocusGird
-                const coord = res.region?.getGeometry().getCenter() as Position2
+                const result = res.result as GeolocusObject
+                const coord = result.getGeometry().getCenter() as Position2
 
                 const polygon = region
                 const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))

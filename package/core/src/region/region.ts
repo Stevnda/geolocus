@@ -31,6 +31,7 @@ import {
 } from '@/relation'
 import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MAGIC_NUMBER, MathUtil, Vector2 } from '@/util'
 import { AStar, Graph } from './aStart'
+import { Layout } from '@/relation/layout'
 
 export class GeoTripleHandler {
   private static intersection = (object0: GeolocusObject, object1: GeolocusObject) => {
@@ -59,6 +60,7 @@ export class GeoTripleHandler {
         distanceDelta,
       },
       sdf: {},
+      spread: {},
       weight: relation.weight,
     }
 
@@ -75,8 +77,9 @@ export class GeoTripleHandler {
       gdf: {},
       sdf: {
         girdRegion: region,
-        girdNum: context.getGridSum(),
+        girdSum: context.getGridSum(),
       },
+      spread: {},
       weight: relation.weight || 1,
     }
     return { region, pdf }
@@ -127,8 +130,9 @@ export class GeoTripleHandler {
       gdf: {},
       sdf: {
         girdRegion: region,
-        girdNum: context.getGridSum(),
+        girdSum: context.getGridSum(),
       },
+      spread: {},
       weight: relation.weight || 1,
     }
 
@@ -171,6 +175,7 @@ export class GeoTripleHandler {
         azimuthDelta: directionDelta,
       },
       sdf: {},
+      spread: {},
       weight: relation.weight,
     }
 
@@ -582,6 +587,8 @@ export class Region {
     result.pdfInput = pdf
     result.region = region
 
+    if (relation.layout != null) Layout.computeLayout(relation.layout, geoTriple, result, context)
+
     // const regionList: GeolocusObject[] = []
     // const originList: GeolocusObject[] = []
     // const girdRegionList: GeolocusObject[] = []
@@ -647,7 +654,14 @@ export class Region {
       pdfGird = {
         type: 'sdf',
         gird: RegionPDF.computePDF(pdfInput),
-        bbox: <GeolocusBBox>pdfInput.sdf?.girdRegion?.getGeometry().getBBox(),
+        bbox: region.getGeometry().getBBox(),
+        weight: pdfInput.weight,
+      }
+    } else if (pdfInput.type === 'spread') {
+      pdfGird = {
+        type: 'spread',
+        gird: RegionPDF.computePDF(pdfInput),
+        bbox: region.getGeometry().getBBox(),
         weight: pdfInput.weight,
       }
     } else {
