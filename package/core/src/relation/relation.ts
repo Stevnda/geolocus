@@ -97,19 +97,14 @@ export class RelationAction {
       const objectMap = context.getObjectMap()
       let obj: GeolocusObject
       if (type != null && coord != null) {
-        obj = new GeolocusObject(
-          new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)),
-          name,
-          null,
-          'precise',
-        )
+        obj = new GeolocusObject(new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)), name, 'precise')
       } else {
         name = <string>name
         const temp = ObjectMapAction.getObjectByPlaceName(objectMap, name)
         if (temp == null) {
           const jstGeometry = JTSGeometryFactory.empty('Point')
           const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-          obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+          obj = new GeolocusObject(geolocusGeometry, name, 'fuzzy')
         } else {
           obj = temp
         }
@@ -134,7 +129,7 @@ export class RelationAction {
 
     const jstGeometry = JTSGeometryFactory.empty('Point')
     const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-    const obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+    const obj = new GeolocusObject(geolocusGeometry, name, 'fuzzy')
 
     const uuid = obj.getUUID()
     ObjectMapAction.addObject(objectMap, obj)
