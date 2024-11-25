@@ -43,7 +43,7 @@ export class Layout {
     )
 
     const activeList: Position2[] = []
-    let initialPoint: Position2 = [minX + Math.random() * (maxX - minX), minY + Math.random() * (maxY - minY)]
+    let initialPoint: Position2 = [minX + 0.5 * (maxX - minX), minY + 0.5 * (maxY - minY)]
     while (!this.isPointInPolygon(initialPoint, geometry)) {
       initialPoint = [minX + Math.random() * (maxX - minX), minY + Math.random() * (maxY - minY)]
     }

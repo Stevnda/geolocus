@@ -78,7 +78,7 @@
       "target": "taiwan"
     }
   ],
-  "pointText4": "5架飞机均匀位于苏拉威西海",
+  "pointText4": "100架飞机均匀位于苏拉威西海",
   "pointData4": [
     {
       "role": "default",
@@ -91,13 +91,13 @@
         "topology": "contain",
         "layout": {
           "type": "uniform",
-          "number": 5
+          "number": 100
         }
       },
       "target": "taiwan"
     }
   ],
-  "pointText5": "5架飞机均匀位于苏拉威西海, 卡里马塔海峡以东",
+  "pointText5": "10架飞机随机位于苏拉威西海",
   "pointData5": [
     {
       "role": "default",
@@ -109,22 +109,9 @@
       "relation": {
         "topology": "contain",
         "layout": {
-          "type": "uniform",
-          "number": 5
+          "type": "random",
+          "number": 10
         }
-      },
-      "target": "taiwan"
-    },
-    {
-      "role": "default",
-      "origin": [
-        {
-          "name": "卡里马塔海峡"
-        }
-      ],
-      "relation": {
-        "topology": "disjoint",
-        "direction": "E"
       },
       "target": "taiwan"
     }
