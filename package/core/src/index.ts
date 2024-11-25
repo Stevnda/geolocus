@@ -51,6 +51,10 @@ class Geolocus {
     this._context = new GeolocusContext(init)
   }
 
+  getContext(): GeolocusContext {
+    return this._context
+  }
+
   use(type: 'placePlugin', fn: PlacePlugin) {
     if (type === 'placePlugin') {
       const objectMap = this._context.getObjectMap()

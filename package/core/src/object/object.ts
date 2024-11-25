@@ -2,36 +2,23 @@ import { generateUUID, GeolocusGird, Gird } from '@/util'
 import jsts from '@geolocus/jsts'
 import { GeolocusGeometry, JTSGeometryFactory } from './geometry'
 
-interface GeolocusObjectProps {
-  setUUID(value: string): void
-  getUUID(): string
-  setStatus(value: 'fuzzy' | 'precise'): void
-  getStatus(): 'fuzzy' | 'precise'
-  setName(value: string | null): void
-  getName(): string | null
-  setType(value: string | null): void
-  getType(): string | null
-  setGeometry(geometry: GeolocusGeometry): void
-  getGeometry(): GeolocusGeometry
-}
-
-export class GeolocusObject implements GeolocusObjectProps {
+export class GeolocusObject {
   private _uuid: string
-  private _status: 'fuzzy' | 'precise'
   private _name: string | null
-  private _type: string | null
+  private _templateName: string | null
+  private _status: 'fuzzy' | 'precise'
   private _geometry: GeolocusGeometry
 
   constructor(
     geometry: GeolocusGeometry,
     name: string | null = null,
-    type: string | null = null,
+    templateName: string | null = null,
     status: 'fuzzy' | 'precise' = 'precise',
   ) {
     this._uuid = generateUUID()
     this._status = status
     this._name = name
-    this._type = type
+    this._templateName = templateName
     this._geometry = geometry
   }
 
@@ -59,12 +46,12 @@ export class GeolocusObject implements GeolocusObjectProps {
     return this._name
   }
 
-  setType(value: string | null): void {
-    this._type = value
+  getTemplateName(): string | null {
+    return this._templateName
   }
 
-  getType(): string | null {
-    return this._type
+  setTemplateName(value: string | null) {
+    this._templateName = value
   }
 
   setGeometry(geometry: GeolocusGeometry): void {
