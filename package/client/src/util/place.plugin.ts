@@ -426,6 +426,54 @@ export const getPlaceDataByName = (name: string): PlaceOutput | null => {
   return null
 }
 
+// 获取ring方向
+const getRingDirection = (ring: [number, number][]): number => {
+  let sum = 0
+  for (let i = 0; i < ring.length - 1; i++) {
+    const [x1, y1] = ring[i]
+    const [x2, y2] = ring[i + 1]
+    sum += (x2 - x1) * (y2 + y1) // 使用 Shoelace 公式计算方向
+  }
+  return sum
+}
+
+// 简化多边形
+const simplifyPolygons = (
+  coordinates: [number, number][][] | [number, number][][][],
+  type: 'Polygon' | 'MultiPolygon',
+): [number, number][][] | [number, number][][][] => {
+  const simplePolygons: [number, number][][][] | [number, number][][] = []
+
+  if (type === 'MultiPolygon') {
+    coordinates.forEach((coordinate) => {
+      // 判断复杂多边形
+      if (coordinate.length > 1) {
+        for (const ring of coordinate as [number, number][][]) {
+          if (getRingDirection(ring) < 0) {
+            ;(simplePolygons as [number, number][][][]).push([ring])
+            break
+          }
+        }
+      } else {
+        ;(simplePolygons as [number, number][][][]).push(coordinate as [number, number][][])
+      }
+    })
+  } else if (type === 'Polygon') {
+    // 判断复杂多边形
+    if (coordinates.length > 1) {
+      for (const ring of coordinates as [number, number][][]) {
+        if (getRingDirection(ring) < 0) {
+          ;(simplePolygons as [number, number][][]).push(ring)
+          break
+        }
+      }
+    } else {
+      ;(simplePolygons as [number, number][][]).push(coordinates[0] as [number, number][])
+    }
+  }
+  return simplePolygons
+}
+
 // NOTE 简单多边形处理
 export const nominatim = (name: string): PlaceOutput | null => {
   const base = `https://nominatim.openstreetmap.org/search.php`
@@ -441,12 +489,29 @@ export const nominatim = (name: string): PlaceOutput | null => {
   xhr.open('GET', url, false)
   xhr.send()
   if (xhr.status === 200) {
-    const featureCollection = toMercator(JSON.parse(xhr.responseText))
+    const featureCollection = JSON.parse(xhr.responseText)
     for (const feature of featureCollection.features) {
       if (feature.properties.category === 'boundary') {
+        const type = feature.geometry.type
+        let coord = feature.geometry.coordinates
+
+        // 判断几何类型并简化多边形
+        if (type === 'Polygon' || type === 'MultiPolygon') {
+          coord = simplifyPolygons(coord, type) // 调用 simplifyPolygons
+        }
+
+        // 转换为 Mercator 坐标
+        const featureInMercator = toMercator({
+          ...feature,
+          geometry: {
+            ...feature.geometry,
+            coordinates: coord,
+          },
+        })
+
         return {
-          type: feature.geometry.type,
-          coord: feature.geometry.coordinates,
+          type: featureInMercator.geometry.type,
+          coord: featureInMercator.geometry.coordinates,
         } as PlaceOutput
       }
     }
