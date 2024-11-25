@@ -581,7 +581,10 @@ export class Region {
         unionOrigin = buffer.getGeometry()
       }
     }
-    unionOrigin = GeolocusGeometryAction.getConcaveHull(<GeolocusGeometry>unionOrigin)
+    unionOrigin =
+      geoTriple.originUUIDList?.length === 1
+        ? unionOrigin
+        : GeolocusGeometryAction.getConvexHull(<GeolocusGeometry>unionOrigin)
     const regionHandler = GeoTripleHandler.getRegionHandler(relation)
     const { region, pdf } = regionHandler(new GeolocusObject(<GeolocusGeometry>unionOrigin), relation, geoTriple.role)
     result.pdfInput = pdf
@@ -693,36 +696,37 @@ export class Region {
     const ratio = dy / dx
     const girdSize = dx / Math.sqrt(gridSum / ratio)
 
-    // 分别存储概率值最大值对应坐标, 概率值大于 0.8 且距离 region 中心点最近的坐标
-    let maxValue = -GEO_MAX_VALUE
-    let minDistance = GEO_MAX_VALUE
-    let maxCoord: Position2 = [0, 0]
-    let minCoord: Position2 = [0, 0]
-    const center = region.getGeometry().getCenter()
+    // 记录概率值大于 0.95 的坐标, 取平均值求得中心点, 寻找最近中心点最近的坐标
+    const maxCoordList: [number, number, number, Position2[]] = [0, 0, 0, []]
     Gird.forEach(gird, (value, row, col) => {
       const x = xStart + (col + 0.5) * girdSize
       const y = yStart + (row + 0.5) * girdSize
 
-      if (Compare.GE(gird[row][col], maxValue)) {
-        maxValue = value
-        maxCoord = [x, y]
-      }
-      const curDistance = Math.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2)
-      if (Compare.LE(curDistance, minDistance) && Compare.GE(gird[row][col], 0.8)) {
-        minDistance = curDistance
-        minCoord = [x, y]
+      if (Compare.GE(value, 0.95)) {
+        maxCoordList[0] += x
+        maxCoordList[1] += y
+        maxCoordList[2]++
+        maxCoordList[3].push([x, y])
       }
     })
+    const maxCoordCenter: Position2 = [
+      Math.floor(maxCoordList[0] / maxCoordList[2]),
+      Math.floor(maxCoordList[1] / maxCoordList[2]),
+    ]
+    const maxCoord = (() => {
+      let minCoord: Position2 = [0, 0]
+      let minDistance = GEO_MAX_VALUE
+      for (const coord of maxCoordList[3]) {
+        const curDistance = (coord[0] - maxCoordCenter[0]) ** 2 + (coord[1] - maxCoordCenter[1]) ** 2
+        if (curDistance < minDistance) {
+          minCoord = coord
+          minDistance = curDistance
+        }
+      }
 
-    // 计算最大值坐标和最小距离坐标作为对角线构成的矩形的面积
-    // 如果构成矩形面积小于等于外接矩形面积的 1/5 (凭感觉的二八法则的魔法数字), 则取最大值坐标, 否则取最小距离坐标
-    let coord: Position2
-    if (Math.abs((maxCoord[0] - minCoord[0]) * (maxCoord[1] - minCoord[1])) <= (dx * dy) / 5) {
-      coord = maxCoord
-    } else {
-      coord = minCoord
-    }
+      return minCoord
+    })()
 
-    return { coord }
+    return { coord: maxCoord }
   }
 }

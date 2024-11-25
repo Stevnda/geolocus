@@ -2,12 +2,22 @@ import { GeolocusContext } from './context'
 import { ObjectMapAction } from './objectMap'
 
 class RouteNode {
+  private _level: number
   private _outNodeList: Set<string>
   private _inNodeList: Set<string>
 
-  constructor() {
+  constructor(level: number) {
+    this._level = level
     this._outNodeList = new Set()
     this._inNodeList = new Set()
+  }
+
+  getLevel(): number {
+    return this._level
+  }
+
+  setLevel(level: number): void {
+    this._level = level
   }
 
   setOutNodeList(outNodeList: Set<string>) {
@@ -34,7 +44,12 @@ export class Route {
 
   constructor(context: GeolocusContext) {
     this._nodeList = new Map()
+    this._nodeList.set('root', new RouteNode(0))
     this._context = context
+  }
+
+  getRootNode(): RouteNode {
+    return <RouteNode>this._nodeList.get('root')
   }
 
   setNodeList(value: Map<string, RouteNode>): void {
@@ -58,10 +73,11 @@ export class Route {
   }
 
   addEdge(parent: string, child: string): void {
-    this.addVertex(parent)
+    this.addVertex(parent, true)
     this.addVertex(child)
     const childrenNode = <RouteNode>this.getNodeList().get(child)
     const parentNode = <RouteNode>this.getNodeList().get(parent)
+    childrenNode.setLevel(Math.max(parentNode.getLevel() + 1, childrenNode.getLevel()))
     childrenNode.getInNodeList().add(parent)
     parentNode.getOutNodeList().add(child)
   }
@@ -73,11 +89,12 @@ export class Route {
     parentNode.getOutNodeList().delete(child)
   }
 
-  private addVertex(uuid: string): void {
-    const node = this.getNodeList().get(uuid)
-    if (!node) {
-      this.getNodeList().set(uuid, new RouteNode())
-    }
+  private addVertex(uuid: string, connextRoot = false): void {
+    if (this.getNodeList().has(uuid)) return
+
+    const node = new RouteNode(1)
+    this.getNodeList().set(uuid, node)
+    if (connextRoot) this.addEdge('root', uuid)
   }
 }
 
@@ -155,7 +172,7 @@ export class RouteAction {
       if ((!parent || parent.size === 0) && fuzzyObject.has(currentUUID)) {
         return false
       }
-      parent?.size && stack.push(...parent)
+      parent?.size && stack.push(...[...parent].filter((value) => value !== 'root'))
       visited.add(currentUUID)
       if (fuzzyObject.has(currentUUID)) {
         computedOrderStack.push(currentUUID)
