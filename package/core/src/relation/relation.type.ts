@@ -1,7 +1,7 @@
 import { Role } from '@/context'
 import { GeoLayout } from './layout.type'
 
-export type RelationMode = 'point' | 'line' | 'plygon'
+export type RelationMode = 'point' | 'line' | 'polygon'
 
 export type EuclideanDistance = number
 export type EuclideanDistanceRange = [number, number]

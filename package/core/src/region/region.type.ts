@@ -43,20 +43,10 @@ export interface GeoTripleResult {
   pdfGird: PdfGird | null // 三元组的目标区域的概率密度栅格
 }
 
-export interface PointResult {
+export interface RegionResult {
   geoTripleList: GeoTriple[]
   geoTripleResultList: GeoTripleResult[]
-  region: GeolocusObject | null
-  regionPdfGird: GeolocusGird | null
-  result: GeolocusObject | null
+  region: GeolocusObject | null // 点对应三元组目标区域的交集, 线面忽略
+  regionPdfGird: GeolocusGird | null // 点 region 的概率密度栅格, 线面忽略
+  result: GeolocusObject | null // 点的概率最大值, 线和面的概率拟合结果
 }
-
-export interface LineResult {
-  geoTripleList: GeoTriple[]
-  geoTripleResultList: GeoTripleResult[]
-  region: GeolocusObject | null
-  regionPdfGird: GeolocusGird | null
-  result: GeolocusObject | null
-}
-
-export type RegionResult = PointResult | LineResult

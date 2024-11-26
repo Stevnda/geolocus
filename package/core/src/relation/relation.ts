@@ -58,6 +58,7 @@ export class RelationAction {
 
     const targetUUID = this.handleTarget(triple, context)
     const originUUIDList = (() => {
+      // 处理 line 中无 origin 的情况, 将上一三元组计算区域作为 origin, 后续会处理
       if (triple.origin == null && mode === 'line') return null
       else return this.handleOrigin(triple, context)
     })()
@@ -97,19 +98,14 @@ export class RelationAction {
       const objectMap = context.getObjectMap()
       let obj: GeolocusObject
       if (type != null && coord != null) {
-        obj = new GeolocusObject(
-          new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)),
-          name,
-          null,
-          'precise',
-        )
+        obj = new GeolocusObject(new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)), { name })
       } else {
         name = <string>name
         const temp = ObjectMapAction.getObjectByPlaceName(objectMap, name)
         if (temp == null) {
           const jstGeometry = JTSGeometryFactory.empty('Point')
           const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-          obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+          obj = new GeolocusObject(geolocusGeometry, { name, status: 'fuzzy' })
         } else {
           obj = temp
         }
@@ -134,7 +130,7 @@ export class RelationAction {
 
     const jstGeometry = JTSGeometryFactory.empty('Point')
     const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-    const obj = new GeolocusObject(geolocusGeometry, name, null, 'fuzzy')
+    const obj = new GeolocusObject(geolocusGeometry, { name, status: 'fuzzy' })
 
     const uuid = obj.getUUID()
     ObjectMapAction.addObject(objectMap, obj)
@@ -187,7 +183,8 @@ export class RelationAction {
         res.distance = max <= maxDistance ? distanceTransform : [min, maxDistance]
       }
     } else if (res.topology === 'disjoint') {
-      res.distance = [0, maxDistance]
+      // 无限距离处理
+      res.distance = [0, maxDistance + Math.PI]
     } else {
       res.distance = 0
     }

@@ -4,7 +4,13 @@ import CodeMirror from '@uiw/react-codemirror'
 import { json } from '@codemirror/lang-json'
 import { Button } from 'antd'
 import { useTextStore } from '@/store/textStore'
-import { computeLineTest, computePointTest, generateBlobPng, geolocusContext } from '@/util/geolocus.util'
+import {
+  computeLineTest,
+  computePointTest,
+  computePolygonTest,
+  generateBlobPng,
+  geolocusContext,
+} from '@/util/geolocus.util'
 import { toWgs84 } from '@turf/projection'
 import { addGeoJSONToMap, addImageToMap, convertToWgs84, removeMapLayer, removeMapSource } from '@/util/mapbox.util'
 import { useMapStore } from '@/store/mapStore'
@@ -213,6 +219,50 @@ export const JsonText = () => {
     }
   }
 
+  const polygonTest = () => {
+    if (typeof jsonText === 'string') {
+      if (!map) return
+      const res = computePolygonTest(jsonText)
+      const regionList = res!.geoTripleResultList.map((res) => [res.region, res.coord])
+      regionList.forEach((region) => {
+        const [polygon, coord] = region as [GeolocusObject, Position2]
+        const point84 = toWgs84(generatePointByCoord(coord))
+        const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
+        const id = (Date.now() + Math.random()).toString()
+        addGeoJSONToMap(map, id + 'point', point84, 'circle', {
+          'circle-color': '#403877',
+        })
+        addGeoJSONToMap(map, id, polygon84, 'fill', {
+          'fill-outline-color': '#15803d',
+          'fill-color': '#4ade80',
+          'fill-opacity': 0.5,
+        })
+        addLayer(id)
+      })
+
+      // const resultGirdList = res!.geoTripleResultList.map((res) => res.pdfGird)
+      // resultGirdList.forEach((item, index) => {
+      //   const region = regionList[index][0] as GeolocusObject
+      //   if (!item || !region) return
+      //   const pngBlob = generateBlobPng(item.gird!)
+      //   const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
+      //     convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+      //   )
+      //   const id = (Date.now() + Math.random()).toString()
+      //   addImageToMap(map, id, pngBlob, bbox)
+      //   addLayer(id)
+      // })
+
+      const polygon = res?.result as GeolocusObject
+      const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
+      addGeoJSONToMap(map, polygon.getName() as string, polygon84, 'fill', {
+        'fill-outline-color': '#15803d',
+        'fill-color': 'rgba(255, 0, 0, 0.5)',
+      })
+      addLayer(polygon.getName() as string)
+    }
+  }
+
   useEffect(() => {
     setJsonText(JSON.stringify(text, null, 2))
   }, [])
@@ -269,8 +319,10 @@ export const JsonText = () => {
                 })
                 addLayer('kxh-point')
               }
-            } else {
+            } else if (type === 'line') {
               lineTest()
+            } else {
+              polygonTest()
             }
           }}
         >

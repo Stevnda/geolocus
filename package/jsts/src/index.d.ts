@@ -17,6 +17,18 @@ declare namespace jsts {
     }
   }
 
+  namespace densify {
+    export class Densifier {
+      constructor()
+      static densify(geom: Geometry, distanceTolerance: number): Geometry
+    }
+
+    export class ConvexHull {
+      constructor(geom: Geometry)
+      getConvexHull(): Geometry
+    }
+  }
+
   namespace geom {
     export class PrecisionModel {
       static FIXED: string

@@ -105,7 +105,7 @@ export class GeolocusGeometryAction {
     return new GeolocusGeometry('Polygon', convexHull)
   }
 
-  static getConcaveHull(geometry: GeolocusGeometry): GeolocusGeometry {
+  static getConcaveHull(geometry: GeolocusGeometry, concavity = 2): GeolocusGeometry {
     const geometryType = geometry.getType()
     if (geometryType === 'Point' || geometryType === 'LineString') return geometry
 
@@ -114,9 +114,15 @@ export class GeolocusGeometryAction {
     if (pointList.length === 1) return new GeolocusGeometry('Point', JTSGeometryFactory.point(pointList[0]))
     if (pointList.length === 2) return new GeolocusGeometry('LineString', JTSGeometryFactory.lineString(pointList))
 
-    const hull = <Position2[]>computeConcaveHull(pointList)
+    const hull = <Position2[]>computeConcaveHull(pointList, concavity)
 
     return new GeolocusGeometry('Polygon', JTSGeometryFactory.polygon([hull]))
+  }
+
+  static densify(geometry: GeolocusGeometry, distanceTolerance: number): GeolocusGeometry {
+    const jtsGeometry = geometry.getGeometry()
+    const densified = JTSGeometryAction.densify(jtsGeometry, distanceTolerance)
+    return new GeolocusGeometry(geometry.getType(), densified)
   }
 }
 
@@ -225,5 +231,9 @@ export class JTSGeometryAction {
   static getConvexHull(geometry: jsts.geom.Geometry): jsts.geom.Geometry {
     const convexHull = new jsts.algorithm.ConvexHull(geometry)
     return convexHull.getConvexHull()
+  }
+
+  static densify(geometry: jsts.geom.Geometry, distanceTolerance: number): jsts.geom.Geometry {
+    return jsts.densify.Densifier.densify(geometry, distanceTolerance)
   }
 }
