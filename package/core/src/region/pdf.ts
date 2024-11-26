@@ -1,6 +1,6 @@
 import { computeGeolocusObjectMaskGrid, GeolocusGeometry, GeolocusObject, Position2 } from '@/object'
 import { Distance } from '@/relation'
-import { GeolocusGird, Gird, Vector2 } from '@/util'
+import { GeolocusGrid, Grid, Vector2 } from '@/util'
 import { PDFInput } from './region.type'
 import { JTSGeometryFactory } from '@/object/geometry'
 
@@ -64,30 +64,30 @@ export class RegionPDF {
   }
 
   private static sdfCompare(
-    gird: GeolocusGird,
+    grid: GeolocusGrid,
     originRow: number,
     originCol: number,
     rowOffset: number,
     colOffset: number,
   ) {
-    const row = gird.length
-    const col = gird[0].length
+    const row = grid.length
+    const col = grid[0].length
     let other = 9999
     const targetRow = originRow + rowOffset
     const targetCol = originCol + colOffset
     if (targetRow >= 0 && targetCol > 0 && targetRow < row && targetCol < col) {
-      other = gird[targetRow][targetCol]
+      other = grid[targetRow][targetCol]
     }
 
     const compareValue = other + Vector2.distanceTo([0, 0], [rowOffset, colOffset])
-    if (gird[originRow][originCol] > compareValue) {
-      gird[originRow][originCol] = compareValue
+    if (grid[originRow][originCol] > compareValue) {
+      grid[originRow][originCol] = compareValue
     }
   }
 
   private static getUnsignedInternalDistanceField(pdf: PDFInput, azimuth?: number, deltaAzimuth?: number) {
-    const mask = computeGeolocusObjectMaskGrid(pdf.sdf.girdRegion as GeolocusObject, pdf.sdf.girdSum as number)
-    const tempGird = Gird.createGirdWithFilter(mask.length + 4, mask[0].length + 4, (row, col) => {
+    const mask = computeGeolocusObjectMaskGrid(pdf.sdf.gridRegion as GeolocusObject, pdf.sdf.gridSum as number)
+    const tempGrid = Grid.createGridWithFilter(mask.length + 4, mask[0].length + 4, (row, col) => {
       if (row <= 1 || col <= 1 || row >= mask.length + 2 || col >= mask[0].length + 2) {
         return 0
       } else {
@@ -95,47 +95,47 @@ export class RegionPDF {
       }
     })
 
-    for (let row = 0; row < tempGird.length; row++) {
-      for (let col = 0; col < tempGird[0].length; col++) {
-        this.sdfCompare(tempGird, row, col, 0, -1)
-        this.sdfCompare(tempGird, row, col, -1, 0)
-        this.sdfCompare(tempGird, row, col, -1, -1)
-        this.sdfCompare(tempGird, row, col, -1, 1)
+    for (let row = 0; row < tempGrid.length; row++) {
+      for (let col = 0; col < tempGrid[0].length; col++) {
+        this.sdfCompare(tempGrid, row, col, 0, -1)
+        this.sdfCompare(tempGrid, row, col, -1, 0)
+        this.sdfCompare(tempGrid, row, col, -1, -1)
+        this.sdfCompare(tempGrid, row, col, -1, 1)
       }
-      for (let col = tempGird[0].length - 1; col >= 0; col--) {
-        this.sdfCompare(tempGird, row, col, 0, 1)
+      for (let col = tempGrid[0].length - 1; col >= 0; col--) {
+        this.sdfCompare(tempGrid, row, col, 0, 1)
       }
     }
 
-    for (let row = tempGird.length - 1; row >= 0; row--) {
-      for (let col = tempGird[0].length - 1; col >= 0; col--) {
-        this.sdfCompare(tempGird, row, col, 0, 1)
-        this.sdfCompare(tempGird, row, col, 1, 0)
-        this.sdfCompare(tempGird, row, col, 1, -1)
-        this.sdfCompare(tempGird, row, col, 1, 1)
+    for (let row = tempGrid.length - 1; row >= 0; row--) {
+      for (let col = tempGrid[0].length - 1; col >= 0; col--) {
+        this.sdfCompare(tempGrid, row, col, 0, 1)
+        this.sdfCompare(tempGrid, row, col, 1, 0)
+        this.sdfCompare(tempGrid, row, col, 1, -1)
+        this.sdfCompare(tempGrid, row, col, 1, 1)
       }
-      for (let col = 0; col < tempGird[0].length; col++) {
-        this.sdfCompare(tempGird, row, col, 0, -1)
+      for (let col = 0; col < tempGrid[0].length; col++) {
+        this.sdfCompare(tempGrid, row, col, 0, -1)
       }
     }
 
     if (azimuth != null && deltaAzimuth != null) {
       const radiansTransform = -azimuth + Math.PI / 2
-      const center: Position2 = [Math.floor(tempGird[0].length / 2), Math.floor(tempGird.length / 2)]
-      const resultGird = Gird.createGirdWithFilter(mask.length, mask[0].length, (row, col) => {
+      const center: Position2 = [Math.floor(tempGrid[0].length / 2), Math.floor(tempGrid.length / 2)]
+      const resultGrid = Grid.createGridWithFilter(mask.length, mask[0].length, (row, col) => {
         const v1 = Vector2.sub([col, row], center)
         const v2: Position2 = [Math.cos(radiansTransform), Math.sin(radiansTransform)]
         const radians = Vector2.angleTo(v1, v2)
 
         const pdf = this.computeNormalDistributionValue(radians, 0, deltaAzimuth / 2)
-        return tempGird[row + 2][col + 2] + pdf / 10
+        return tempGrid[row + 2][col + 2] + pdf / 10
       })
-      return resultGird
+      return resultGrid
     } else {
-      const resultGird = Gird.createGirdWithFilter(mask.length, mask[0].length, (row, col) => {
-        return tempGird[row + 2][col + 2]
+      const resultGrid = Grid.createGridWithFilter(mask.length, mask[0].length, (row, col) => {
+        return tempGrid[row + 2][col + 2]
       })
-      return resultGird
+      return resultGrid
     }
   }
 
@@ -150,7 +150,7 @@ export class RegionPDF {
       [1, 1],
       [1, -1],
     ]
-    const bbox = (<GeolocusObject>pdf.spread.girdRegion).getGeometry().getBBox()
+    const bbox = (<GeolocusObject>pdf.spread.gridRegion).getGeometry().getBBox()
     const xStart = bbox[0]
     const xEnd = bbox[2]
     const dx = xEnd - xStart
@@ -158,17 +158,17 @@ export class RegionPDF {
     const yEnd = bbox[3]
     const dy = yEnd - yStart
     const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(<number>pdf.spread.girdSum / ratio)
-    const mask = computeGeolocusObjectMaskGrid(<GeolocusObject>pdf.spread.girdRegion, <number>pdf.spread.girdSum)
+    const gridSize = dx / Math.sqrt(<number>pdf.spread.gridSum / ratio)
+    const mask = computeGeolocusObjectMaskGrid(<GeolocusObject>pdf.spread.gridRegion, <number>pdf.spread.gridSum)
     const m = mask.length
     const n = mask[0].length
-    const spreadGrid = Gird.createGirdWithValue(m, n, -1)
+    const spreadGrid = Grid.createGridWithValue(m, n, -1)
 
     const queue: Position2[] = []
     const startPointList = <Position2[]>pdf.spread.spreadPointList?.getGeometry().getCoordList()
     for (const [x, y] of startPointList) {
-      const col = Math.floor((x - xStart) / girdSize)
-      const row = Math.floor((y - yStart) / girdSize)
+      const col = Math.floor((x - xStart) / gridSize)
+      const row = Math.floor((y - yStart) / gridSize)
       spreadGrid[row][col] = m * n
       queue.push([row, col])
     }
@@ -176,14 +176,14 @@ export class RegionPDF {
     let min = m * n
     while (queue.length > 0) {
       const [row, col] = <Position2>queue.shift()
-      const girdValue = spreadGrid[row][col]
+      const gridValue = spreadGrid[row][col]
 
       for (const [dx, dy] of directions) {
         const curRow = row + dx
         const curCol = col + dy
 
         if (curRow >= 0 && curRow < m && curCol >= 0 && curCol < n && mask[curRow][curCol] === 1) {
-          const value = girdValue - Math.sqrt(dx * dx + dy * dy)
+          const value = gridValue - Math.sqrt(dx * dx + dy * dy)
           if (spreadGrid[curRow][curCol] === -1 || value > spreadGrid[curRow][curCol]) {
             spreadGrid[curRow][curCol] = value
             min = Math.min(min, spreadGrid[curRow][curCol])
@@ -193,7 +193,7 @@ export class RegionPDF {
       }
     }
 
-    Gird.forEach(spreadGrid, (value, row, col, grid) => {
+    Grid.forEach(spreadGrid, (value, row, col, grid) => {
       if (value === -1) {
         grid[row][col] = 0
       } else {
@@ -204,9 +204,9 @@ export class RegionPDF {
     return spreadGrid
   }
 
-  static computePDF(pdf: PDFInput): GeolocusGird
+  static computePDF(pdf: PDFInput): GeolocusGrid
   static computePDF(pdf: PDFInput, target?: Position2): number
-  static computePDF(pdf: PDFInput, target?: Position2): number | GeolocusGird {
+  static computePDF(pdf: PDFInput, target?: Position2): number | GeolocusGrid {
     const type = pdf.type
     const origin = pdf.origin
     let targetObject = null

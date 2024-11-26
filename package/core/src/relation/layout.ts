@@ -133,11 +133,11 @@ export class Layout {
       if (type === 'between') {
         geoTripleResult.region = result
         pdfInput.type = 'sdf'
-        pdfInput.sdf.girdRegion = result
+        pdfInput.sdf.gridRegion = result
       } else {
         pdfInput.type = 'spread'
-        pdfInput.spread.girdRegion = <GeolocusObject>geoTripleResult.region
-        pdfInput.spread.girdSum = context.getGridSum()
+        pdfInput.spread.gridRegion = <GeolocusObject>geoTripleResult.region
+        pdfInput.spread.gridSum = context.getGridSum()
         pdfInput.spread.spreadPointList = result
       }
     }

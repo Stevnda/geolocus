@@ -5,4 +5,5 @@ export interface GeolocusContextInit {
   name?: string
   gridSum?: number
   region: Position2[]
+  gridScale: number
 }

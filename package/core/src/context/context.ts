@@ -15,7 +15,8 @@ export class GeolocusContext {
   private _regionRange: GeolocusObject
   private _roleMap: Map<string, Role>
   private _maxDistance: number
-  private _gridSum: number
+  private _gridSum: number // 输出概率栅格的栅格数量, 对应计算精度
+  private _gridScale: number // 上下文的空间尺度, 用于空间结构
 
   // runtime
   private _objectMap: ObjectMap
@@ -33,7 +34,8 @@ export class GeolocusContext {
     this._roleMap = new Map() // the key is the name of role
     this._resultMap = new Map() // the uuid of resultMap is the same as geolocusObject
     this._maxDistance = init.maxDistance
-    this._gridSum = init.gridSum || 128
+    this._gridSum = init.gridSum || 128 * 128
+    this._gridScale = init.gridScale
   }
 
   setUUID(value: string): void {
@@ -118,5 +120,13 @@ export class GeolocusContext {
 
   getGridSum(): number {
     return this._gridSum
+  }
+
+  getGridScale(): number {
+    return this._gridScale
+  }
+
+  setGridScale(value: number): void {
+    this._gridScale = value
   }
 }
