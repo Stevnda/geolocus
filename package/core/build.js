@@ -28,6 +28,7 @@ const mergeTs = (dir) => {
       } else if (path.extname(file) === '.ts' && !file.includes('index')) {
         let content = fs.readFileSync(filePath, 'utf-8')
         content = content.replace(/import.+/g, '')
+        content = content.replace(/export declare const/g, 'const')
         mergedContent += content + '\n'
       }
     })
@@ -39,6 +40,7 @@ const mergeTs = (dir) => {
 
   const filePath = path.join(dir, 'index.d.ts')
   let content = fs.readFileSync(filePath, 'utf-8')
+  content = content.replace(/import\(.*?\)\./g, '')
   content = content.replace(/import.+/g, '')
 
   let res = ''

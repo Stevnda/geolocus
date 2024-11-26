@@ -1,6 +1,7 @@
 import { SemanticDistanceMap } from '@/relation'
 import { GeolocusContext } from './context'
 import { generateUUID } from '@/util'
+import { SpatialRef } from './spatialReference'
 
 export class Role {
   private _uuid: string
@@ -11,6 +12,7 @@ export class Role {
   private _distanceDelta: number
   private _semanticDistanceMap: SemanticDistanceMap
   private _weight: number
+  private _spatialRef: SpatialRef
 
   constructor(
     name: string,
@@ -19,6 +21,7 @@ export class Role {
     distanceDelta: number,
     semanticDistanceMap: SemanticDistanceMap,
     weight: number,
+    spatialRef: SpatialRef,
     context: GeolocusContext,
   ) {
     this._uuid = generateUUID()
@@ -29,6 +32,7 @@ export class Role {
     this._distanceDelta = distanceDelta
     this._semanticDistanceMap = semanticDistanceMap
     this._weight = weight
+    this._spatialRef = spatialRef
   }
 
   setUUID(value: string): void {
@@ -93,5 +97,13 @@ export class Role {
 
   getWeight(): number {
     return this._weight
+  }
+
+  setSpatialRef(value: SpatialRef): void {
+    this._spatialRef = value
+  }
+
+  getSpatialRef(): SpatialRef {
+    return this._spatialRef
   }
 }

@@ -240,24 +240,24 @@ export const JsonText = () => {
         addLayer(id)
       })
 
-      // const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
-      // resultGridList.forEach((item, index) => {
-      //   const region = regionList[index][0] as GeolocusObject
-      //   if (!item || !region) return
-      //   const pngBlob = generateBlobPng(item.grid!)
-      //   const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
-      //     convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
-      //   )
-      //   const id = (Date.now() + Math.random()).toString()
-      //   addImageToMap(map, id, pngBlob, bbox)
-      //   addLayer(id)
-      // })
+      const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
+      resultGridList.forEach((item, index) => {
+        const region = regionList[index][0] as GeolocusObject
+        if (!item || !region) return
+        const pngBlob = generateBlobPng(item.grid!)
+        const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
+          convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+        )
+        const id = (Date.now() + Math.random()).toString()
+        addImageToMap(map, id, pngBlob, bbox)
+        addLayer(id)
+      })
 
       const polygon = res?.result as GeolocusObject
       const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
       addGeoJSONToMap(map, polygon.getName() as string, polygon84, 'fill', {
         'fill-outline-color': '#15803d',
-        'fill-color': 'rgba(255, 0, 0, 0.5)',
+        'fill-color': 'rgba(255, 0, 0, 0.3)',
       })
       addLayer(polygon.getName() as string)
     }
@@ -288,6 +288,7 @@ export const JsonText = () => {
                 if (!map) return
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const res = computePointTest(jsonText)!
+                console.log(res)
                 const region = res.region as GeolocusObject
                 const pdfGrid = res.regionPdfGrid as GeolocusGrid
                 const result = res.result as GeolocusObject
