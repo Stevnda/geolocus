@@ -7,21 +7,23 @@ import { RegionResult } from '@/region'
 import { ObjectMap } from './objectMap'
 import { generateUUID } from '@/util'
 import { GeolocusGeometry, GeolocusObject, JTSGeometryFactory } from '@/object'
+import { SpatialRef } from './spatialReference'
 
 export class GeolocusContext {
   // init
   private _uuid: string
   private _name: string
   private _regionRange: GeolocusObject
-  private _roleMap: Map<string, Role>
   private _maxDistance: number
   private _gridSum: number // 输出概率栅格的栅格数量, 对应计算精度
   private _gridScale: number // 上下文的空间尺度, 用于空间结构
 
   // runtime
   private _objectMap: ObjectMap
-  private _relation: Relation
+  private _spatialRefMap: Map<string, SpatialRef>
+  private _roleMap: Map<string, Role>
   private _route: Route
+  private _relation: Relation
   private _resultMap: Map<string, RegionResult>
 
   constructor(init: GeolocusContextInit) {
@@ -36,6 +38,7 @@ export class GeolocusContext {
     this._maxDistance = init.maxDistance
     this._gridSum = init.gridSum || 128 * 128
     this._gridScale = init.gridScale
+    this._spatialRefMap = new Map() // the key is the uuid of SpatialRef
   }
 
   setUUID(value: string): void {
@@ -128,5 +131,13 @@ export class GeolocusContext {
 
   setGridScale(value: number): void {
     this._gridScale = value
+  }
+
+  getSpatialRefMap(): Map<string, SpatialRef> {
+    return this._spatialRefMap
+  }
+
+  setSpatialRefMap(spatialRefMap: Map<string, SpatialRef>): void {
+    this._spatialRefMap = spatialRefMap
   }
 }

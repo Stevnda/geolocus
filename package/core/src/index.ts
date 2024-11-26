@@ -9,12 +9,21 @@ import {
   SeManticDirection,
   RelationMode,
 } from './relation'
-import { GeolocusContext, GeolocusContextInit, PlacePlugin, Role, ObjectMapAction } from './context'
+import {
+  GeolocusContext,
+  GeolocusContextInit,
+  PlacePlugin,
+  Role,
+  ObjectMapAction,
+  createSpatialRefFromEPSG,
+  SpatialRef,
+} from './context'
 import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
 import { Region, RegionResult } from './region'
 import { GeoJSON } from 'geojson'
 import { IO } from './io'
 import { GeoLayout } from './relation/layout.type'
+import { generateUUID } from './util'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
@@ -42,6 +51,7 @@ export interface RoleInit {
   distanceDelta: number
   semanticDistanceMap: SemanticDistanceMap
   weight: number
+  spatialRef: SpatialRef
 }
 
 class Geolocus {
@@ -75,6 +85,7 @@ class Geolocus {
       init.distanceDelta,
       init.semanticDistanceMap,
       init.weight,
+      init.spatialRef,
       this._context,
     )
     roleMap.set(init.name, role)
@@ -140,10 +151,12 @@ class Geolocus {
   }
 }
 
-const createContext = (init: GeolocusContextInit) => {
+const createContext = (init: GeolocusContextInit): Geolocus => {
   return new Geolocus(init)
 }
 
 export const geolocus = {
   createContext,
+  createSpatialRefFromEPSG,
+  generateUUID,
 }

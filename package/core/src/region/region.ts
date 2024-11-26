@@ -324,10 +324,8 @@ export class Region {
       // update the point object
       const objectMap = context.getObjectMap()
       const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, currentUUID)
-      const geometry = object.getGeometry()
-      const center = geometry.getCenter()
-      const geometryTranslate = GeolocusGeometryAction.translate(geometry, coord[0] - center[0], coord[1] - center[1])
-      object.setGeometry(geometryTranslate)
+      const geometry = new GeolocusGeometry('Point', JTSGeometryFactory.point(coord))
+      object.setGeometry(geometry)
       object.setStatus('precise')
       currentResult.result = object
     }

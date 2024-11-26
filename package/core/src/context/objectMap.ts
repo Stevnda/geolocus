@@ -1,6 +1,7 @@
 import { GeolocusGeometry, GeolocusGeometryType, GeolocusObject, JTSGeometryFactory, Position2 } from '@/object'
 import { GeolocusContext } from './context'
 import { PlaceOutput, PlacePlugin } from './objectMap.type'
+import { SpatialRef } from './spatialReference'
 
 // NOTE 命名最大概率匹配算法
 const defaultPlacePlugin = (name: string, nameMap: Map<string, Set<GeolocusObject>>): PlaceOutput | null => {
@@ -86,7 +87,8 @@ export class ObjectMapAction {
   static getObjectByPlaceName(objectMap: ObjectMap, name: string): GeolocusObject | null {
     const pluginList = objectMap.getPlacePluginList()
     for (const plugin of pluginList) {
-      const res = plugin(name)
+      // NOTE spatialRef 的处理
+      const res = plugin(name, <SpatialRef>(<unknown>'123'))
       if (res == null) continue
       if (res.object != null) {
         return res.object

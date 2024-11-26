@@ -1,4 +1,4 @@
-import { GeolocusContext, ObjectMapAction, Role, RouteAction } from '@/context'
+import { GeolocusContext, ObjectMapAction, Role, RouteAction, SpatialRef } from '@/context'
 import { GeoRelation, GeoTriple, RelationMode, SemanticRelation } from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
 import { generateUUID } from '@/util'
@@ -125,7 +125,8 @@ export class RelationAction {
     const pluginList = objectMap.getPlacePluginList()
     const defaultPlugin = pluginList[0]
 
-    const res = defaultPlugin(name)
+    // NOTE SpatialRef 处理
+    const res = defaultPlugin(name, <SpatialRef>(<unknown>'test'))
     if (res?.object != null) return res.object.getUUID()
 
     const jstGeometry = JTSGeometryFactory.empty('Point')
