@@ -1,13 +1,5 @@
 import { GeolocusContext, ObjectMapAction, Role, RouteAction } from '@/context'
-import {
-  PDFInput,
-  GeoTripleResult,
-  PdfGird,
-  RegionHandlerResult,
-  PointResult,
-  RegionResult,
-  LineResult,
-} from './region.type'
+import { PDFInput, GeoTripleResult, PdfGird, RegionHandlerResult, RegionResult } from './region.type'
 import { RegionPDF } from './pdf'
 import {
   computeGeolocusObjectMaskGrid,
@@ -28,10 +20,10 @@ import {
   EuclideanDistance,
   GeoRelation,
   TopologyRelation,
+  Layout,
 } from '@/relation'
 import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MAGIC_NUMBER, MathUtil, Vector2 } from '@/util'
 import { AStar, Graph } from './aStart'
-import { Layout } from '@/relation/layout'
 
 export class GeoTripleHandler {
   private static intersection = (object0: GeolocusObject, object1: GeolocusObject) => {
@@ -48,10 +40,13 @@ export class GeoTripleHandler {
     const minDistance = distance.min - meanDistanceDelta * 1.5 >= 0 ? distance.min - meanDistanceDelta * 1.5 : 0
     const maxDistance = distance.max + meanDistanceDelta * 1.5
     const distanceDelta = (maxDistance - minDistance) / 3
+    const infinity =
+      relation.distance instanceof Array &&
+      Compare.EQ(relation.distance[0], 0) &&
+      Compare.EQ(relation.distance[1], role.getContext().getMaxDistance() + Math.PI)
 
     const geometry = <GeolocusGeometry>Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance])
-    const region = new GeolocusObject(geometry)
-
+    const region = new GeolocusObject(geometry, { infinity })
     const pdf: PDFInput = {
       type: 'distance',
       origin,
@@ -69,7 +64,7 @@ export class GeoTripleHandler {
 
   private static containHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role): RegionHandlerResult => {
     const context = role.getContext()
-    const geometry = Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER) as GeolocusGeometry
+    const geometry = origin.getGeometry()
     const region = new GeolocusObject(geometry) as GeolocusObject
     const pdf: PDFInput = {
       type: 'sdf',
@@ -183,11 +178,14 @@ export class GeoTripleHandler {
   }
 
   private static distanceHandler = (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+    // 统一转换为 polygon
+    origin.setGeometry(<GeolocusGeometry>Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER))
+
     // 相离关系直接返回 origin
     if (relation.topology === 'disjoint') return origin
 
     let distanceRegion: GeolocusObject
-    const geometry = Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER) as GeolocusGeometry
+    const geometry = origin.getGeometry()
     // 如果 distance=0, origin 不变
     if (relation.distance === 0) {
       distanceRegion = origin
@@ -252,6 +250,7 @@ export class GeoTripleHandler {
     } else {
       const direction = this.directionHandler(distanceRegion, relation, role)
       const intersection = this.intersection(td.region, direction.region)
+      intersection.setInfinity(td.region.getInfinity())
 
       td.region = intersection
       td.pdf.sdf.girdRegion = intersection
@@ -277,7 +276,7 @@ export class GeoTripleHandler {
 
 export class Region {
   // point object
-  static computeFuzzyPointObject(uuid: string, context: GeolocusContext): PointResult {
+  static computeFuzzyPointObject(uuid: string, context: GeolocusContext): RegionResult {
     // compute the order
     const route = context.getRoute()
     const computedOrderStack = RouteAction.computeObjectOrder(context, uuid, route)
@@ -285,11 +284,11 @@ export class Region {
       throw new Error('Can not compute this object or it is not necessary be computed.')
     }
 
-    let result: PointResult | null = null
+    let result: RegionResult | null = null
     // compute single object by order
     while (computedOrderStack.length > 0) {
       const currentUUID = computedOrderStack.pop() as string
-      const currentResult: PointResult = {
+      const currentResult: RegionResult = {
         geoTripleList: RelationAction.getTripleListByUUID(context.getRelation(), currentUUID),
         geoTripleResultList: [],
         region: null,
@@ -318,7 +317,7 @@ export class Region {
       }
       currentResult.region = new GeolocusObject(resultRegion)
       // compute the pdfGird of result, the dot of all pdfGird
-      currentResult.regionPdfGird = this.computePointResultPDFGird(currentResult, context)
+      currentResult.regionPdfGird = this.computeRegionResultPDFGird(currentResult, context)
       // compute the coord of result, the coord of maximum of pdfGird
       const { coord } = this.getCoordOfMaximumOfGeolocusGird(currentResult.regionPdfGird, currentResult.region, context)
 
@@ -333,10 +332,10 @@ export class Region {
       currentResult.result = object
     }
 
-    return <PointResult>result
+    return <RegionResult>result
   }
 
-  private static computePointResultPDFGird(result: RegionResult, context: GeolocusContext) {
+  private static computeRegionResultPDFGird(result: RegionResult, context: GeolocusContext) {
     const gridSum = context.getGridSum()
     const mask = computeGeolocusObjectMaskGrid(<GeolocusObject>result?.region, gridSum)
     const resultGird: GeolocusGird = Gird.createGirdWithValue(mask.length, mask[0].length, 1)
@@ -403,10 +402,10 @@ export class Region {
   }
 
   // line object
-  static computeFuzzyLineObject(uuid: string, context: GeolocusContext): LineResult {
+  static computeFuzzyLineObject(uuid: string, context: GeolocusContext): RegionResult {
     const geoTripleList = RelationAction.getTripleListByUUID(context.getRelation(), uuid)
     const objectMap = context.getObjectMap()
-    const result: LineResult = {
+    const result: RegionResult = {
       geoTripleList,
       geoTripleResultList: [],
       region: null,
@@ -417,7 +416,7 @@ export class Region {
 
     // preHandler fuzzy origin of tripleList
     for (const geoTriple of geoTripleList) {
-      this.preHandleGeoTripleOfLine(geoTriple, context)
+      this.preHandleGeoTripleOfLineAndPolygon(geoTriple, context)
     }
 
     // compute pdf, region, regionPdfGrid and coord of per geoTriple together because of toward relation
@@ -456,15 +455,14 @@ export class Region {
     const coords: Position2[] = []
     let beforeCoord = geoTripleResultList[0].coord as Position2
     for (let i = 0; i < geoTripleResultList.length; i++) {
-      const res = this.computeLineCoord(geoTripleList[i], geoTripleResultList, geoTripleResultList[i], i, beforeCoord)
+      const res = this.computeLineCoord(context, geoTripleResultList, geoTripleResultList[i], i, beforeCoord)
       coords.push(...(res[0] as Position2[]))
       beforeCoord = res[1]
     }
 
     // update the object
     const object = ObjectMapAction.getObjectByUUID(objectMap, uuid) as GeolocusObject
-    const jstGeometry = JTSGeometryFactory.lineString(coords)
-    const geolocusGeometry = new GeolocusGeometry('LineString', jstGeometry)
+    const geolocusGeometry = new GeolocusGeometry('LineString', JTSGeometryFactory.lineString(coords))
     object.setGeometry(geolocusGeometry)
     object.setStatus('precise')
     result.result = object
@@ -472,25 +470,14 @@ export class Region {
     return result
   }
 
-  private static preHandleGeoTripleOfLine(triple: GeoTriple, context: GeolocusContext) {
-    if (triple.originUUIDList == null) return
-    for (const originUUID of triple.originUUIDList) {
-      const objectMap = context.getObjectMap()
-      const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, originUUID)
-      if (object.getStatus() === 'precise') return
-      this.computeFuzzyPointObject(object.getUUID(), context)
-    }
-  }
-
   private static computeLineCoord(
-    geoTriple: GeoTriple,
+    context: GeolocusContext,
     geoTripleResultList: GeoTripleResult[],
     geoTripleResult: GeoTripleResult,
     index: number,
     beforeCoord: Position2,
   ): [Position2[], Position2] {
     geoTripleResult = geoTripleResult as GeoTripleResult
-    const context = geoTriple.role.getContext()
     const curRegion = <GeolocusGeometry>geoTripleResult.region?.getGeometry()
     const curPoint = new GeolocusGeometry('Point', JTSGeometryFactory.point(<Position2>geoTripleResult.coord))
 
@@ -561,6 +548,88 @@ export class Region {
     }
 
     return [coordList, coord1]
+  }
+
+  // polygon object
+  static computeFuzzyPolygonObject(uuid: string, context: GeolocusContext): RegionResult {
+    const geoTripleList = RelationAction.getTripleListByUUID(context.getRelation(), uuid)
+    const objectMap = context.getObjectMap()
+    const result: RegionResult = {
+      geoTripleList,
+      geoTripleResultList: [],
+      region: null,
+      regionPdfGird: null,
+      result: null,
+    }
+    context.getResultMap().set(uuid, result)
+
+    // preHandler fuzzy origin of tripleList
+    for (const geoTriple of geoTripleList) {
+      this.preHandleGeoTripleOfLineAndPolygon(geoTriple, context)
+    }
+
+    // compute pdf, region, regionPdfGrid and coord of per geoTriple together
+    const geoTripleResultList = []
+    for (const geoTriple of geoTripleList) {
+      const geoTripleResult = this.computePdfAndRegionOfGeoTriple(geoTriple, context)
+      geoTripleResult.pdfGird = this.computePdfGird(
+        <GeolocusObject>geoTripleResult.region,
+        <PDFInput>geoTripleResult.pdfInput,
+        context,
+      )
+      geoTripleResult.pdfGird.gird = Gird.normalize(<GeolocusGird>geoTripleResult.pdfGird.gird)
+      geoTripleResult.coord = this.getCoordOfMaximumOfGeolocusGird(
+        <GeolocusGird>geoTripleResult.pdfGird.gird,
+        <GeolocusObject>geoTripleResult.region,
+        context,
+      ).coord
+      geoTripleResultList.push(geoTripleResult)
+    }
+    result.geoTripleResultList = geoTripleResultList
+
+    // compute the union of finite region, and then compute the intersection of union and infinity region
+    let unionRegion: GeolocusGeometry | null = null
+    for (const { region } of geoTripleResultList) {
+      if (region?.getInfinity()) continue
+      const geometry = <GeolocusGeometry>region?.getGeometry()
+      if (unionRegion != null) {
+        unionRegion = <GeolocusGeometry>Topology.union(unionRegion, geometry)
+      } else {
+        unionRegion = geometry
+      }
+    }
+    for (const { region } of geoTripleResultList) {
+      if (!region?.getInfinity()) continue
+      const tempRegion = Topology.intersection(<GeolocusGeometry>unionRegion, <GeolocusGeometry>region?.getGeometry())
+      if (!tempRegion) {
+        throw new Error("Can't compute the fuzzy region, the intersection is empty.")
+      }
+      unionRegion = tempRegion
+    }
+
+    // compute concaveHull
+    const bbox = <GeolocusBBox>unionRegion?.getBBox()
+    const distance = Math.sqrt((bbox[2] - bbox[0]) ** 2 + (bbox[3] - bbox[1]) ** 2)
+    const densifyGeometry = GeolocusGeometryAction.densify(<GeolocusGeometry>unionRegion, distance / 100)
+    const resultGeometry = GeolocusGeometryAction.getConcaveHull(densifyGeometry, Math.PI)
+
+    // update the object
+    const object = ObjectMapAction.getObjectByUUID(objectMap, uuid) as GeolocusObject
+    object.setGeometry(resultGeometry)
+    object.setStatus('precise')
+    result.result = object
+
+    return result
+  }
+
+  private static preHandleGeoTripleOfLineAndPolygon(triple: GeoTriple, context: GeolocusContext) {
+    if (triple.originUUIDList == null) return
+    for (const originUUID of triple.originUUIDList) {
+      const objectMap = context.getObjectMap()
+      const object = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, originUUID)
+      if (object.getStatus() === 'precise') return
+      this.computeFuzzyPointObject(object.getUUID(), context)
+    }
   }
 
   private static computePdfAndRegionOfGeoTriple(geoTriple: GeoTriple, context: GeolocusContext): GeoTripleResult {

@@ -11,7 +11,7 @@ import {
 } from './relation'
 import { GeolocusContext, GeolocusContextInit, PlacePlugin, Role, ObjectMapAction } from './context'
 import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
-import { LineResult, PointResult, Region } from './region'
+import { Region, RegionResult } from './region'
 import { GeoJSON } from 'geojson'
 import { IO } from './io'
 import { GeoLayout } from './relation/layout.type'
@@ -86,7 +86,7 @@ class Geolocus {
     }
   }
 
-  computeFuzzyPointObject(placeName: string): PointResult | null {
+  computeFuzzyPointObject(placeName: string): RegionResult | null {
     const objectMap = this._context.getObjectMap()
     const object = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)
     if (object?.getStatus() === 'precise') {
@@ -99,7 +99,7 @@ class Geolocus {
     return res
   }
 
-  computeFuzzyLineObject(placeName: string): LineResult | null {
+  computeFuzzyLineObject(placeName: string): RegionResult | null {
     const objectMap = this._context.getObjectMap()
     const object = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)
     if (object?.getStatus() === 'precise') {
@@ -109,6 +109,20 @@ class Geolocus {
     const uuid = object?.getUUID()
     if (!uuid) return null
     const result = Region.computeFuzzyLineObject(uuid, this._context)
+
+    return result
+  }
+
+  computeFuzzyPolygonObject(placeName: string): RegionResult | null {
+    const objectMap = this._context.getObjectMap()
+    const object = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)
+    if (object?.getStatus() === 'precise') {
+      return null
+    }
+
+    const uuid = object?.getUUID()
+    if (!uuid) return null
+    const result = Region.computeFuzzyPolygonObject(uuid, this._context)
 
     return result
   }

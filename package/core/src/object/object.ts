@@ -2,24 +2,28 @@ import { generateUUID, GeolocusGird, Gird } from '@/util'
 import jsts from '@geolocus/jsts'
 import { GeolocusGeometry, JTSGeometryFactory } from './geometry'
 
+interface GeolocusObjectProps {
+  name?: string | null // 默认值 null
+  templateName?: string | null // 默认值 null
+  status?: 'fuzzy' | 'precise' // 默认值 precise
+  infinity?: boolean // 默认值 false
+}
+
 export class GeolocusObject {
   private _uuid: string
   private _name: string | null
   private _templateName: string | null
   private _status: 'fuzzy' | 'precise'
   private _geometry: GeolocusGeometry
+  private _infinity: boolean // 用于判断该对象是否通过无线距离生成
 
-  constructor(
-    geometry: GeolocusGeometry,
-    name: string | null = null,
-    templateName: string | null = null,
-    status: 'fuzzy' | 'precise' = 'precise',
-  ) {
+  constructor(geometry: GeolocusGeometry, init?: GeolocusObjectProps) {
     this._uuid = generateUUID()
-    this._status = status
-    this._name = name
-    this._templateName = templateName
     this._geometry = geometry
+    this._name = init?.name || null
+    this._templateName = init?.templateName || null
+    this._status = init?.status || 'precise'
+    this._infinity = init?.infinity || false
   }
 
   setUUID(value: string): void {
@@ -60,6 +64,14 @@ export class GeolocusObject {
 
   getGeometry(): GeolocusGeometry {
     return this._geometry
+  }
+
+  getInfinity(): boolean {
+    return this._infinity
+  }
+
+  setInfinity(value: boolean): void {
+    this._infinity = value
   }
 }
 

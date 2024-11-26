@@ -93,12 +93,7 @@ export class ObjectMapAction {
       } else {
         const coord = <Position2 | Position2[] | Position2[][] | Position2[][][]>res.coord
         const type = <GeolocusGeometryType>res.type
-        return new GeolocusObject(
-          new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)),
-          name,
-          null,
-          'precise',
-        )
+        return new GeolocusObject(new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)), { name })
       }
     }
     return null

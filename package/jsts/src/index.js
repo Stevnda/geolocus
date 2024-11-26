@@ -8,11 +8,15 @@ import GeoJSONWriter from 'jsts/org/locationtech/jts/io/GeoJSONWriter.js'
 import BufferOp from 'jsts/org/locationtech/jts/operation/buffer/BufferOp.js'
 import DistanceOp from 'jsts/org/locationtech/jts/operation/distance/DistanceOp.js'
 import OverlayOp from 'jsts/org/locationtech/jts/operation/overlay/OverlayOp.js'
+import Densifier from 'jsts/org/locationtech/jts/densify/Densifier'
 
 const jsts = {
   algorithm: {
     Centroid,
     ConvexHull,
+  },
+  densify: {
+    Densifier,
   },
   geom: {
     Coordinate,

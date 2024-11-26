@@ -26,6 +26,7 @@ const App = () => {
           >
             <Radio value={'point'}>点</Radio>
             <Radio value={'line'}>线</Radio>
+            <Radio value={'polygon'}>面</Radio>
           </Radio.Group>
           <div className="w-96 flex-1">
             <AiText></AiText>

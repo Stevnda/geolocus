@@ -1,10 +1,10 @@
 import { create } from 'zustand'
 
 interface textStore {
-  type: 'point' | 'line'
+  type: 'point' | 'line' | 'polygon'
   aiText: string | null
   jsonText: string | null
-  setType: (value: 'point' | 'line') => void
+  setType: (value: 'point' | 'line' | 'polygon') => void
   setAiText: (value: string | null) => void
   getAiText: () => string | null
   clearAiText: () => void

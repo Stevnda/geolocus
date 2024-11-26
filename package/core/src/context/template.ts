@@ -174,7 +174,7 @@ export class TemplateAction {
         centerCoord[1] - templateCenter[1],
       )
     }
-    const object = new GeolocusObject(geometry, name, templateName, 'precise')
+    const object = new GeolocusObject(geometry, { name, templateName })
 
     // add object to objectMap
     const objectMap = context.getObjectMap()

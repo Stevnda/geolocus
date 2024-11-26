@@ -149,6 +149,14 @@ export const computeLineTest = (text: string) => {
   return res
 }
 
+export const computePolygonTest = (text: string) => {
+  const tripleList = JSON.parse(text) as UserGeolocusTriple[]
+  geolocusContext.defineRelation(tripleList, 'polygon')
+  const res = geolocusContext.computeFuzzyPolygonObject('taiwan')
+  console.log(res)
+  return res
+}
+
 function getColorFromRainbow(value: number) {
   value = value + 0.1
   // 定义彩虹色带的RGB颜色值
