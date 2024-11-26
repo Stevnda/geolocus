@@ -1,4 +1,4 @@
-import { generateUUID, GeolocusGird, Gird } from '@/util'
+import { generateUUID, GeolocusGrid, Grid } from '@/util'
 import jsts from '@geolocus/jsts'
 import { GeolocusGeometry, JTSGeometryFactory } from './geometry'
 
@@ -75,7 +75,7 @@ export class GeolocusObject {
   }
 }
 
-export const computeGeolocusObjectMaskGrid = (object: GeolocusObject, girdSum: number): GeolocusGird => {
+export const computeGeolocusObjectMaskGrid = (object: GeolocusObject, gridSum: number): GeolocusGrid => {
   const bbox = object.getGeometry().getBBox()
   const xStart = bbox[0]
   const xEnd = bbox[2]
@@ -84,11 +84,11 @@ export const computeGeolocusObjectMaskGrid = (object: GeolocusObject, girdSum: n
   const yEnd = bbox[3]
   const dy = yEnd - yStart
   const ratio = dy / dx
-  const girdSize = dx / Math.sqrt(girdSum / ratio)
+  const gridSize = dx / Math.sqrt(gridSum / ratio)
   const geometry = object.getGeometry()
 
-  const mask = Gird.createGirdWithFilter(Math.ceil(dy / girdSize), Math.ceil(dx / girdSize), (row, col) => {
-    const tempPoint = JTSGeometryFactory.point([xStart + col * girdSize, yStart + row * girdSize])
+  const mask = Grid.createGridWithFilter(Math.ceil(dy / gridSize), Math.ceil(dx / gridSize), (row, col) => {
+    const tempPoint = JTSGeometryFactory.point([xStart + col * gridSize, yStart + row * gridSize])
     const result = jsts.operation.distance.DistanceOp.distance(geometry.getGeometry(), tempPoint) === 0
     return +result
   })

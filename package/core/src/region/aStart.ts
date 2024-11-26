@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-types */
-import { GeolocusGird } from '@/util'
+import { GeolocusGrid } from '@/util'
 
 function pathTo(node: GridNode) {
   let curr = node
@@ -124,7 +124,7 @@ export class Graph {
   diagonal: boolean
   dirtyNodes: GridNode[]
 
-  constructor(gridIn: GeolocusGird, options = { diagonal: false }) {
+  constructor(gridIn: GeolocusGrid, options = { diagonal: false }) {
     options = options || {}
     this.nodes = []
     this.diagonal = !!options.diagonal

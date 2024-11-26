@@ -1,5 +1,5 @@
 import { GeolocusContext, ObjectMapAction, Role, RouteAction } from '@/context'
-import { PDFInput, GeoTripleResult, PdfGird, RegionHandlerResult, RegionResult } from './region.type'
+import { PDFInput, GeoTripleResult, PdfGrid, RegionHandlerResult, RegionResult } from './region.type'
 import { RegionPDF } from './pdf'
 import {
   computeGeolocusObjectMaskGrid,
@@ -22,7 +22,7 @@ import {
   TopologyRelation,
   Layout,
 } from '@/relation'
-import { Compare, GEO_MAX_VALUE, GeolocusGird, Gird, MAGIC_NUMBER, MathUtil, Vector2 } from '@/util'
+import { Compare, GEO_MAX_VALUE, GeolocusGrid, Grid, MAGIC_NUMBER, MathUtil, Vector2 } from '@/util'
 import { AStar, Graph } from './aStart'
 
 export class GeoTripleHandler {
@@ -71,8 +71,8 @@ export class GeoTripleHandler {
       origin,
       gdf: {},
       sdf: {
-        girdRegion: region,
-        girdSum: context.getGridSum(),
+        gridRegion: region,
+        gridSum: context.getGridSum(),
       },
       spread: {},
       weight: relation.weight || 1,
@@ -124,8 +124,8 @@ export class GeoTripleHandler {
       origin,
       gdf: {},
       sdf: {
-        girdRegion: region,
-        girdSum: context.getGridSum(),
+        gridRegion: region,
+        gridSum: context.getGridSum(),
       },
       spread: {},
       weight: relation.weight || 1,
@@ -253,7 +253,7 @@ export class GeoTripleHandler {
       intersection.setInfinity(td.region.getInfinity())
 
       td.region = intersection
-      td.pdf.sdf.girdRegion = intersection
+      td.pdf.sdf.gridRegion = intersection
       td.pdf.type = td.pdf.type === 'sdf' ? 'sdf' : 'distanceAndAngle'
       td.pdf.gdf = {
         ...td.pdf.gdf,
@@ -292,7 +292,7 @@ export class Region {
         geoTripleList: RelationAction.getTripleListByUUID(context.getRelation(), currentUUID),
         geoTripleResultList: [],
         region: null,
-        regionPdfGird: null,
+        regionPdfGrid: null,
         result: null,
       }
       context.getResultMap().set(currentUUID, currentResult)
@@ -316,10 +316,10 @@ export class Region {
         resultRegion = tempRegion
       }
       currentResult.region = new GeolocusObject(resultRegion)
-      // compute the pdfGird of result, the dot of all pdfGird
-      currentResult.regionPdfGird = this.computeRegionResultPDFGird(currentResult, context)
-      // compute the coord of result, the coord of maximum of pdfGird
-      const { coord } = this.getCoordOfMaximumOfGeolocusGird(currentResult.regionPdfGird, currentResult.region, context)
+      // compute the pdfGrid of result, the dot of all pdfGrid
+      currentResult.regionPdfGrid = this.computeRegionResultPDFGrid(currentResult, context)
+      // compute the coord of result, the coord of maximum of pdfGrid
+      const { coord } = this.getCoordOfMaximumOfGeolocusGrid(currentResult.regionPdfGrid, currentResult.region, context)
 
       // update the point object
       const objectMap = context.getObjectMap()
@@ -335,40 +335,40 @@ export class Region {
     return <RegionResult>result
   }
 
-  private static computeRegionResultPDFGird(result: RegionResult, context: GeolocusContext) {
+  private static computeRegionResultPDFGrid(result: RegionResult, context: GeolocusContext) {
     const gridSum = context.getGridSum()
     const mask = computeGeolocusObjectMaskGrid(<GeolocusObject>result?.region, gridSum)
-    const resultGird: GeolocusGird = Gird.createGirdWithValue(mask.length, mask[0].length, 1)
+    const resultGrid: GeolocusGrid = Grid.createGridWithValue(mask.length, mask[0].length, 1)
     const region = <GeolocusObject>result.region
     const bbox = region.getGeometry().getBBox()
 
     for (const geoTripleResult of result.geoTripleResultList) {
-      geoTripleResult.pdfGird = this.computePdfGird(region, <PDFInput>geoTripleResult.pdfInput, context)
+      geoTripleResult.pdfGrid = this.computePdfGrid(region, <PDFInput>geoTripleResult.pdfInput, context)
     }
 
     result.geoTripleResultList.forEach((geoTripleResult) => {
-      const pdfGird = <PdfGird>geoTripleResult.pdfGird
-      const tempGird = <GeolocusGird>pdfGird.gird
-      const weight = pdfGird.weight
-      const transformGird =
-        pdfGird.type === 'gdf' ? tempGird : this.extractRegionGird(tempGird, <GeolocusBBox>pdfGird.bbox, bbox, gridSum)
-      Gird.forEach(resultGird, (_, row, col) => {
-        resultGird[row][col] *= weight * transformGird[row][col]
+      const pdfGrid = <PdfGrid>geoTripleResult.pdfGrid
+      const tempGrid = <GeolocusGrid>pdfGrid.grid
+      const weight = pdfGrid.weight
+      const transformGrid =
+        pdfGrid.type === 'gdf' ? tempGrid : this.extractRegionGrid(tempGrid, <GeolocusBBox>pdfGrid.bbox, bbox, gridSum)
+      Grid.forEach(resultGrid, (_, row, col) => {
+        resultGrid[row][col] *= weight * transformGrid[row][col]
       })
     })
 
-    const transformGird = Gird.normalize(resultGird)
-    return transformGird
+    const transformGrid = Grid.normalize(resultGrid)
+    return transformGrid
   }
 
-  private static extractRegionGird(
-    gird: GeolocusGird,
+  private static extractRegionGrid(
+    grid: GeolocusGrid,
     originBBox: GeolocusBBox,
     targetBBox: GeolocusBBox,
     gridSum: number,
-  ): GeolocusGird {
-    const girdRow = gird.length
-    const girdCol = gird[0].length
+  ): GeolocusGrid {
+    const gridRow = grid.length
+    const gridCol = grid[0].length
 
     const originXStart = originBBox[0]
     const originXEnd = originBBox[2]
@@ -384,21 +384,21 @@ export class Region {
     const targetYEnd = targetBBox[3]
     const targetDy = targetYEnd - targetYStart
     const ratio = targetDy / targetDx
-    const girdSize = targetDx / Math.sqrt(gridSum / ratio)
+    const gridSize = targetDx / Math.sqrt(gridSum / ratio)
 
-    const resultGird = Gird.createGirdWithFilter(
-      Math.ceil(targetDy / girdSize),
-      Math.ceil(targetDx / girdSize),
+    const resultGrid = Grid.createGridWithFilter(
+      Math.ceil(targetDy / gridSize),
+      Math.ceil(targetDx / gridSize),
       (row, col) => {
-        const x = originXStart + (col + 0.5) * girdSize
-        const y = originYStart + (row + 0.5) * girdSize
-        const transformX = Math.floor(((x - originXStart) / originDx) * (girdCol - 1))
-        const transformY = Math.floor(((y - originYStart) / originDy) * (girdRow - 1))
-        return gird[transformY][transformX]
+        const x = originXStart + (col + 0.5) * gridSize
+        const y = originYStart + (row + 0.5) * gridSize
+        const transformX = Math.floor(((x - originXStart) / originDx) * (gridCol - 1))
+        const transformY = Math.floor(((y - originYStart) / originDy) * (gridRow - 1))
+        return grid[transformY][transformX]
       },
     )
 
-    return resultGird
+    return resultGrid
   }
 
   // line object
@@ -409,7 +409,7 @@ export class Region {
       geoTripleList,
       geoTripleResultList: [],
       region: null,
-      regionPdfGird: null,
+      regionPdfGrid: null,
       result: null,
     }
     context.getResultMap().set(uuid, result)
@@ -430,14 +430,14 @@ export class Region {
         geoTriple.originUUIDList = [beforeRegion.getUUID()]
       }
       const geoTripleResult = this.computePdfAndRegionOfGeoTriple(geoTriple, context)
-      geoTripleResult.pdfGird = this.computePdfGird(
+      geoTripleResult.pdfGrid = this.computePdfGrid(
         <GeolocusObject>geoTripleResult.region,
         <PDFInput>geoTripleResult.pdfInput,
         context,
       )
-      geoTripleResult.pdfGird.gird = Gird.normalize(<GeolocusGird>geoTripleResult.pdfGird.gird)
-      geoTripleResult.coord = this.getCoordOfMaximumOfGeolocusGird(
-        <GeolocusGird>geoTripleResult.pdfGird.gird,
+      geoTripleResult.pdfGrid.grid = Grid.normalize(<GeolocusGrid>geoTripleResult.pdfGrid.grid)
+      geoTripleResult.coord = this.getCoordOfMaximumOfGeolocusGrid(
+        <GeolocusGrid>geoTripleResult.pdfGrid.grid,
         <GeolocusObject>geoTripleResult.region,
         context,
       ).coord
@@ -511,22 +511,22 @@ export class Region {
     const yEnd = bbox[3]
     const dy = yEnd - yStart
     const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(context.getGridSum() / ratio)
-    const rowCount = Math.ceil(dy / girdSize)
-    const colCount = Math.ceil(dx / girdSize)
+    const gridSize = dx / Math.sqrt(context.getGridSum() / ratio)
+    const rowCount = Math.ceil(dy / gridSize)
+    const colCount = Math.ceil(dx / gridSize)
 
     // 计算 coord0 和 coord1 在 grid 中的位置, 避免超出外接矩形范围
-    const col0 = MathUtil.clamp(Math.floor((coord0[0] - xStart) / girdSize), 0, colCount - 1)
-    const row0 = MathUtil.clamp(Math.floor((coord0[1] - yStart) / girdSize), 0, rowCount - 1)
-    const col1 = MathUtil.clamp(Math.floor((coord1[0] - xStart) / girdSize), 0, colCount - 1)
-    const row1 = MathUtil.clamp(Math.floor((coord1[1] - yStart) / girdSize), 0, rowCount - 1)
+    const col0 = MathUtil.clamp(Math.floor((coord0[0] - xStart) / gridSize), 0, colCount - 1)
+    const row0 = MathUtil.clamp(Math.floor((coord0[1] - yStart) / gridSize), 0, rowCount - 1)
+    const col1 = MathUtil.clamp(Math.floor((coord1[0] - xStart) / gridSize), 0, colCount - 1)
+    const row1 = MathUtil.clamp(Math.floor((coord1[1] - yStart) / gridSize), 0, rowCount - 1)
 
     // 栅格概率值反转, 转换为最小距离之和
-    const gird = <GeolocusGird>geoTripleResult.pdfGird?.gird
-    const gridTransform = Gird.createGirdWithFilter(
-      gird.length,
-      gird[0].length,
-      (row, col) => 1 / (gird[row][col] + 0.01),
+    const grid = <GeolocusGrid>geoTripleResult.pdfGrid?.grid
+    const gridTransform = Grid.createGridWithFilter(
+      grid.length,
+      grid[0].length,
+      (row, col) => 1 / (grid[row][col] + 0.01),
     )
 
     const graph = new Graph(gridTransform, {
@@ -542,8 +542,8 @@ export class Region {
       const col = res[i][1]
       const row = res[i][0]
       // 栅格中心点坐标
-      const x = xStart + (col + 0.5) * girdSize
-      const y = yStart + (row + 0.5) * girdSize
+      const x = xStart + (col + 0.5) * gridSize
+      const y = yStart + (row + 0.5) * gridSize
       coordList.push([x, y])
     }
 
@@ -558,7 +558,7 @@ export class Region {
       geoTripleList,
       geoTripleResultList: [],
       region: null,
-      regionPdfGird: null,
+      regionPdfGrid: null,
       result: null,
     }
     context.getResultMap().set(uuid, result)
@@ -572,14 +572,14 @@ export class Region {
     const geoTripleResultList = []
     for (const geoTriple of geoTripleList) {
       const geoTripleResult = this.computePdfAndRegionOfGeoTriple(geoTriple, context)
-      geoTripleResult.pdfGird = this.computePdfGird(
+      geoTripleResult.pdfGrid = this.computePdfGrid(
         <GeolocusObject>geoTripleResult.region,
         <PDFInput>geoTripleResult.pdfInput,
         context,
       )
-      geoTripleResult.pdfGird.gird = Gird.normalize(<GeolocusGird>geoTripleResult.pdfGird.gird)
-      geoTripleResult.coord = this.getCoordOfMaximumOfGeolocusGird(
-        <GeolocusGird>geoTripleResult.pdfGird.gird,
+      geoTripleResult.pdfGrid.grid = Grid.normalize(<GeolocusGrid>geoTripleResult.pdfGrid.grid)
+      geoTripleResult.coord = this.getCoordOfMaximumOfGeolocusGrid(
+        <GeolocusGrid>geoTripleResult.pdfGrid.grid,
         <GeolocusObject>geoTripleResult.region,
         context,
       ).coord
@@ -637,7 +637,7 @@ export class Region {
       coord: null,
       region: null,
       pdfInput: null,
-      pdfGird: null,
+      pdfGrid: null,
     }
 
     const relation = geoTriple.relation
@@ -665,14 +665,14 @@ export class Region {
 
     // const regionList: GeolocusObject[] = []
     // const originList: GeolocusObject[] = []
-    // const girdRegionList: GeolocusObject[] = []
+    // const gridRegionList: GeolocusObject[] = []
     // for (const originUUID of <string[]>geoTriple.originUUIDList) {
     //   const origin = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, originUUID)
     //   const regionHandler = GeoTripleHandler.getRegionHandler(relation)
     //   const { region, pdf } = regionHandler(origin, relation, geoTriple.role)
     //   regionList.push(region)
     //   originList.push(origin)
-    //   if (pdf.sdf.girdRegion != null) girdRegionList.push(pdf.sdf.girdRegion)
+    //   if (pdf.sdf.gridRegion != null) gridRegionList.push(pdf.sdf.gridRegion)
     //   result.pdfInput = pdf
     // }
 
@@ -694,20 +694,20 @@ export class Region {
     // resultOrigin = GeolocusGeometryAction.getConcaveHull(resultOrigin)
     // ;(<PDFInput>result.pdfInput).origin = new GeolocusObject(resultOrigin)
 
-    // let resultGirdRegion = context.getRegionRange().getGeometry()
-    // for (const girdRegion of girdRegionList) {
-    //   const tempRegion = Topology.intersection(resultRegion, girdRegion.getGeometry())
+    // let resultGridRegion = context.getRegionRange().getGeometry()
+    // for (const gridRegion of gridRegionList) {
+    //   const tempRegion = Topology.intersection(resultRegion, gridRegion.getGeometry())
     //   if (!tempRegion) {
     //     throw new Error("Can't compute the fuzzy region, the intersection is empty.")
     //   }
-    //   resultGirdRegion = tempRegion
+    //   resultGridRegion = tempRegion
     // }
-    // ;(<PDFInput>result.pdfInput).sdf.girdRegion = new GeolocusObject(resultGirdRegion)
+    // ;(<PDFInput>result.pdfInput).sdf.gridRegion = new GeolocusObject(resultGridRegion)
 
     return result
   }
 
-  private static computePdfGird(region: GeolocusObject, pdfInput: PDFInput, context: GeolocusContext) {
+  private static computePdfGrid(region: GeolocusObject, pdfInput: PDFInput, context: GeolocusContext) {
     const gridSum = context.getGridSum()
     const mask = computeGeolocusObjectMaskGrid(region, gridSum)
 
@@ -719,43 +719,43 @@ export class Region {
     const yEnd = bbox[3]
     const dy = yEnd - yStart
     const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(gridSum / ratio)
-    const rowCount = Math.ceil(dy / girdSize)
-    const colCount = Math.ceil(dx / girdSize)
+    const gridSize = dx / Math.sqrt(gridSum / ratio)
+    const rowCount = Math.ceil(dy / gridSize)
+    const colCount = Math.ceil(dx / gridSize)
 
-    let pdfGird: PdfGird
+    let pdfGrid: PdfGrid
     if (pdfInput.type === 'sdf') {
-      pdfGird = {
+      pdfGrid = {
         type: 'sdf',
-        gird: RegionPDF.computePDF(pdfInput),
+        grid: RegionPDF.computePDF(pdfInput),
         bbox: region.getGeometry().getBBox(),
         weight: pdfInput.weight,
       }
     } else if (pdfInput.type === 'spread') {
-      pdfGird = {
+      pdfGrid = {
         type: 'spread',
-        gird: RegionPDF.computePDF(pdfInput),
+        grid: RegionPDF.computePDF(pdfInput),
         bbox: region.getGeometry().getBBox(),
         weight: pdfInput.weight,
       }
     } else {
-      const gird = Gird.createGirdWithFilter(rowCount, colCount, (row, col) => {
-        const x = xStart + (col + 0.5) * girdSize
-        const y = yStart + (row + 0.5) * girdSize
+      const grid = Grid.createGridWithFilter(rowCount, colCount, (row, col) => {
+        const x = xStart + (col + 0.5) * gridSize
+        const y = yStart + (row + 0.5) * gridSize
         return mask[row][col] && RegionPDF.computePDF(pdfInput, [x, y])
       })
-      pdfGird = {
+      pdfGrid = {
         type: 'gdf',
-        gird,
+        grid,
         bbox: region.getGeometry().getBBox(),
         weight: pdfInput.weight,
       }
     }
 
-    return pdfGird
+    return pdfGrid
   }
 
-  private static getCoordOfMaximumOfGeolocusGird(gird: GeolocusGird, region: GeolocusObject, context: GeolocusContext) {
+  private static getCoordOfMaximumOfGeolocusGrid(grid: GeolocusGrid, region: GeolocusObject, context: GeolocusContext) {
     const gridSum = context.getGridSum()
     const bbox = region.getGeometry().getBBox()
     const xStart = bbox[0]
@@ -765,13 +765,13 @@ export class Region {
     const yEnd = bbox[3]
     const dy = yEnd - yStart
     const ratio = dy / dx
-    const girdSize = dx / Math.sqrt(gridSum / ratio)
+    const gridSize = dx / Math.sqrt(gridSum / ratio)
 
     // 记录概率值大于 0.95 的坐标, 取平均值求得中心点, 寻找最近中心点最近的坐标
     const maxCoordList: [number, number, number, Position2[]] = [0, 0, 0, []]
-    Gird.forEach(gird, (value, row, col) => {
-      const x = xStart + (col + 0.5) * girdSize
-      const y = yStart + (row + 0.5) * girdSize
+    Grid.forEach(grid, (value, row, col) => {
+      const x = xStart + (col + 0.5) * gridSize
+      const y = yStart + (row + 0.5) * gridSize
 
       if (Compare.GE(value, 0.95)) {
         maxCoordList[0] += x

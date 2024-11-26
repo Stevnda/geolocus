@@ -14,7 +14,7 @@ import {
 import { toWgs84 } from '@turf/projection'
 import { addGeoJSONToMap, addImageToMap, convertToWgs84, removeMapLayer, removeMapSource } from '@/util/mapbox.util'
 import { useMapStore } from '@/store/mapStore'
-import { GeolocusGird, GeolocusObject, Position2 } from '@geolocus/core'
+import { GeolocusGrid, GeolocusObject, Position2 } from '@geolocus/core'
 import { useLayerStore } from '@/store/layerStore'
 import { generatePointByCoord } from '@/util/geojson.util'
 
@@ -196,11 +196,11 @@ export const JsonText = () => {
         addLayer(id)
       })
 
-      const resultGirdList = res!.geoTripleResultList.map((res) => res.pdfGird)
-      resultGirdList.forEach((item, index) => {
+      const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
+      resultGridList.forEach((item, index) => {
         const region = regionList[index][0] as GeolocusObject
         if (!item || !region) return
-        const pngBlob = generateBlobPng(item.gird!)
+        const pngBlob = generateBlobPng(item.grid!)
         const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
           convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
         )
@@ -240,11 +240,11 @@ export const JsonText = () => {
         addLayer(id)
       })
 
-      // const resultGirdList = res!.geoTripleResultList.map((res) => res.pdfGird)
-      // resultGirdList.forEach((item, index) => {
+      // const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
+      // resultGridList.forEach((item, index) => {
       //   const region = regionList[index][0] as GeolocusObject
       //   if (!item || !region) return
-      //   const pngBlob = generateBlobPng(item.gird!)
+      //   const pngBlob = generateBlobPng(item.grid!)
       //   const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
       //     convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
       //   )
@@ -289,7 +289,7 @@ export const JsonText = () => {
                 // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const res = computePointTest(jsonText)!
                 const region = res.region as GeolocusObject
-                const pdfGird = res.regionPdfGird as GeolocusGird
+                const pdfGrid = res.regionPdfGrid as GeolocusGrid
                 const result = res.result as GeolocusObject
                 const coord = result.getGeometry().getCenter() as Position2
 
@@ -303,7 +303,7 @@ export const JsonText = () => {
                 })
                 addLayer(id)
 
-                const pngBlob = generateBlobPng(pdfGird)
+                const pngBlob = generateBlobPng(pdfGrid)
                 const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
                   convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
                 )

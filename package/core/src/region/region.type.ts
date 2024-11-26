@@ -1,6 +1,6 @@
 import { GeolocusBBox, GeolocusObject, Position2 } from '@/object'
 import { GeoTriple } from '@/relation'
-import { GeolocusGird } from '@/util'
+import { GeolocusGrid } from '@/util'
 
 export interface PDFInput {
   type: 'distance' | 'angle' | 'distanceAndAngle' | 'sdf' | 'spread'
@@ -13,13 +13,13 @@ export interface PDFInput {
     azimuthDelta?: number
   }
   sdf: {
-    girdRegion?: GeolocusObject // sdf 的计算区域, 与三元组的目标区域相同
-    girdSum?: number // 计算栅格总数
+    gridRegion?: GeolocusObject // sdf 的计算区域, 与三元组的目标区域相同
+    gridSum?: number // 计算栅格总数
   }
   spread: {
-    girdRegion?: GeolocusObject // spread 的计算区域
+    gridRegion?: GeolocusObject // spread 的计算区域
     spreadPointList?: GeolocusObject // spread 的起始扩散点
-    girdSum?: number // 计算栅格总数
+    gridSum?: number // 计算栅格总数
   }
   weight: number
 }
@@ -29,9 +29,9 @@ export interface RegionHandlerResult {
   pdf: PDFInput
 }
 
-export interface PdfGird {
+export interface PdfGrid {
   type: 'gdf' | 'sdf' | 'spread' | null
-  gird: GeolocusGird | null
+  grid: GeolocusGrid | null
   bbox: GeolocusBBox | null
   weight: number
 }
@@ -40,13 +40,13 @@ export interface GeoTripleResult {
   coord: Position2 | Position2[] | null // 概率密度最大的若干个点, 只有描述多个点时为数组
   region: GeolocusObject | null // 三元组的目标区域
   pdfInput: PDFInput | null // 概率计算公式输入参数
-  pdfGird: PdfGird | null // 三元组的目标区域的概率密度栅格
+  pdfGrid: PdfGrid | null // 三元组的目标区域的概率密度栅格
 }
 
 export interface RegionResult {
   geoTripleList: GeoTriple[]
   geoTripleResultList: GeoTripleResult[]
   region: GeolocusObject | null // 点对应三元组目标区域的交集, 线面忽略
-  regionPdfGird: GeolocusGird | null // 点 region 的概率密度栅格, 线面忽略
+  regionPdfGrid: GeolocusGrid | null // 点 region 的概率密度栅格, 线面忽略
   result: GeolocusObject | null // 点的概率最大值, 线和面的概率拟合结果
 }

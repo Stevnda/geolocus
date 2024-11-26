@@ -1,6 +1,6 @@
-export { Gird } from './gird.util'
+export { Grid } from './grid.util'
 export { Compare, MathUtil, generateUUID } from './math.util'
-export { type GeolocusGird } from './util.type'
+export { type GeolocusGrid } from './util.type'
 export { Vector2 } from './vector.util'
 // constant
 export const GEO_MAX_VALUE = 281474956710534

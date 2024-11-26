@@ -1,4 +1,4 @@
-import { geolocus, GeolocusGird, UserGeolocusTriple } from '@geolocus/core'
+import { geolocus, GeolocusGrid, UserGeolocusTriple } from '@geolocus/core'
 import { getPlaceDataByName, nominatim } from './place.plugin'
 
 export const temp = [
@@ -112,6 +112,7 @@ export const geolocusContext = geolocus.createContext({
     [-99999999, 99999999],
     [-99999999, -99999999],
   ],
+  gridScale: 1000,
 })
 
 geolocusContext.addRole({
@@ -186,7 +187,7 @@ function getColorFromRainbow(value: number) {
   return [r, g, b]
 }
 
-export const generateBlobPng = (matrix: GeolocusGird) => {
+export const generateBlobPng = (matrix: GeolocusGrid) => {
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   const m = matrix.length

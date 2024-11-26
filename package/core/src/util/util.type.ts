@@ -1,1 +1,1 @@
-export type GeolocusGird = number[][]
+export type GeolocusGrid = number[][]
