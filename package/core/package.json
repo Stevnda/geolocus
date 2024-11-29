@@ -15,7 +15,7 @@
     "prettier": "prettier src/**/* --write",
     "format": "pnpm prettier && pnpm lint",
     "check": "tsc --noEmit",
-    "test": "vitest --config ./vitest.config.ts",
+    "test": "vitest run --config ./vitest.config.ts",
     "test:coverage": "vitest run --config ./vitest.config.ts --coverage",
     "bench": "vitest bench --config ./vitest.config.ts"
   },

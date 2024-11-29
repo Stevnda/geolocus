@@ -7,7 +7,7 @@ export default defineConfig({
       '@': path.resolve(process.cwd(), './src'),
     },
     coverage: {
-      include: ['**/src/**'],
+      include: ['**/test/**'],
       exclude: [
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         ...configDefaults.coverage.exclude!,
@@ -15,6 +15,6 @@ export default defineConfig({
         '**/index.ts',
       ],
     },
-    include: ['**/src/**/*.test.ts'],
+    include: ['**/test/**/*.test.ts'],
   },
 })

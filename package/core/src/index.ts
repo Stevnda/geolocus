@@ -56,7 +56,7 @@ export interface RoleInit {
   spatialRef: SpatialRef
 }
 
-class Geolocus {
+export class Geolocus {
   private _context: GeolocusContext
 
   constructor(init: GeolocusContextInit) {
