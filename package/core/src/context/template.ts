@@ -199,8 +199,9 @@ export class TemplateAction {
     ObjectMapAction.addObject(objectMap, object)
 
     // add route
-    if (parentObject) route.addEdge(parentObject.getUUID(), object.getUUID())
-    else route.addEdge('root', object.getUUID())
+    if (parentObject)
+      route.addEdge(parentObject.getUUID(), object.getUUID(), 'subordination')
+    else route.addEdge('root', object.getUUID(), 'subordination')
 
     // handle rule
     const ruleList = templateNode.getRuleList()
@@ -311,7 +312,7 @@ export class TemplateAction {
     const objectMap = context.getObjectMap()
     ObjectMapAction.addObject(objectMap, point)
     const route = context.getRoute()
-    route.addEdge(originObject.getUUID(), point.getUUID())
+    route.addEdge(originObject.getUUID(), point.getUUID(), 'calculation')
     const tripleListMap = context.getRelation().getTripleListMap()
     const triple: GeoTriple = {
       originUUIDList: [originObject.getUUID()],

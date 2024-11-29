@@ -1,15 +1,17 @@
 import { GeolocusContext } from './context'
 import { ObjectMapAction } from './objectMap'
 
+export type RouteRelationType = 'calculation' | 'subordination' | 'association'
+
 export class RouteNode {
   private _level: number
-  private _outNodeList: Set<string>
-  private _inNodeList: Set<string>
+  private _outNodeMap: Map<string, Set<RouteRelationType>>
+  private _inNodeMap: Map<string, Set<RouteRelationType>>
 
   constructor(level: number) {
     this._level = level
-    this._outNodeList = new Set()
-    this._inNodeList = new Set()
+    this._outNodeMap = new Map()
+    this._inNodeMap = new Map()
   }
 
   getLevel(): number {
@@ -20,20 +22,20 @@ export class RouteNode {
     this._level = level
   }
 
-  setOutNodeList(outNodeList: Set<string>) {
-    this._outNodeList = outNodeList
+  setOutNodeMap(outNodeMap: Map<string, Set<RouteRelationType>>) {
+    this._outNodeMap = outNodeMap
   }
 
-  getOutNodeList(): Set<string> {
-    return this._outNodeList
+  getOutNodeMap(): Map<string, Set<RouteRelationType>> {
+    return this._outNodeMap
   }
 
-  setInNodeList(inNodeList: Set<string>) {
-    this._inNodeList = inNodeList
+  setInNodeMap(inNodeMap: Map<string, Set<RouteRelationType>>) {
+    this._inNodeMap = inNodeMap
   }
 
-  getInNodeList(): Set<string> {
-    return this._inNodeList
+  getInNodeMap(): Map<string, Set<RouteRelationType>> {
+    return this._inNodeMap
   }
 }
 
@@ -76,43 +78,70 @@ export class Route {
     return this._nodeList.size || 0
   }
 
-  addEdge(parent: string, child: string): void {
-    this.addVertex(parent, true)
-    this.addVertex(child)
+  addEdge(
+    parent: string,
+    child: string,
+    routeEdgeType: RouteRelationType,
+  ): void {
+    this.addVertex(parent, routeEdgeType, true)
+    this.addVertex(child, routeEdgeType)
     const childrenNode = <RouteNode>this.getNodeByUUID(child)
     const parentNode = <RouteNode>this.getNodeByUUID(parent)
     childrenNode.setLevel(
       Math.max(parentNode.getLevel() + 1, childrenNode.getLevel()),
     )
-    childrenNode.getInNodeList().add(parent)
-    parentNode.getOutNodeList().add(child)
+
+    const inNodeListOfChild = childrenNode.getInNodeMap()
+    if (inNodeListOfChild.has(parent)) {
+      inNodeListOfChild.get(parent)?.add(routeEdgeType)
+    } else {
+      inNodeListOfChild.set(parent, new Set([routeEdgeType]))
+    }
+    const outNodeListOfParent = parentNode.getOutNodeMap()
+    if (outNodeListOfParent.has(child)) {
+      outNodeListOfParent.get(child)?.add(routeEdgeType)
+    } else {
+      outNodeListOfParent.set(child, new Set([routeEdgeType]))
+    }
   }
 
   removeEdge(parent: string, child: string): void {
     const childrenNode = <RouteNode>this.getNodeByUUID(child)
     const parentNode = <RouteNode>this.getNodeByUUID(parent)
-    childrenNode.getInNodeList().delete(parent)
-    parentNode.getOutNodeList().delete(child)
+    for (const nodeID of childrenNode.getInNodeMap().keys()) {
+      if (nodeID !== parent) continue
+      childrenNode.getInNodeMap().delete(nodeID)
+      break
+    }
+    for (const nodeID of parentNode.getOutNodeMap().keys()) {
+      if (nodeID !== child) continue
+      parentNode.getOutNodeMap().delete(nodeID)
+      break
+    }
     if (
-      childrenNode.getInNodeList().size === 0 &&
-      childrenNode.getOutNodeList().size === 0
+      childrenNode.getInNodeMap().size === 0 &&
+      childrenNode.getOutNodeMap().size === 0
     ) {
       this.getNodeList().delete(child)
     }
     if (
-      parentNode.getInNodeList().size === 0 &&
-      parentNode.getOutNodeList().size === 0
+      parentNode.getInNodeMap().size === 0 &&
+      parentNode.getOutNodeMap().size === 0
     ) {
       this.getNodeList().delete(parent)
     }
   }
 
-  private addVertex(uuid: string, connextRoot = false): void {
+  private addVertex(
+    uuid: string,
+    routeEdgeType: RouteRelationType,
+    connextRoot = false,
+  ): void {
     if (this.getNodeList().has(uuid)) return
 
     const node = new RouteNode(1)
     this.getNodeList().set(uuid, node)
-    if (connextRoot) this.addEdge('root', uuid)
+    if (connextRoot) this.addEdge('root', uuid, routeEdgeType)
   }
 }
 
@@ -122,7 +151,9 @@ export class RouteAction {
     // generate inDegree of graph
     const inDegree: Record<string, number> = {}
     for (const [key, node] of nodeList.entries()) {
-      inDegree[key] = node.getInNodeList().size
+      inDegree[key] = Array.from(node.getInNodeMap().values()).filter(
+        (typeSet) => typeSet.has('calculation'),
+      ).length
     }
 
     // traversal the node that its inDegree is 0
@@ -138,13 +169,13 @@ export class RouteAction {
     while (queue.length > 0) {
       const node = queue.shift() as string
       result.push(node)
-      const children = nodeList.get(node)?.getOutNodeList()
-      if (children) {
-        for (const child of children) {
-          inDegree[child] -= 1
-          if (inDegree[child] === 0) {
-            queue.push(child)
-          }
+      const children = nodeList.get(node)?.getOutNodeMap()
+      if (!children) continue
+      for (const [nodeID, typeSet] of children) {
+        if (!typeSet.has('calculation')) continue
+        inDegree[nodeID] -= 1
+        if (inDegree[nodeID] === 0) {
+          queue.push(nodeID)
         }
       }
     }
@@ -162,7 +193,14 @@ export class RouteAction {
     // generate inNode map
     const inNode: Map<string, Set<string>> = new Map()
     for (const [key, node] of route.getNodeList().entries()) {
-      inNode.set(key, node.getInNodeList())
+      inNode.set(
+        key,
+        new Set(
+          Array.from(node.getInNodeMap().entries())
+            .filter(([, typeSet]) => typeSet.has('calculation'))
+            .map(([nodeID]) => nodeID),
+        ),
+      )
     }
 
     // the object must be fuzzy object
