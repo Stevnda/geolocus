@@ -6,10 +6,18 @@ import {
   JTSGeometryFactory,
   Position2,
 } from '@/object'
-import { GeolocusContext } from '.'
+import { GeolocusContext, Role } from '.'
 import { ObjectMapAction } from './objectMap'
 import { RouteNode } from './route'
 import { generateUUID } from '@/util'
+import {
+  GeoRelation,
+  GeoTriple,
+  RelationAction,
+  SemanticRelation,
+} from '@/relation'
+import { Region } from '@/region'
+import { UserGeoRelation } from '..'
 
 type TemplateCustomRule = (object: GeolocusObject) => Position2
 
@@ -26,9 +34,10 @@ interface TemplateBBoxRule {
 
 interface TemplateRule {
   templateNodeName: string
-  // 优先级: custom > bbox, 只能执行一个规则
+  // 优先级: custom > bbox > relation, 只能执行一个规则
   customRule?: TemplateCustomRule
   bboxRule?: TemplateBBoxRule
+  relationRule?: UserGeoRelation
 }
 
 type LevelName = { level: number; name: string }[]
@@ -206,7 +215,7 @@ export class TemplateAction {
           [...levelName],
           rule.customRule,
         )
-      } else {
+      } else if (rule.bboxRule != null) {
         this.handleBBoxRule(
           context,
           template,
@@ -214,6 +223,15 @@ export class TemplateAction {
           rule.templateNodeName,
           [...levelName],
           <TemplateBBoxRule>rule.bboxRule,
+        )
+      } else {
+        this.handleRelationRule(
+          context,
+          template,
+          object,
+          rule.templateNodeName,
+          [...levelName],
+          <SemanticRelation>rule.relationRule,
         )
       }
     }
@@ -263,6 +281,56 @@ export class TemplateAction {
     } else {
       centerCoord = [center[0] + rule.offset[0], center[1] + rule.offset[1]]
     }
+    this.createObjectByTemplate(
+      context,
+      template,
+      childTemplateNodeName,
+      centerCoord,
+      levelName,
+      originObject,
+    )
+  }
+
+  private static handleRelationRule = (
+    context: GeolocusContext,
+    template: Template,
+    originObject: GeolocusObject,
+    childTemplateNodeName: string,
+    levelName: LevelName,
+    rule: SemanticRelation,
+  ) => {
+    const role = <Role>context.getDefaultRole()
+    const relation: GeoRelation = RelationAction.transform(rule, role, 'point')
+    const point = new GeolocusObject(
+      new GeolocusGeometry('Point', JTSGeometryFactory.empty('Point')),
+      {
+        status: 'fuzzy',
+      },
+    )
+    // add temp objectMap, route and triple
+    const objectMap = context.getObjectMap()
+    ObjectMapAction.addObject(objectMap, point)
+    const route = context.getRoute()
+    route.addEdge(originObject.getUUID(), point.getUUID())
+    const tripleListMap = context.getRelation().getTripleListMap()
+    const triple: GeoTriple = {
+      originUUIDList: [originObject.getUUID()],
+      relation,
+      role,
+      targetUUID: point.getUUID(),
+      uuid: generateUUID(),
+    }
+    tripleListMap.set(point.getUUID(), new Set([triple]))
+
+    // compute coord
+    const res = Region.computeFuzzyPointObject(point.getUUID(), context)
+    const centerCoord = <Position2>res.result?.getGeometry().getCenter()
+
+    // remove temp route and triple
+    ObjectMapAction.deleteObject(objectMap, point)
+    route.removeEdge(originObject.getUUID(), point.getUUID())
+    tripleListMap.delete(point.getUUID())
+
     this.createObjectByTemplate(
       context,
       template,

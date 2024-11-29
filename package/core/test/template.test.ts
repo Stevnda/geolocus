@@ -2,6 +2,7 @@ import { beforeEach, expect, test } from 'vitest'
 import { createTestContext } from './init'
 import { Geolocus } from '@/index'
 import { TemplateNode, Template, TemplateAction } from '@/context'
+import { GeolocusObject } from '@/object'
 
 let scene: Geolocus
 beforeEach(() => {
@@ -80,9 +81,9 @@ test('1-n', () => {
     },
     {
       templateNodeName: '足球门',
-      bboxRule: {
-        type: 'relative',
-        offset: [0, -0.5],
+      relationRule: {
+        direction: 'E',
+        distance: 15,
       },
     },
   ])
@@ -104,4 +105,32 @@ test('1-n', () => {
     '运动场足球场足球门',
   ])
   expect(route.getNodeList().size).toEqual(6)
+  expect(
+    (() => {
+      const nameMap = objectMap.getNameMap()
+      const sportsFiled = <GeolocusObject>(
+        nameMap.get('运动场')?.values().next().value
+      )
+      const soccerCourt = <GeolocusObject>(
+        nameMap.get('运动场足球场')?.values().next().value
+      )
+      const basketballCourt = <GeolocusObject>(
+        nameMap.get('运动场篮球场')?.values().next().value
+      )
+      const soccerGoal = Array.from(
+        <SetIterator<GeolocusObject>>(
+          nameMap.get('运动场足球场足球门')?.values()
+        ),
+      )
+
+      return (
+        sportsFiled.getGeometry().getCenter()[0] === 0 &&
+        soccerCourt.getGeometry().getCenter()[0] === -25 &&
+        basketballCourt.getGeometry().getCenter()[0] === 25 &&
+        soccerGoal[0].getGeometry().getCenter()[1] === 7.5 &&
+        soccerGoal[1].getGeometry().getCenter()[0] >= 4.9 &&
+        soccerGoal[1].getGeometry().getCenter()[0] <= 5
+      )
+    })(),
+  ).toBeTruthy()
 })

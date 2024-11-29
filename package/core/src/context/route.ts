@@ -93,6 +93,18 @@ export class Route {
     const parentNode = <RouteNode>this.getNodeByUUID(parent)
     childrenNode.getInNodeList().delete(parent)
     parentNode.getOutNodeList().delete(child)
+    if (
+      childrenNode.getInNodeList().size === 0 &&
+      childrenNode.getOutNodeList().size === 0
+    ) {
+      this.getNodeList().delete(child)
+    }
+    if (
+      parentNode.getInNodeList().size === 0 &&
+      parentNode.getOutNodeList().size === 0
+    ) {
+      this.getNodeList().delete(parent)
+    }
   }
 
   private addVertex(uuid: string, connextRoot = false): void {

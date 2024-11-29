@@ -9,7 +9,7 @@ import { GEO_MAX_VALUE } from '@/util'
 import {
   AbsoluteDirection,
   ComputeRegionRange,
-  SeManticDirection,
+  SemanticDirection,
 } from './relation.type'
 import { Topology } from './topology'
 import { Role } from '@/context'
@@ -24,7 +24,7 @@ export class Direction {
     return angle
   }
 
-  static transform(direction: SeManticDirection | number, role: Role) {
+  static transform(direction: SemanticDirection | number, role: Role) {
     if (typeof direction === 'number') return (direction / 360) * 2 * Math.PI
 
     const AbsoluteDirectionMap = {

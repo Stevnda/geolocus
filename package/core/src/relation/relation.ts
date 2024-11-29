@@ -81,6 +81,8 @@ export class RelationAction {
       if (triple.originList == null && mode === 'line') return null
       else return this.handleOrigin(triple, context, mode)
     })()
+
+    // 添加至路由
     if (originUUIDList != null) {
       const route = context.getRoute()
       for (const originUUID of originUUIDList) {
@@ -93,6 +95,7 @@ export class RelationAction {
       }
     }
 
+    // 添加至三元组映射
     const tripleTransform: GeoTriple = {
       uuid: generateUUID(),
       role,

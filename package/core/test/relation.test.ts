@@ -37,7 +37,7 @@ test('simple direction and distance', () => {
   expect(coord[0] < 70.2 && coord[0] > 70.1).toBeTruthy()
 })
 
-test('two direction and distance, semanticDirection', () => {
+test('two direction and distance, SemanticDirection', () => {
   scene.defineRelation(
     [
       {
