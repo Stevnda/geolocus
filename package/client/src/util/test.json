@@ -4,7 +4,7 @@
     {
       "role": "default",
       "target": "kxh",
-      "origin": [
+      "originList": [
         {
           "name": "台湾"
         }
@@ -18,7 +18,7 @@
     {
       "role": "default",
       "target": "kxh",
-      "origin": [
+      "originList": [
         {
           "name": "巴士海峡"
         }
@@ -33,7 +33,7 @@
     {
       "role": "default",
       "target": "kxh1727274277362",
-      "origin": [
+      "originList": [
         {
           "name": "台湾"
         }
@@ -46,7 +46,7 @@
     {
       "role": "default",
       "target": "kxh1727274277362",
-      "origin": [
+      "originList": [
         {
           "name": "松山机场"
         }
@@ -61,7 +61,7 @@
   "pointData3": [
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "卡里马塔海峡"
         },
@@ -82,7 +82,7 @@
   "pointData4": [
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "苏拉威西海"
         }
@@ -101,7 +101,7 @@
   "pointData5": [
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "苏拉威西海"
         }
@@ -120,7 +120,7 @@
   "lineData": [
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "吉隆坡机场"
         }
@@ -129,7 +129,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "马六甲海峡"
         }
@@ -142,7 +142,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "卡里马塔海峡"
         }
@@ -151,7 +151,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "九段线"
         }
@@ -165,7 +165,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "加里曼尼岛"
         }
@@ -174,7 +174,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "苏拉威西海"
         }
@@ -187,7 +187,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "菲律宾"
         }
@@ -201,7 +201,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "巴士海峡"
         }
@@ -215,7 +215,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "台湾"
         }
@@ -228,7 +228,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "松山机场"
         }
@@ -255,7 +255,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "首尔"
         }
@@ -267,7 +267,7 @@
   "123": [
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "北京市"
         }
@@ -276,7 +276,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "济南市"
         }
@@ -289,7 +289,7 @@
     },
     {
       "role": "default",
-      "origin": [
+      "originList": [
         {
           "name": "南京市"
         }
@@ -299,7 +299,7 @@
     {
       "role": "default",
       "target": "taiwan",
-      "origin": [
+      "originList": [
         {
           "name": "广州市"
         }
