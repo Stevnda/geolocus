@@ -162,8 +162,7 @@ export class TemplateAction {
         levelName = [{ level: 0, name: 'root' }]
       }
     }
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    levelName.push({ level: levelName.at(-1)!.level + 1, name: templateNode.getName() })
+    levelName.push({ level: levelName[levelName.length - 1].level + 1, name: templateNode.getName() })
     const name = TemplateAction.generateTemplateName(levelName)
     let geometry = new GeolocusGeometry(geometryType, JTSGeometryFactory.create(geometryType, coordList))
     if (centerCoord != null) {

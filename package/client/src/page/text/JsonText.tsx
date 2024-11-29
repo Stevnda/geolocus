@@ -21,7 +21,7 @@ import { generatePointByCoord } from '@/util/geojson.util'
 const text = [
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '吉隆坡机场',
       },
@@ -30,7 +30,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '马六甲海峡',
       },
@@ -43,7 +43,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '卡里马塔海峡',
       },
@@ -52,7 +52,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '九段线',
       },
@@ -66,7 +66,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '加里曼尼岛',
       },
@@ -75,7 +75,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '苏拉威西海',
       },
@@ -88,7 +88,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '菲律宾',
       },
@@ -102,7 +102,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '巴士海峡',
       },
@@ -116,7 +116,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '台湾',
       },
@@ -129,7 +129,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '松山机场',
       },
@@ -156,7 +156,7 @@ const text = [
   },
   {
     role: 'default',
-    origin: [
+    originList: [
       {
         name: '首尔',
       },

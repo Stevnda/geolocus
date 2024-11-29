@@ -33,13 +33,15 @@ export interface UserGeoRelation {
   layout?: GeoLayout
 }
 
+export interface UserGeolocusTripleOrigin {
+  name?: string
+  type?: GeolocusGeometryType
+  coord?: Position2 | Position2[] | Position2[][] | Position2[][][]
+}
+
 export interface UserGeolocusTriple {
   role: string
-  origin?: {
-    name?: string
-    type?: GeolocusGeometryType
-    coord?: Position2 | Position2[] | Position2[][] | Position2[][][]
-  }[]
+  originList?: (UserGeolocusTripleOrigin | UserGeolocusTriple)[]
   relation?: UserGeoRelation
   target: string
 }

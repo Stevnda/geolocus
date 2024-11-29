@@ -168,7 +168,7 @@ export class RouteAction {
     while (stack.length > 0) {
       const currentUUID = stack.pop() as string
       // has circle
-      if (visited.has(currentUUID)) {
+      if (visited.has(currentUUID) && fuzzyObject.has(currentUUID)) {
         return false
       }
       // all object are computed
