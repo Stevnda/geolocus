@@ -64,7 +64,12 @@ test('compute order', () => {
   scene.computeFuzzyPointObject('c')
   const res = scene.getComputeResult('c')
   const coord = <Position2>res?.result?.getGeometry().getCenter()
-  expect(coord[0] <= 169.5 && coord[0] >= 169.4 && coord[1] <= 69.6 && coord[1] >= 69.5).toBe(true)
+  expect(
+    coord[0] <= 169.5 &&
+      coord[0] >= 169.4 &&
+      coord[1] <= 69.6 &&
+      coord[1] >= 69.5,
+  ).toBe(true)
 })
 
 test('circle relation', () => {

@@ -12,7 +12,13 @@ import {
   geolocusContext,
 } from '@/util/geolocus.util'
 import { toWgs84 } from '@turf/projection'
-import { addGeoJSONToMap, addImageToMap, convertToWgs84, removeMapLayer, removeMapSource } from '@/util/mapbox.util'
+import {
+  addGeoJSONToMap,
+  addImageToMap,
+  convertToWgs84,
+  removeMapLayer,
+  removeMapSource,
+} from '@/util/mapbox.util'
 import { useMapStore } from '@/store/mapStore'
 import { GeolocusGrid, GeolocusObject, Position2 } from '@geolocus/core'
 import { useLayerStore } from '@/store/layerStore'
@@ -179,7 +185,10 @@ export const JsonText = () => {
     if (typeof jsonText === 'string') {
       if (!map) return
       const res = computeLineTest(jsonText)
-      const regionList = res!.geoTripleResultList.map((res) => [res.region, res.coord])
+      const regionList = res!.geoTripleResultList.map((res) => [
+        res.region,
+        res.coord,
+      ])
       regionList.forEach((region) => {
         const [polygon, coord] = region as [GeolocusObject, Position2]
         const point84 = toWgs84(generatePointByCoord(coord))
@@ -201,8 +210,12 @@ export const JsonText = () => {
         const region = regionList[index][0] as GeolocusObject
         if (!item || !region) return
         const pngBlob = generateBlobPng(item.grid!)
-        const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
-          convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+        const bbox = convertToWgs84(
+          region.getGeometry().getBBox().slice(0, 2) as Position2,
+        ).concat(
+          convertToWgs84(
+            region.getGeometry().getBBox().slice(2, 4) as Position2,
+          ),
         )
         const id = (Date.now() + Math.random()).toString()
         addImageToMap(map, id, pngBlob, bbox)
@@ -223,7 +236,10 @@ export const JsonText = () => {
     if (typeof jsonText === 'string') {
       if (!map) return
       const res = computePolygonTest(jsonText)
-      const regionList = res!.geoTripleResultList.map((res) => [res.region, res.coord])
+      const regionList = res!.geoTripleResultList.map((res) => [
+        res.region,
+        res.coord,
+      ])
       regionList.forEach((region) => {
         const [polygon, coord] = region as [GeolocusObject, Position2]
         const point84 = toWgs84(generatePointByCoord(coord))
@@ -245,8 +261,12 @@ export const JsonText = () => {
         const region = regionList[index][0] as GeolocusObject
         if (!item || !region) return
         const pngBlob = generateBlobPng(item.grid!)
-        const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
-          convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+        const bbox = convertToWgs84(
+          region.getGeometry().getBBox().slice(0, 2) as Position2,
+        ).concat(
+          convertToWgs84(
+            region.getGeometry().getBBox().slice(2, 4) as Position2,
+          ),
         )
         const id = (Date.now() + Math.random()).toString()
         addImageToMap(map, id, pngBlob, bbox)
@@ -268,8 +288,13 @@ export const JsonText = () => {
   }, [])
 
   return (
-    <div className="flex h-full flex-col rounded border border-slate-400 bg-slate-100">
-      <div className="h-9 border-b border-b-slate-400 px-2 leading-9">JSON格式化数据</div>
+    <div
+      className="flex h-full flex-col rounded border border-slate-400
+        bg-slate-100"
+    >
+      <div className="h-9 border-b border-b-slate-400 px-2 leading-9">
+        JSON格式化数据
+      </div>
       <CodeMirror
         ref={textRef}
         height="310px"
@@ -280,7 +305,10 @@ export const JsonText = () => {
           setJsonText(val)
         }}
       />
-      <div className="flex flex-1 flex-row-reverse items-center border-t border-t-slate-400 *:mx-2">
+      <div
+        className="flex flex-1 flex-row-reverse items-center border-t
+          border-t-slate-400 *:mx-2"
+      >
         <Button
           onClick={() => {
             if (type === 'point') {
@@ -305,8 +333,12 @@ export const JsonText = () => {
                 addLayer(id)
 
                 const pngBlob = generateBlobPng(pdfGrid)
-                const bbox = convertToWgs84(region.getGeometry().getBBox().slice(0, 2) as Position2).concat(
-                  convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+                const bbox = convertToWgs84(
+                  region.getGeometry().getBBox().slice(0, 2) as Position2,
+                ).concat(
+                  convertToWgs84(
+                    region.getGeometry().getBBox().slice(2, 4) as Position2,
+                  ),
                 )
                 id = (Date.now() + Math.random()).toString()
                 addImageToMap(map, id, pngBlob, bbox)

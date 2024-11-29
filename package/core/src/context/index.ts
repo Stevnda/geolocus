@@ -4,5 +4,9 @@ export { Role } from './role'
 export { ObjectMapAction } from './objectMap'
 export { type PlacePlugin } from './objectMap.type'
 export { type GeolocusContextInit } from './context.type'
-export { SpatialRef, SpatialRefAction, createSpatialRefFromEPSG } from './spatialReference'
+export {
+  SpatialRef,
+  SpatialRefAction,
+  createSpatialRefFromEPSG,
+} from './spatialReference'
 export { Template, TemplateAction, TemplateNode } from './template'

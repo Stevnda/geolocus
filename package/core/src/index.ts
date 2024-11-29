@@ -142,7 +142,10 @@ export class Geolocus {
 
   getComputeResult(placeName: string) {
     const objectMap = this._context.getObjectMap()
-    const uuid = ObjectMapAction.getObjectByPlaceName(objectMap, placeName)?.getUUID()
+    const uuid = ObjectMapAction.getObjectByPlaceName(
+      objectMap,
+      placeName,
+    )?.getUUID()
     if (uuid == null) return null
     return this._context.getRegionResultByObjectUUID(uuid) || null
   }

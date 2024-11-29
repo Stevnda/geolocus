@@ -9,7 +9,13 @@ export class SpatialRef {
   private _name: string // 空间参考名称
   private _description: string // 空间参考信息描述
 
-  constructor(uuid: string, type: SpatialRefType, crs: string, name: string, description: string) {
+  constructor(
+    uuid: string,
+    type: SpatialRefType,
+    crs: string,
+    name: string,
+    description: string,
+  ) {
     this._uuid = uuid
     this._type = type
     this._crs = crs
@@ -68,7 +74,10 @@ export class SpatialRefAction {
     const R2D = 180 / Math.PI
     const A = 6378137.0
 
-    return [(coord[0] * R2D) / A, (Math.PI * 0.5 - 2.0 * Math.atan(Math.exp(-coord[1] / A))) * R2D]
+    return [
+      (coord[0] * R2D) / A,
+      (Math.PI * 0.5 - 2.0 * Math.atan(Math.exp(-coord[1] / A))) * R2D,
+    ]
   }
 
   // 地理转投影
@@ -79,8 +88,14 @@ export class SpatialRefAction {
     const D2R = Math.PI / 180
     const A = 6378137.0
     const MAXEXTENT = 20037508.342789244
-    const adjusted = Math.abs(coord[0]) <= 180 ? coord[0] : coord[0] - Math.sign(coord[0]) * 360
-    const xy: Position2 = [A * adjusted * D2R, A * Math.log(Math.tan(Math.PI * 0.25 + 0.5 * coord[1] * D2R))]
+    const adjusted =
+      Math.abs(coord[0]) <= 180
+        ? coord[0]
+        : coord[0] - Math.sign(coord[0]) * 360
+    const xy: Position2 = [
+      A * adjusted * D2R,
+      A * Math.log(Math.tan(Math.PI * 0.25 + 0.5 * coord[1] * D2R)),
+    ]
 
     if (xy[0] > MAXEXTENT) xy[0] = MAXEXTENT
     if (xy[0] < -MAXEXTENT) xy[0] = -MAXEXTENT

@@ -82,7 +82,9 @@ export class TemplateNode {
     return this._coordList
   }
 
-  setCoordList(coord: Position2 | Position2[] | Position2[][] | Position2[][][]): void {
+  setCoordList(
+    coord: Position2 | Position2[] | Position2[][] | Position2[][][],
+  ): void {
     this._coordList = coord
   }
 
@@ -157,14 +159,22 @@ export class TemplateAction {
     if (levelName == null) {
       if (parentObject != null) {
         const routeNode = <RouteNode>route.getNodeByUUID(parentObject.getUUID())
-        levelName = [{ level: routeNode.getLevel(), name: <string>parentObject.getName() }]
+        levelName = [
+          { level: routeNode.getLevel(), name: <string>parentObject.getName() },
+        ]
       } else {
         levelName = [{ level: 0, name: 'root' }]
       }
     }
-    levelName.push({ level: levelName[levelName.length - 1].level + 1, name: templateNode.getName() })
+    levelName.push({
+      level: levelName[levelName.length - 1].level + 1,
+      name: templateNode.getName(),
+    })
     const name = TemplateAction.generateTemplateName(levelName)
-    let geometry = new GeolocusGeometry(geometryType, JTSGeometryFactory.create(geometryType, coordList))
+    let geometry = new GeolocusGeometry(
+      geometryType,
+      JTSGeometryFactory.create(geometryType, coordList),
+    )
     if (centerCoord != null) {
       const templateCenter = geometry.getCenter()
       geometry = GeolocusGeometryAction.translate(
@@ -188,7 +198,14 @@ export class TemplateAction {
     if (ruleList.length === 0) return
     for (const rule of ruleList) {
       if (rule.customRule != null) {
-        this.handleCustomRule(context, template, object, rule.templateNodeName, [...levelName], rule.customRule)
+        this.handleCustomRule(
+          context,
+          template,
+          object,
+          rule.templateNodeName,
+          [...levelName],
+          rule.customRule,
+        )
       } else {
         this.handleBBoxRule(
           context,
@@ -211,7 +228,14 @@ export class TemplateAction {
     rule: TemplateCustomRule,
   ) => {
     const centerCoord = rule(originObject)
-    this.createObjectByTemplate(context, template, childTemplateNodeName, centerCoord, levelName, originObject)
+    this.createObjectByTemplate(
+      context,
+      template,
+      childTemplateNodeName,
+      centerCoord,
+      levelName,
+      originObject,
+    )
   }
 
   private static handleBBoxRule = (
@@ -232,10 +256,20 @@ export class TemplateAction {
     const dy = yEnd - yStart
     const center = [(xStart + xEnd) / 2, (yStart + yEnd) / 2]
     if (rule.type === 'relative') {
-      centerCoord = [center[0] + (dx * rule.offset[0]) / 2, center[1] + (dy * rule.offset[1]) / 2]
+      centerCoord = [
+        center[0] + (dx * rule.offset[0]) / 2,
+        center[1] + (dy * rule.offset[1]) / 2,
+      ]
     } else {
       centerCoord = [center[0] + rule.offset[0], center[1] + rule.offset[1]]
     }
-    this.createObjectByTemplate(context, template, childTemplateNodeName, centerCoord, levelName, originObject)
+    this.createObjectByTemplate(
+      context,
+      template,
+      childTemplateNodeName,
+      centerCoord,
+      levelName,
+      originObject,
+    )
   }
 }

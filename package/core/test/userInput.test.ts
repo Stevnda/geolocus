@@ -61,5 +61,10 @@ test('origin is geoTriple', () => {
   scene.computeFuzzyPointObject('b')
   const res = scene.getComputeResult('b')
   const coord = <Position2>res?.result?.getGeometry().getCenter() // 49.72 87.73
-  expect(coord[0] <= 49.8 && coord[0] >= 49.6 && coord[1] <= 87.8 && coord[1] >= 87.6).toBeTruthy()
+  expect(
+    coord[0] <= 49.8 &&
+      coord[0] >= 49.6 &&
+      coord[1] <= 87.8 &&
+      coord[1] >= 87.6,
+  ).toBeTruthy()
 })

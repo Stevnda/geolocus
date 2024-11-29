@@ -1,10 +1,19 @@
-import { GeolocusGeometry, GeolocusGeometryType, GeolocusObject, JTSGeometryFactory, Position2 } from '@/object'
+import {
+  GeolocusGeometry,
+  GeolocusGeometryType,
+  GeolocusObject,
+  JTSGeometryFactory,
+  Position2,
+} from '@/object'
 import { GeolocusContext } from './context'
 import { PlaceOutput, PlacePlugin } from './objectMap.type'
 import { SpatialRef } from './spatialReference'
 
 // NOTE 命名最大概率匹配算法
-const defaultPlacePlugin = (name: string, nameMap: Map<string, Set<GeolocusObject>>): PlaceOutput | null => {
+const defaultPlacePlugin = (
+  name: string,
+  nameMap: Map<string, Set<GeolocusObject>>,
+): PlaceOutput | null => {
   const res = nameMap.get(name)
   if (res == null) {
     return null
@@ -24,7 +33,9 @@ export class ObjectMap {
 
   constructor(context: GeolocusContext) {
     this._context = context
-    this._placePluginList = [(name: string) => defaultPlacePlugin(name, this._nameMap)]
+    this._placePluginList = [
+      (name: string) => defaultPlacePlugin(name, this._nameMap),
+    ]
     this._uuidMap = new Map() // objectUUID - geolocusObject
     this._nameMap = new Map() // objectName - geolocusObject
   }
@@ -79,12 +90,18 @@ export class ObjectMapAction {
     }
   }
 
-  static getObjectByUUID(objectMap: ObjectMap, uuid: string): GeolocusObject | null {
+  static getObjectByUUID(
+    objectMap: ObjectMap,
+    uuid: string,
+  ): GeolocusObject | null {
     const map = objectMap.getUUIDMap()
     return map.get(uuid) || null
   }
 
-  static getObjectByPlaceName(objectMap: ObjectMap, name: string): GeolocusObject | null {
+  static getObjectByPlaceName(
+    objectMap: ObjectMap,
+    name: string,
+  ): GeolocusObject | null {
     const pluginList = objectMap.getPlacePluginList()
     for (const plugin of pluginList) {
       // NOTE spatialRef 的处理
@@ -93,9 +110,14 @@ export class ObjectMapAction {
       if (res.object != null) {
         return res.object
       } else {
-        const coord = <Position2 | Position2[] | Position2[][] | Position2[][][]>res.coord
+        const coord = <
+          Position2 | Position2[] | Position2[][] | Position2[][][]
+        >res.coord
         const type = <GeolocusGeometryType>res.type
-        return new GeolocusObject(new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)), { name })
+        return new GeolocusObject(
+          new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)),
+          { name },
+        )
       }
     }
     return null

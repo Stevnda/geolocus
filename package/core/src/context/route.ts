@@ -81,7 +81,9 @@ export class Route {
     this.addVertex(child)
     const childrenNode = <RouteNode>this.getNodeByUUID(child)
     const parentNode = <RouteNode>this.getNodeByUUID(parent)
-    childrenNode.setLevel(Math.max(parentNode.getLevel() + 1, childrenNode.getLevel()))
+    childrenNode.setLevel(
+      Math.max(parentNode.getLevel() + 1, childrenNode.getLevel()),
+    )
     childrenNode.getInNodeList().add(parent)
     parentNode.getOutNodeList().add(child)
   }
@@ -135,10 +137,16 @@ export class RouteAction {
       }
     }
 
-    return result.length === route.getNodeCount() ? [true, result] : [false, null]
+    return result.length === route.getNodeCount()
+      ? [true, result]
+      : [false, null]
   }
 
-  static computeObjectOrder(context: GeolocusContext, uuid: string, route: Route) {
+  static computeObjectOrder(
+    context: GeolocusContext,
+    uuid: string,
+    route: Route,
+  ) {
     // generate inNode map
     const inNode: Map<string, Set<string>> = new Map()
     for (const [key, node] of route.getNodeList().entries()) {
@@ -176,7 +184,8 @@ export class RouteAction {
       if ((!parent || parent.size === 0) && fuzzyObject.has(currentUUID)) {
         return false
       }
-      parent?.size && stack.push(...[...parent].filter((value) => value !== 'root'))
+      parent?.size &&
+        stack.push(...[...parent].filter((value) => value !== 'root'))
       visited.add(currentUUID)
       if (fuzzyObject.has(currentUUID)) {
         computedOrderStack.push(currentUUID)

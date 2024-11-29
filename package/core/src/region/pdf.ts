@@ -1,11 +1,20 @@
-import { computeGeolocusObjectMaskGrid, GeolocusGeometry, GeolocusObject, Position2 } from '@/object'
+import {
+  computeGeolocusObjectMaskGrid,
+  GeolocusGeometry,
+  GeolocusObject,
+  Position2,
+} from '@/object'
 import { Distance } from '@/relation'
 import { GeolocusGrid, Grid, Vector2 } from '@/util'
 import { PDFInput } from './region.type'
 import { JTSGeometryFactory } from '@/object/geometry'
 
 export class RegionPDF {
-  private static computeNormalDistributionValue(x: number, mean: number, std: number) {
+  private static computeNormalDistributionValue(
+    x: number,
+    mean: number,
+    std: number,
+  ) {
     const exponent = (Math.pow(x - mean, 2) / Math.pow(std, 2)) * -0.5
     // const coefficient = 1 / (std * Math.sqrt(2 * Math.PI))
     // const result = coefficient * Math.exp(exponent)
@@ -22,7 +31,10 @@ export class RegionPDF {
     meanY: number,
     stdY: number,
   ) {
-    const exponent = (Math.pow(x - meanX, 2) / Math.pow(stdX, 2) + Math.pow(y - meanY, 2) / Math.pow(stdY, 2)) * -0.5
+    const exponent =
+      (Math.pow(x - meanX, 2) / Math.pow(stdX, 2) +
+        Math.pow(y - meanY, 2) / Math.pow(stdY, 2)) *
+      -0.5
     // const coefficient = 1 / (2 * Math.PI * stdX * stdY)
     // const result = coefficient * Math.exp(exponent)
     const result = Math.exp(exponent)
@@ -30,16 +42,32 @@ export class RegionPDF {
     return result
   }
 
-  private static distance(origin: GeolocusObject, target: GeolocusObject, distance: number, delta: number) {
+  private static distance(
+    origin: GeolocusObject,
+    target: GeolocusObject,
+    distance: number,
+    delta: number,
+  ) {
     const x = Distance.distance(origin.getGeometry(), target.getGeometry())
 
     return this.computeNormalDistributionValue(x, distance, delta / 2)
   }
 
-  private static angle(origin: GeolocusObject, target: GeolocusObject, azimuth: number, delta: number) {
+  private static angle(
+    origin: GeolocusObject,
+    target: GeolocusObject,
+    azimuth: number,
+    delta: number,
+  ) {
     const radiansTransform = -azimuth + Math.PI / 2
-    const v1 = Vector2.sub(target.getGeometry().getCenter(), origin.getGeometry().getCenter())
-    const v2: Position2 = [Math.cos(radiansTransform), Math.sin(radiansTransform)]
+    const v1 = Vector2.sub(
+      target.getGeometry().getCenter(),
+      origin.getGeometry().getCenter(),
+    )
+    const v2: Position2 = [
+      Math.cos(radiansTransform),
+      Math.sin(radiansTransform),
+    ]
     const radians = Vector2.angleTo(v1, v2)
 
     return this.computeNormalDistributionValue(radians, 0, delta / 2)
@@ -56,11 +84,24 @@ export class RegionPDF {
     const x = Distance.distance(origin.getGeometry(), target.getGeometry())
 
     const radiansTransform = -azimuth + Math.PI / 2
-    const v1 = Vector2.sub(target.getGeometry().getCenter(), origin.getGeometry().getCenter())
-    const v2: Position2 = [Math.cos(radiansTransform), Math.sin(radiansTransform)]
+    const v1 = Vector2.sub(
+      target.getGeometry().getCenter(),
+      origin.getGeometry().getCenter(),
+    )
+    const v2: Position2 = [
+      Math.cos(radiansTransform),
+      Math.sin(radiansTransform),
+    ]
     const radians = Vector2.angleTo(v1, v2)
 
-    return this.computeBivariateNormalDistributionValue(x, distance, deltaDistance / 2, radians, 0, deltaAzimuth / 2)
+    return this.computeBivariateNormalDistributionValue(
+      x,
+      distance,
+      deltaDistance / 2,
+      radians,
+      0,
+      deltaAzimuth / 2,
+    )
   }
 
   private static sdfCompare(
@@ -79,21 +120,38 @@ export class RegionPDF {
       other = grid[targetRow][targetCol]
     }
 
-    const compareValue = other + Vector2.distanceTo([0, 0], [rowOffset, colOffset])
+    const compareValue =
+      other + Vector2.distanceTo([0, 0], [rowOffset, colOffset])
     if (grid[originRow][originCol] > compareValue) {
       grid[originRow][originCol] = compareValue
     }
   }
 
-  private static getUnsignedInternalDistanceField(pdf: PDFInput, azimuth?: number, deltaAzimuth?: number) {
-    const mask = computeGeolocusObjectMaskGrid(pdf.sdf.gridRegion as GeolocusObject, pdf.sdf.gridSum as number)
-    const tempGrid = Grid.createGridWithFilter(mask.length + 4, mask[0].length + 4, (row, col) => {
-      if (row <= 1 || col <= 1 || row >= mask.length + 2 || col >= mask[0].length + 2) {
-        return 0
-      } else {
-        return mask[row - 2][col - 2] ? 9999 : 0
-      }
-    })
+  private static getUnsignedInternalDistanceField(
+    pdf: PDFInput,
+    azimuth?: number,
+    deltaAzimuth?: number,
+  ) {
+    const mask = computeGeolocusObjectMaskGrid(
+      pdf.sdf.gridRegion as GeolocusObject,
+      pdf.sdf.gridSum as number,
+    )
+    const tempGrid = Grid.createGridWithFilter(
+      mask.length + 4,
+      mask[0].length + 4,
+      (row, col) => {
+        if (
+          row <= 1 ||
+          col <= 1 ||
+          row >= mask.length + 2 ||
+          col >= mask[0].length + 2
+        ) {
+          return 0
+        } else {
+          return mask[row - 2][col - 2] ? 9999 : 0
+        }
+      },
+    )
 
     for (let row = 0; row < tempGrid.length; row++) {
       for (let col = 0; col < tempGrid[0].length; col++) {
@@ -121,20 +179,38 @@ export class RegionPDF {
 
     if (azimuth != null && deltaAzimuth != null) {
       const radiansTransform = -azimuth + Math.PI / 2
-      const center: Position2 = [Math.floor(tempGrid[0].length / 2), Math.floor(tempGrid.length / 2)]
-      const resultGrid = Grid.createGridWithFilter(mask.length, mask[0].length, (row, col) => {
-        const v1 = Vector2.sub([col, row], center)
-        const v2: Position2 = [Math.cos(radiansTransform), Math.sin(radiansTransform)]
-        const radians = Vector2.angleTo(v1, v2)
+      const center: Position2 = [
+        Math.floor(tempGrid[0].length / 2),
+        Math.floor(tempGrid.length / 2),
+      ]
+      const resultGrid = Grid.createGridWithFilter(
+        mask.length,
+        mask[0].length,
+        (row, col) => {
+          const v1 = Vector2.sub([col, row], center)
+          const v2: Position2 = [
+            Math.cos(radiansTransform),
+            Math.sin(radiansTransform),
+          ]
+          const radians = Vector2.angleTo(v1, v2)
 
-        const pdf = this.computeNormalDistributionValue(radians, 0, deltaAzimuth / 2)
-        return tempGrid[row + 2][col + 2] + pdf / 10
-      })
+          const pdf = this.computeNormalDistributionValue(
+            radians,
+            0,
+            deltaAzimuth / 2,
+          )
+          return tempGrid[row + 2][col + 2] + pdf / 10
+        },
+      )
       return resultGrid
     } else {
-      const resultGrid = Grid.createGridWithFilter(mask.length, mask[0].length, (row, col) => {
-        return tempGrid[row + 2][col + 2]
-      })
+      const resultGrid = Grid.createGridWithFilter(
+        mask.length,
+        mask[0].length,
+        (row, col) => {
+          return tempGrid[row + 2][col + 2]
+        },
+      )
       return resultGrid
     }
   }
@@ -159,13 +235,18 @@ export class RegionPDF {
     const dy = yEnd - yStart
     const ratio = dy / dx
     const gridSize = dx / Math.sqrt(<number>pdf.spread.gridSum / ratio)
-    const mask = computeGeolocusObjectMaskGrid(<GeolocusObject>pdf.spread.gridRegion, <number>pdf.spread.gridSum)
+    const mask = computeGeolocusObjectMaskGrid(
+      <GeolocusObject>pdf.spread.gridRegion,
+      <number>pdf.spread.gridSum,
+    )
     const m = mask.length
     const n = mask[0].length
     const spreadGrid = Grid.createGridWithValue(m, n, -1)
 
     const queue: Position2[] = []
-    const startPointList = <Position2[]>pdf.spread.spreadPointList?.getGeometry().getCoordList()
+    const startPointList = <Position2[]>(
+      pdf.spread.spreadPointList?.getGeometry().getCoordList()
+    )
     for (const [x, y] of startPointList) {
       const col = Math.floor((x - xStart) / gridSize)
       const row = Math.floor((y - yStart) / gridSize)
@@ -182,9 +263,18 @@ export class RegionPDF {
         const curRow = row + dx
         const curCol = col + dy
 
-        if (curRow >= 0 && curRow < m && curCol >= 0 && curCol < n && mask[curRow][curCol] === 1) {
+        if (
+          curRow >= 0 &&
+          curRow < m &&
+          curCol >= 0 &&
+          curCol < n &&
+          mask[curRow][curCol] === 1
+        ) {
           const value = gridValue - Math.sqrt(dx * dx + dy * dy)
-          if (spreadGrid[curRow][curCol] === -1 || value > spreadGrid[curRow][curCol]) {
+          if (
+            spreadGrid[curRow][curCol] === -1 ||
+            value > spreadGrid[curRow][curCol]
+          ) {
             spreadGrid[curRow][curCol] = value
             min = Math.min(min, spreadGrid[curRow][curCol])
             queue.push([curRow, curCol])
@@ -224,7 +314,12 @@ export class RegionPDF {
           pdf.gdf.distanceDelta as number,
         ),
       angle: () =>
-        this.angle(origin, targetObject as GeolocusObject, pdf.gdf.azimuth as number, pdf.gdf.azimuthDelta as number),
+        this.angle(
+          origin,
+          targetObject as GeolocusObject,
+          pdf.gdf.azimuth as number,
+          pdf.gdf.azimuthDelta as number,
+        ),
       distanceAndAngle: () =>
         this.distanceAndAngle(
           origin,
@@ -234,7 +329,12 @@ export class RegionPDF {
           pdf.gdf.azimuth as number,
           pdf.gdf.azimuthDelta as number,
         ),
-      sdf: () => this.getUnsignedInternalDistanceField(pdf, pdf.gdf.azimuth, pdf.gdf.azimuthDelta),
+      sdf: () =>
+        this.getUnsignedInternalDistanceField(
+          pdf,
+          pdf.gdf.azimuth,
+          pdf.gdf.azimuthDelta,
+        ),
       spread: () => this.generateSpreadGrid(pdf),
     }
 

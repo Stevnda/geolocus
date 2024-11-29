@@ -87,11 +87,21 @@ test('1-n', () => {
     },
   ])
 
-  TemplateAction.createObjectByTemplate(scene.getContext(), template, '运动场', [0, 0])
+  TemplateAction.createObjectByTemplate(
+    scene.getContext(),
+    template,
+    '运动场',
+    [0, 0],
+  )
   const context = scene.getContext()
   const route = context.getRoute()
   const objectMap = context.getObjectMap()
   const objectNameList = Array.from(objectMap.getNameMap().keys()).sort()
-  expect(objectNameList).toEqual(['运动场', '运动场篮球场', '运动场足球场', '运动场足球场足球门'])
+  expect(objectNameList).toEqual([
+    '运动场',
+    '运动场篮球场',
+    '运动场足球场',
+    '运动场足球场足球门',
+  ])
   expect(route.getNodeList().size).toEqual(6)
 })

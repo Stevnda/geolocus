@@ -75,7 +75,10 @@ export class GeolocusObject {
   }
 }
 
-export const computeGeolocusObjectMaskGrid = (object: GeolocusObject, gridSum: number): GeolocusGrid => {
+export const computeGeolocusObjectMaskGrid = (
+  object: GeolocusObject,
+  gridSum: number,
+): GeolocusGrid => {
   const bbox = object.getGeometry().getBBox()
   const xStart = bbox[0]
   const xEnd = bbox[2]
@@ -87,11 +90,22 @@ export const computeGeolocusObjectMaskGrid = (object: GeolocusObject, gridSum: n
   const gridSize = dx / Math.sqrt(gridSum / ratio)
   const geometry = object.getGeometry()
 
-  const mask = Grid.createGridWithFilter(Math.ceil(dy / gridSize), Math.ceil(dx / gridSize), (row, col) => {
-    const tempPoint = JTSGeometryFactory.point([xStart + col * gridSize, yStart + row * gridSize])
-    const result = jsts.operation.distance.DistanceOp.distance(geometry.getGeometry(), tempPoint) === 0
-    return +result
-  })
+  const mask = Grid.createGridWithFilter(
+    Math.ceil(dy / gridSize),
+    Math.ceil(dx / gridSize),
+    (row, col) => {
+      const tempPoint = JTSGeometryFactory.point([
+        xStart + col * gridSize,
+        yStart + row * gridSize,
+      ])
+      const result =
+        jsts.operation.distance.DistanceOp.distance(
+          geometry.getGeometry(),
+          tempPoint,
+        ) === 0
+      return +result
+    },
+  )
 
   return mask
 }
