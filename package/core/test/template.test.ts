@@ -2,7 +2,7 @@ import { beforeEach, expect, test } from 'vitest'
 import { createTestContext } from './init'
 import { Geolocus } from '@/index'
 import { TemplateNode, Template, TemplateAction } from '@/context'
-import { GeolocusObject } from '@/object'
+import { GeolocusObject, Position2 } from '@/object'
 
 let scene: Geolocus
 beforeEach(() => {
@@ -87,41 +87,71 @@ test('1-n', () => {
       },
     },
   ])
-
   TemplateAction.createObjectByTemplate(
     scene.getContext(),
     template,
     '运动场',
     [0, 0],
   )
+
+  scene.defineRelation(
+    [
+      {
+        originList: [
+          {
+            name: '运动场篮球场',
+          },
+        ],
+        relation: {
+          direction: 0,
+          distance: 100,
+          topology: 'disjoint',
+        },
+        role: 'test',
+        target: 'a',
+      },
+    ],
+    'point',
+  )
+  const center = <Position2>(
+    scene.computeFuzzyPointObject('a')?.result?.getGeometry().getCenter()
+  ) // [ 23.382361147149695, 114.55367398906374 ]
+  expect(
+    center[0] >= 23.3 &&
+      center[0] <= 23.4 &&
+      center[1] >= 114.5 &&
+      center[1] <= 114.6,
+  ).toBeTruthy()
+
   const context = scene.getContext()
   const route = context.getRoute()
   const objectMap = context.getObjectMap()
   const objectNameList = Array.from(objectMap.getNameMap().keys()).sort()
   expect(objectNameList).toEqual([
+    'a',
     '运动场',
     '运动场篮球场',
     '运动场足球场',
     '运动场足球场足球门',
   ])
-  expect(route.getNodeList().size).toEqual(6)
+  expect(route.getNodeList().size).toEqual(7)
   expect(
     (() => {
       const nameMap = objectMap.getNameMap()
       const sportsFiled = <GeolocusObject>(
         nameMap.get('运动场')?.values().next().value
-      )
+      ) // [0, 0]
       const soccerCourt = <GeolocusObject>(
         nameMap.get('运动场足球场')?.values().next().value
-      )
+      ) // [-25, 0]
       const basketballCourt = <GeolocusObject>(
         nameMap.get('运动场篮球场')?.values().next().value
-      )
+      ) // [25, 0]
       const soccerGoal = Array.from(
         <SetIterator<GeolocusObject>>(
           nameMap.get('运动场足球场足球门')?.values()
         ),
-      )
+      ) // [-25, 7.5], [4.930890921432788, -1.1475419665558064]
 
       return (
         sportsFiled.getGeometry().getCenter()[0] === 0 &&

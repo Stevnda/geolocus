@@ -86,7 +86,7 @@ export class RelationAction {
     if (originUUIDList != null) {
       const route = context.getRoute()
       for (const originUUID of originUUIDList) {
-        route.addEdge(originUUID, targetUUID)
+        route.addEdge(originUUID, targetUUID, 'calculation')
         const circle = RouteAction.validateRouteValidity(route)
         if (!circle[0]) {
           route.removeEdge(originUUID, targetUUID)
