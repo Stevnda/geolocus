@@ -7,4 +7,7 @@ export interface PlaceOutput {
   coord?: Position2 | Position2[] | Position2[][] | Position2[][][]
 }
 
-export type PlacePlugin = (name: string, spatialRef: SpatialRef) => PlaceOutput | null
+export type PlacePlugin = (
+  name: string,
+  spatialRef: SpatialRef,
+) => PlaceOutput | null

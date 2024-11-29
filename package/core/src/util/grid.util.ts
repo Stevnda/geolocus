@@ -33,7 +33,12 @@ export class Grid {
 
   static forEach(
     grid: GeolocusGrid,
-    callbackFn: (value: number, row: number, col: number, grid: GeolocusGrid) => void,
+    callbackFn: (
+      value: number,
+      row: number,
+      col: number,
+      grid: GeolocusGrid,
+    ) => void,
   ) {
     for (let row = 0; row < grid.length; row++) {
       for (let col = 0; col < grid[0].length; col++) {
@@ -43,7 +48,11 @@ export class Grid {
   }
 
   static normalize(grid: GeolocusGrid) {
-    const transformGrid = this.createGridWithValue(grid.length, grid[0].length, 0)
+    const transformGrid = this.createGridWithValue(
+      grid.length,
+      grid[0].length,
+      0,
+    )
 
     let max = -GEO_MAX_VALUE
     let min = GEO_MAX_VALUE

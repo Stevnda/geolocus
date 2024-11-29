@@ -1,8 +1,23 @@
-import { GeolocusContext, ObjectMapAction, Role, RouteAction, SpatialRef } from '@/context'
-import { GeoRelation, GeoTriple, RelationMode, SemanticRelation } from './relation.type'
+import {
+  GeolocusContext,
+  ObjectMapAction,
+  Role,
+  RouteAction,
+  SpatialRef,
+} from '@/context'
+import {
+  GeoRelation,
+  GeoTriple,
+  RelationMode,
+  SemanticRelation,
+} from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
 import { generateUUID } from '@/util'
-import { UserGeolocusTriple, UserGeolocusTripleOrigin, UserGeoRelation } from '..'
+import {
+  UserGeolocusTriple,
+  UserGeolocusTripleOrigin,
+  UserGeoRelation,
+} from '..'
 import { Distance } from './distance'
 import { Direction } from './direction'
 
@@ -52,7 +67,11 @@ export class RelationAction {
     else return []
   }
 
-  static defineTriple(triple: UserGeolocusTriple, context: GeolocusContext, mode: RelationMode): GeoTriple {
+  static defineTriple(
+    triple: UserGeolocusTriple,
+    context: GeolocusContext,
+    mode: RelationMode,
+  ): GeoTriple {
     const role = context.getRoleMap().get(triple.role)
     if (!role) throw new Error('role is not existed')
 
@@ -93,13 +112,21 @@ export class RelationAction {
     return tripleTransform
   }
 
-  private static handleOrigin(triple: UserGeolocusTriple, context: GeolocusContext, mode: RelationMode): string[] {
+  private static handleOrigin(
+    triple: UserGeolocusTriple,
+    context: GeolocusContext,
+    mode: RelationMode,
+  ): string[] {
     const uuidList: string[] = []
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     for (let origin of triple.originList!) {
       if ('role' in origin) {
         const triple = <UserGeolocusTriple>origin
-        const tripleTransform = RelationAction.defineTriple(triple, context, mode)
+        const tripleTransform = RelationAction.defineTriple(
+          triple,
+          context,
+          mode,
+        )
         uuidList.push(tripleTransform.targetUUID)
       } else {
         origin = <UserGeolocusTripleOrigin>origin
@@ -112,7 +139,13 @@ export class RelationAction {
             obj = ObjectMapAction.getObjectByPlaceName(objectMap, name)
           }
           if (obj == null) {
-            obj = new GeolocusObject(new GeolocusGeometry(type, JTSGeometryFactory.create(type, coord)), { name })
+            obj = new GeolocusObject(
+              new GeolocusGeometry(
+                type,
+                JTSGeometryFactory.create(type, coord),
+              ),
+              { name },
+            )
           }
         } else {
           name = <string>name
@@ -120,7 +153,10 @@ export class RelationAction {
           if (obj == null) {
             const jstGeometry = JTSGeometryFactory.empty('Point')
             const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-            obj = new GeolocusObject(geolocusGeometry, { name, status: 'fuzzy' })
+            obj = new GeolocusObject(geolocusGeometry, {
+              name,
+              status: 'fuzzy',
+            })
           }
         }
 
@@ -133,7 +169,10 @@ export class RelationAction {
     return uuidList
   }
 
-  private static handleTarget(triple: UserGeolocusTriple, context: GeolocusContext): string {
+  private static handleTarget(
+    triple: UserGeolocusTriple,
+    context: GeolocusContext,
+  ): string {
     const name = triple.target as string
     const objectMap = context.getObjectMap()
     const pluginList = objectMap.getPlacePluginList()
@@ -153,7 +192,11 @@ export class RelationAction {
     return uuid
   }
 
-  static transform(relation: UserGeoRelation, role: Role, mode: RelationMode): GeoRelation {
+  static transform(
+    relation: UserGeoRelation,
+    role: Role,
+    mode: RelationMode,
+  ): GeoRelation {
     const res: GeoRelation = {
       topology: 'disjoint',
       direction: undefined,
@@ -189,13 +232,18 @@ export class RelationAction {
     if (relation.topology === 'within') {
       relation.distance = 0
     } else if (relation.distance != null) {
-      const distanceTransform = Distance.transformDistance(relation.distance, role.getSemanticDistanceMap())
+      const distanceTransform = Distance.transformDistance(
+        relation.distance,
+        role.getSemanticDistanceMap(),
+      )
       // 最大距离处理
       if (typeof distanceTransform === 'number') {
-        res.distance = distanceTransform <= maxDistance ? distanceTransform : maxDistance
+        res.distance =
+          distanceTransform <= maxDistance ? distanceTransform : maxDistance
       } else {
         const [min, max] = distanceTransform
-        res.distance = max <= maxDistance ? distanceTransform : [min, maxDistance]
+        res.distance =
+          max <= maxDistance ? distanceTransform : [min, maxDistance]
       }
     } else if (res.topology === 'disjoint') {
       // 无限距离处理

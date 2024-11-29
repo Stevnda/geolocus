@@ -128,7 +128,10 @@ geolocusContext.addRole({
     VF: [300000, 2000000],
   },
   weight: 1,
-  spatialRef: geolocus.createSpatialRefFromEPSG(geolocus.generateUUID(), '4326'),
+  spatialRef: geolocus.createSpatialRefFromEPSG(
+    geolocus.generateUUID(),
+    '4326',
+  ),
 })
 
 geolocusContext.use('placePlugin', getPlaceDataByName)

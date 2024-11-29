@@ -1,5 +1,10 @@
 import jsts from '@geolocus/jsts'
-import { EuclideanDistance, EuclideanDistanceRange, SemanticDistance, SemanticDistanceMap } from './relation.type'
+import {
+  EuclideanDistance,
+  EuclideanDistanceRange,
+  SemanticDistance,
+  SemanticDistanceMap,
+} from './relation.type'
 import { GeolocusGeometry, Position2 } from '@/object'
 
 interface DistanceNormalization {
@@ -21,7 +26,9 @@ export class Distance {
     return distance
   }
 
-  static normalize = (distance: EuclideanDistance | EuclideanDistanceRange): DistanceNormalization => {
+  static normalize = (
+    distance: EuclideanDistance | EuclideanDistanceRange,
+  ): DistanceNormalization => {
     if (typeof distance === 'number') {
       const result: DistanceNormalization = {
         max: distance,
@@ -49,10 +56,16 @@ export class Distance {
     return distance
   }
 
-  static nearestPoints(object0: GeolocusGeometry, object1: GeolocusGeometry): [Position2, Position2] {
+  static nearestPoints(
+    object0: GeolocusGeometry,
+    object1: GeolocusGeometry,
+  ): [Position2, Position2] {
     const geom0 = object0.getGeometry()
     const geom1 = object1.getGeometry()
-    const [coord0, coord1] = jsts.operation.distance.DistanceOp.nearestPoints(geom0, geom1)
+    const [coord0, coord1] = jsts.operation.distance.DistanceOp.nearestPoints(
+      geom0,
+      geom1,
+    )
     return [
       [coord0.x, coord0.y],
       [coord1.x, coord1.y],

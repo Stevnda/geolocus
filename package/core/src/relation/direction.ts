@@ -1,6 +1,16 @@
-import { GeolocusBBox, GeolocusGeometry, JTSGeometryFactory, GeolocusGeometryAction, Position2 } from '@/object'
+import {
+  GeolocusBBox,
+  GeolocusGeometry,
+  JTSGeometryFactory,
+  GeolocusGeometryAction,
+  Position2,
+} from '@/object'
 import { GEO_MAX_VALUE } from '@/util'
-import { AbsoluteDirection, ComputeRegionRange, SeManticDirection } from './relation.type'
+import {
+  AbsoluteDirection,
+  ComputeRegionRange,
+  SeManticDirection,
+} from './relation.type'
 import { Topology } from './topology'
 import { Role } from '@/context'
 
@@ -8,7 +18,9 @@ export class Direction {
   // radian from [1,0] (N)
   // range: [0,2pi]
   static azimuth(vector: Position2): number {
-    const angle = (Math.PI / 2 - Math.atan2(vector[1], vector[0]) + 2 * Math.PI) % (2 * Math.PI)
+    const angle =
+      (Math.PI / 2 - Math.atan2(vector[1], vector[0]) + 2 * Math.PI) %
+      (2 * Math.PI)
     return angle
   }
 
@@ -25,20 +37,41 @@ export class Direction {
       W: (3 * Math.PI) / 2,
       NW: (7 * Math.PI) / 4,
     }
-    if (direction in AbsoluteDirectionMap) return AbsoluteDirectionMap[<AbsoluteDirection>direction]
+    if (direction in AbsoluteDirectionMap)
+      return AbsoluteDirectionMap[<AbsoluteDirection>direction]
 
     const transformDirection = <AbsoluteDirection>(
-      direction.replace('F', 'N').replace('B', 'S').replace('R', 'E').replace('L', 'W')
+      direction
+        .replace('F', 'N')
+        .replace('B', 'S')
+        .replace('R', 'E')
+        .replace('L', 'W')
     )
 
     return AbsoluteDirectionMap[transformDirection] + role.getOrientation()
   }
 
-  static computeRegion(geometry: GeolocusGeometry, direction: number, range: ComputeRegionRange) {
+  static computeRegion(
+    geometry: GeolocusGeometry,
+    direction: number,
+    range: ComputeRegionRange,
+  ) {
     const center = geometry.getCenter()
-    const target: GeolocusBBox = [-GEO_MAX_VALUE, center[1], GEO_MAX_VALUE, GEO_MAX_VALUE]
-    const bbox = new GeolocusGeometry('Polygon', JTSGeometryFactory.bbox(target))
-    const bboxRotated = GeolocusGeometryAction.rotateAroundCoord(bbox, direction, geometry.getCenter())
+    const target: GeolocusBBox = [
+      -GEO_MAX_VALUE,
+      center[1],
+      GEO_MAX_VALUE,
+      GEO_MAX_VALUE,
+    ]
+    const bbox = new GeolocusGeometry(
+      'Polygon',
+      JTSGeometryFactory.bbox(target),
+    )
+    const bboxRotated = GeolocusGeometryAction.rotateAroundCoord(
+      bbox,
+      direction,
+      geometry.getCenter(),
+    )
 
     if (range === 'inside') {
       const intersection = Topology.intersection(bboxRotated, geometry)

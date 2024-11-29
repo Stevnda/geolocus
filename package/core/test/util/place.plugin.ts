@@ -418,7 +418,11 @@ export const getPlaceDataByName: PlacePlugin = (name: string) => {
     if (feature.properties && feature.properties.name === name) {
       return {
         type: feature.geometry.type as GeolocusGeometryType,
-        coord: feature.geometry.coordinates as Position2 | Position2[] | Position2[][] | Position2[][][],
+        coord: feature.geometry.coordinates as
+          | Position2
+          | Position2[]
+          | Position2[][]
+          | Position2[][][],
       }
     }
   }

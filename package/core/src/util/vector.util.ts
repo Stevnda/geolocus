@@ -29,7 +29,9 @@ export class Vector2 {
 
   // Computes the angle in radians from v1 to v2, The range of result in [0, pi]
   static angleTo(v1: Position2, v2: Position2): number {
-    const denominator = Math.sqrt(Vector2.lengthSquare(v1) * Vector2.lengthSquare(v2))
+    const denominator = Math.sqrt(
+      Vector2.lengthSquare(v1) * Vector2.lengthSquare(v2),
+    )
     if (Compare.EQ(denominator, 0)) return Math.PI / 2
     const theta = Vector2.dot(v1, v2) / denominator
     return Math.acos(MathUtil.clamp(theta, -1, 1))

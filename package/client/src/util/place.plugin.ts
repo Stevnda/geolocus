@@ -455,7 +455,9 @@ const simplifyPolygons = (
           }
         }
       } else {
-        ;(simplePolygons as [number, number][][][]).push(coordinate as [number, number][][])
+        ;(simplePolygons as [number, number][][][]).push(
+          coordinate as [number, number][][],
+        )
       }
     })
   } else if (type === 'Polygon') {
@@ -468,7 +470,9 @@ const simplifyPolygons = (
         }
       }
     } else {
-      ;(simplePolygons as [number, number][][]).push(coordinates[0] as [number, number][])
+      ;(simplePolygons as [number, number][][]).push(
+        coordinates[0] as [number, number][],
+      )
     }
   }
   return simplePolygons

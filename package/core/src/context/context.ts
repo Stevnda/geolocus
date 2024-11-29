@@ -29,7 +29,12 @@ export class GeolocusContext {
   constructor(init: GeolocusContextInit) {
     this._uuid = generateUUID()
     this._name = init.name || 'default'
-    this._regionRange = new GeolocusObject(new GeolocusGeometry('Polygon', JTSGeometryFactory.polygon([init.region])))
+    this._regionRange = new GeolocusObject(
+      new GeolocusGeometry(
+        'Polygon',
+        JTSGeometryFactory.polygon([init.region]),
+      ),
+    )
     this._objectMap = new ObjectMap(this)
     this._relation = new Relation(this)
     this._route = new Route(this)

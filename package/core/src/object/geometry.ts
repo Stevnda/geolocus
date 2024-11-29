@@ -70,56 +70,91 @@ export class GeolocusGeometry implements GeolocusGeometryProps {
 }
 
 export class GeolocusGeometryAction {
-  static translate(geometry: GeolocusGeometry, x: number, y: number): GeolocusGeometry {
+  static translate(
+    geometry: GeolocusGeometry,
+    x: number,
+    y: number,
+  ): GeolocusGeometry {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.translate(x, y)
-    const geometryTranslated = affineTransformation.transform(geometry.getGeometry())
+    const geometryTranslated = affineTransformation.transform(
+      geometry.getGeometry(),
+    )
     const type = geometry.getType()
 
     return new GeolocusGeometry(type, geometryTranslated)
   }
 
-  static rotateAroundCoord(geometry: GeolocusGeometry, theta: number, coord: Position2) {
+  static rotateAroundCoord(
+    geometry: GeolocusGeometry,
+    theta: number,
+    coord: Position2,
+  ) {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
     affineTransformation.rotate(-theta, ...coord)
-    const geometryRotated = affineTransformation.transform(geometry.getGeometry())
+    const geometryRotated = affineTransformation.transform(
+      geometry.getGeometry(),
+    )
     const type = geometry.getType()
 
     return new GeolocusGeometry(type, geometryRotated)
   }
 
   static getConvexHull(geometry: GeolocusGeometry) {
-    geometry = <GeolocusGeometry>Topology.bufferOfDistance(geometry, MAGIC_NUMBER)
-    return new GeolocusGeometry('Polygon', JTSGeometryAction.getConvexHull(geometry.getGeometry()))
+    geometry = <GeolocusGeometry>(
+      Topology.bufferOfDistance(geometry, MAGIC_NUMBER)
+    )
+    return new GeolocusGeometry(
+      'Polygon',
+      JTSGeometryAction.getConvexHull(geometry.getGeometry()),
+    )
   }
 
   static getConvexHullByGeometryList(geometryList: GeolocusGeometry[]) {
     const convexHullArray = geometryList.map((geometry) => {
-      geometry = <GeolocusGeometry>Topology.bufferOfDistance(geometry, MAGIC_NUMBER)
+      geometry = <GeolocusGeometry>(
+        Topology.bufferOfDistance(geometry, MAGIC_NUMBER)
+      )
       return JTSGeometryAction.getConvexHull(geometry.getGeometry())
     })
 
-    const multiPolygon = JTSGeometryFactory.multiPolygonByPolygonList(convexHullArray)
+    const multiPolygon =
+      JTSGeometryFactory.multiPolygonByPolygonList(convexHullArray)
     const convexHull = JTSGeometryAction.getConvexHull(multiPolygon)
 
     return new GeolocusGeometry('Polygon', convexHull)
   }
 
-  static getConcaveHull(geometry: GeolocusGeometry, concavity = 2): GeolocusGeometry {
+  static getConcaveHull(
+    geometry: GeolocusGeometry,
+    concavity = 2,
+  ): GeolocusGeometry {
     const geometryType = geometry.getType()
-    if (geometryType === 'Point' || geometryType === 'LineString') return geometry
+    if (geometryType === 'Point' || geometryType === 'LineString')
+      return geometry
 
     const jtsGeometry = geometry.getGeometry()
     const pointList = JTSGeometryAction.getCoordList(jtsGeometry)
-    if (pointList.length === 1) return new GeolocusGeometry('Point', JTSGeometryFactory.point(pointList[0]))
-    if (pointList.length === 2) return new GeolocusGeometry('LineString', JTSGeometryFactory.lineString(pointList))
+    if (pointList.length === 1)
+      return new GeolocusGeometry(
+        'Point',
+        JTSGeometryFactory.point(pointList[0]),
+      )
+    if (pointList.length === 2)
+      return new GeolocusGeometry(
+        'LineString',
+        JTSGeometryFactory.lineString(pointList),
+      )
 
     const hull = <Position2[]>computeConcaveHull(pointList, concavity)
 
     return new GeolocusGeometry('Polygon', JTSGeometryFactory.polygon([hull]))
   }
 
-  static densify(geometry: GeolocusGeometry, distanceTolerance: number): GeolocusGeometry {
+  static densify(
+    geometry: GeolocusGeometry,
+    distanceTolerance: number,
+  ): GeolocusGeometry {
     const jtsGeometry = geometry.getGeometry()
     const densified = JTSGeometryAction.densify(jtsGeometry, distanceTolerance)
     return new GeolocusGeometry(geometry.getType(), densified)
@@ -141,7 +176,10 @@ export class JTSGeometryFactory {
 
   static polygon = (position: Position2[][]): jsts.geom.Geometry => {
     const lineStringArray = position.map((value) => this.lineString(value))
-    return this._geometryFactory.createPolygon(lineStringArray[0], lineStringArray.slice(1))
+    return this._geometryFactory.createPolygon(
+      lineStringArray[0],
+      lineStringArray.slice(1),
+    )
   }
 
   static multiPoint = (position: Position2[]): jsts.geom.Geometry => {
@@ -186,7 +224,10 @@ export class JTSGeometryFactory {
     return factory
   }
 
-  static create(type: GeolocusGeometryType, coord: Position2 | Position2[] | Position2[][] | Position2[][][]) {
+  static create(
+    type: GeolocusGeometryType,
+    coord: Position2 | Position2[] | Position2[][] | Position2[][][],
+  ) {
     const map = {
       Point: this.point,
       LineString: this.lineString,
@@ -233,7 +274,10 @@ export class JTSGeometryAction {
     return convexHull.getConvexHull()
   }
 
-  static densify(geometry: jsts.geom.Geometry, distanceTolerance: number): jsts.geom.Geometry {
+  static densify(
+    geometry: jsts.geom.Geometry,
+    distanceTolerance: number,
+  ): jsts.geom.Geometry {
     return jsts.densify.Densifier.densify(geometry, distanceTolerance)
   }
 }

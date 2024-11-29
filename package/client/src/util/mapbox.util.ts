@@ -44,7 +44,12 @@ export const addGeoJSONToMap = (
   })
 }
 
-export const addImageToMap = (map: mapboxgl.Map, dataID: string, blob: Blob, extent: number[]) => {
+export const addImageToMap = (
+  map: mapboxgl.Map,
+  dataID: string,
+  blob: Blob,
+  extent: number[],
+) => {
   const url = window.URL.createObjectURL(blob)
   map.addSource(dataID, {
     type: 'image',
@@ -74,7 +79,12 @@ export const removeMapSource = (map: mapboxgl.Map, dataID: string) => {
   if (map.getSource(dataID)) map.removeSource(dataID)
 }
 
-export const addImageSequenceToMap = (map: mapboxgl.Map, dataID: string, blobList: Blob[], extent: number[]) => {
+export const addImageSequenceToMap = (
+  map: mapboxgl.Map,
+  dataID: string,
+  blobList: Blob[],
+  extent: number[],
+) => {
   let time = 0
   const length = blobList.length
   const url = URL.createObjectURL(blobList[time % length])
@@ -107,8 +117,14 @@ export const convertToMercator = (lonLat: Position2) => {
   const A = 6378137.0
   const MAXEXTENT = 20037508.342789244
 
-  const adjusted = Math.abs(lonLat[0]) <= 180 ? lonLat[0] : lonLat[0] - Math.sign(lonLat[0]) * 360
-  const xy: Position2 = [A * adjusted * D2R, A * Math.log(Math.tan(Math.PI * 0.25 + 0.5 * lonLat[1] * D2R))]
+  const adjusted =
+    Math.abs(lonLat[0]) <= 180
+      ? lonLat[0]
+      : lonLat[0] - Math.sign(lonLat[0]) * 360
+  const xy: Position2 = [
+    A * adjusted * D2R,
+    A * Math.log(Math.tan(Math.PI * 0.25 + 0.5 * lonLat[1] * D2R)),
+  ]
 
   if (xy[0] > MAXEXTENT) xy[0] = MAXEXTENT
   if (xy[0] < -MAXEXTENT) xy[0] = -MAXEXTENT
@@ -122,5 +138,8 @@ export function convertToWgs84(xy: Position2) {
   const R2D = 180 / Math.PI
   const A = 6378137.0
 
-  return [(xy[0] * R2D) / A, (Math.PI * 0.5 - 2.0 * Math.atan(Math.exp(-xy[1] / A))) * R2D] as Position2
+  return [
+    (xy[0] * R2D) / A,
+    (Math.PI * 0.5 - 2.0 * Math.atan(Math.exp(-xy[1] / A))) * R2D,
+  ] as Position2
 }

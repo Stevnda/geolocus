@@ -6,15 +6,39 @@ export type RelationMode = 'point' | 'line' | 'polygon'
 export type EuclideanDistance = number
 export type EuclideanDistanceRange = [number, number]
 export type SemanticDistance = 'VN' | 'N' | 'M' | 'F' | 'VF'
-export type SemanticDistanceMap = Record<SemanticDistance, EuclideanDistanceRange>
+export type SemanticDistanceMap = Record<
+  SemanticDistance,
+  EuclideanDistanceRange
+>
 
-export type AbsoluteDirection = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW'
-export type RelativeDirection = 'F' | 'FR' | 'R' | 'BR' | 'B' | 'BL' | 'L' | 'FL'
+export type AbsoluteDirection =
+  | 'N'
+  | 'NE'
+  | 'E'
+  | 'SE'
+  | 'S'
+  | 'SW'
+  | 'W'
+  | 'NW'
+export type RelativeDirection =
+  | 'F'
+  | 'FR'
+  | 'R'
+  | 'BR'
+  | 'B'
+  | 'BL'
+  | 'L'
+  | 'FL'
 export type SeManticDirection = AbsoluteDirection | RelativeDirection
 
 export type ComputeRegionRange = 'inside' | 'outside' | 'both'
 
-export type TopologyRelation = 'disjoint' | 'contain' | 'within' | 'intersect' | 'along'
+export type TopologyRelation =
+  | 'disjoint'
+  | 'contain'
+  | 'within'
+  | 'intersect'
+  | 'along'
 
 export interface GeoRelation {
   topology: TopologyRelation
