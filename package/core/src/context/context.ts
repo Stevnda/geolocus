@@ -21,6 +21,7 @@ export class GeolocusContext {
   // runtime
   private _objectMap: ObjectMap
   private _spatialRefMap: Map<string, SpatialRef>
+  private _defaultRole: Role | null
   private _roleMap: Map<string, Role>
   private _route: Route
   private _relation: Relation
@@ -38,6 +39,7 @@ export class GeolocusContext {
     this._objectMap = new ObjectMap(this)
     this._relation = new Relation(this)
     this._route = new Route(this)
+    this._defaultRole = null
     this._roleMap = new Map() // the key is the name of role
     this._resultMap = new Map() // the uuid of resultMap is the same as geolocusObject
     this._maxDistance = init.maxDistance
@@ -92,6 +94,14 @@ export class GeolocusContext {
 
   getRoute(): Route {
     return this._route
+  }
+
+  getDefaultRole(): Role | null {
+    return this._defaultRole
+  }
+
+  setDefaultRole(role: Role): void {
+    this._defaultRole = role
   }
 
   setRoleMap(value: Map<string, Role>): void {

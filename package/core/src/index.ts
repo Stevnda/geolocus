@@ -6,7 +6,7 @@ import {
   TopologyRelation,
   SemanticDistance,
   RelationAction,
-  SeManticDirection,
+  SemanticDirection,
   RelationMode,
 } from './relation'
 import {
@@ -27,7 +27,7 @@ import { generateUUID } from './util'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
-  direction?: SeManticDirection | number // [0,360], N=0
+  direction?: SemanticDirection | number // [0,360], N=0
   distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
   range?: ComputeRegionRange
   layout?: GeoLayout
@@ -91,6 +91,9 @@ export class Geolocus {
       this._context,
     )
     roleMap.set(init.name, role)
+    if (this._context.getDefaultRole() == null) {
+      this._context.setDefaultRole(role)
+    }
   }
 
   defineRelation(tripleList: UserGeolocusTriple[], mode: RelationMode) {

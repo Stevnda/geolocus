@@ -4,11 +4,12 @@ export {
   type SemanticDistance,
   type SemanticDistanceMap,
   type GeoRelation,
-  type SeManticDirection,
+  type SemanticDirection,
   type TopologyRelation,
   type GeoTriple,
   type ComputeRegionRange,
   type RelationMode,
+  type SemanticRelation,
 } from './relation.type'
 export { Distance } from './distance'
 export { Topology } from './topology'

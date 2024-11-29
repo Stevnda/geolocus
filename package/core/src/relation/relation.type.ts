@@ -29,7 +29,7 @@ export type RelativeDirection =
   | 'BL'
   | 'L'
   | 'FL'
-export type SeManticDirection = AbsoluteDirection | RelativeDirection
+export type SemanticDirection = AbsoluteDirection | RelativeDirection
 
 export type ComputeRegionRange = 'inside' | 'outside' | 'both'
 
