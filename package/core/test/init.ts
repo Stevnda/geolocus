@@ -19,7 +19,7 @@ export const createTestContext = () => {
 
   context.addRole({
     name: 'test',
-    directionDelta: Math.PI / 4,
+    directionDelta: 90,
     distanceDelta: 0.2,
     orientation: 0,
     semanticDistanceMap: {
@@ -31,6 +31,7 @@ export const createTestContext = () => {
     },
     weight: 1,
     spatialRef: createSpatialRefFromEPSG(generateUUID(), '4326'),
+    isDefault: true,
   })
 
   return context

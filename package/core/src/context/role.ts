@@ -13,6 +13,7 @@ export class Role {
   private _semanticDistanceMap: SemanticDistanceMap
   private _weight: number
   private _spatialRef: SpatialRef
+  private _isDefault: boolean
 
   constructor(
     name: string,
@@ -22,17 +23,19 @@ export class Role {
     semanticDistanceMap: SemanticDistanceMap,
     weight: number,
     spatialRef: SpatialRef,
+    isDefault: boolean,
     context: GeolocusContext,
   ) {
     this._uuid = generateUUID()
     this._name = name
     this._context = context
     this._orientation = orientation // azimuth, N=0, [0, 2pi]
-    this._directionDelta = directionDelta
+    this._directionDelta = (directionDelta / 360) * Math.PI // azimuth, N=0, [0, 2pi]
     this._distanceDelta = distanceDelta
     this._semanticDistanceMap = semanticDistanceMap
     this._weight = weight
     this._spatialRef = spatialRef
+    this._isDefault = isDefault
   }
 
   setUUID(value: string): void {
@@ -105,5 +108,13 @@ export class Role {
 
   getSpatialRef(): SpatialRef {
     return this._spatialRef
+  }
+
+  getIsDefault(): boolean {
+    return this._isDefault
+  }
+
+  setIsDefault(value: boolean): void {
+    this._isDefault = value
   }
 }

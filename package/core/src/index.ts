@@ -54,6 +54,7 @@ export interface RoleInit {
   semanticDistanceMap: SemanticDistanceMap
   weight: number
   spatialRef: SpatialRef
+  isDefault?: boolean
 }
 
 export class Geolocus {
@@ -88,12 +89,10 @@ export class Geolocus {
       init.semanticDistanceMap,
       init.weight,
       init.spatialRef,
+      init.isDefault || false,
       this._context,
     )
     roleMap.set(init.name, role)
-    if (this._context.getDefaultRole() == null) {
-      this._context.setDefaultRole(role)
-    }
   }
 
   defineRelation(tripleList: UserGeolocusTriple[], mode: RelationMode) {
