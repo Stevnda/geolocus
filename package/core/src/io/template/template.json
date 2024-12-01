@@ -1,0 +1,167 @@
+{
+  "contextInit": {
+    "uuid": "d43f0fc4-1978-47e3-9692-682747adb9cd",
+    "name": "南京师范大学",
+    "region": [
+      [0, 0],
+      [0, 1],
+      [1, 1],
+      [1, 0],
+      [0, 0]
+    ],
+    "maxDistance": 100000,
+    "gridSum": 16384,
+    "gridScale": 10000
+  },
+  "placePluginList": [
+    {
+      "code": "function example() {\n    console.log(\"Hello, World!\");\n}"
+    }
+  ],
+  "objectMap": [
+    {
+      "uuid": "8caaa45e-738c-4271-9e25-54f21f4a687f",
+      "name": "南京师范大学操场",
+      "template": "操场",
+      "status": "precise",
+      "infinity": "false",
+      "geolocusGeometry": {
+        "type": "point",
+        "coordList": [0, 0]
+      }
+    }
+  ],
+  "spatialMap": [
+    {
+      "uuid": "2dd52e00-c475-497d-bc4b-afd0d532dc26",
+      "type": "EPSG",
+      "crs": "4326",
+      "name": "4326",
+      "description": "GPS全球定位系统使用的坐标系"
+    }
+  ],
+  "roleMap": [
+    {
+      "name": "test",
+      "directionDelta": 90,
+      "distanceDelta": 0.2,
+      "orientation": 0,
+      "semanticDistanceMap": {
+        "VN": [0, 100],
+        "N": [100, 300],
+        "M": [300, 1000],
+        "F": [1000, 3000],
+        "VF": [3000, 20000]
+      },
+      "weight": 1,
+      "spatialRef": "2dd52e00-c475-497d-bc4b-afd0d532dc26",
+      "isDefault": true
+    }
+  ],
+  "route": {
+    "root": {
+      "level": 0,
+      "outNodeMap": { "8caaa45e-738c-4271-9e25-54f21f4a687f": "subordination" },
+      "inNodeMap": {}
+    },
+    "8caaa45e-738c-4271-9e25-54f21f4a687f": {
+      "level": 1,
+      "outNodeMap": {
+        "69bd9c28-dbb6-4f59-a071-9f28c52b05d8": "calculation"
+      },
+      "inNodeMap": { "root": "subordination" }
+    },
+    "69bd9c28-dbb6-4f59-a071-9f28c52b05d8": {
+      "level": 2,
+      "outNodeMap": {},
+      "inNodeMap": { "8caaa45e-738c-4271-9e25-54f21f4a687f": "calculation" }
+    }
+  },
+
+  "relation": {
+    "tripleListMap": {
+      "433c5382-4eb0-46e0-84db-0ec79dbcdf8f": {
+        "uuid": "ebd7a2f8-2046-4995-adc0-235e883ff30a",
+        "role": "test",
+        "originUUIDList": ["0f118056-c7ef-4ae8-a2d5-497204fa4445"],
+        "relation": {
+          "topology": "disjoint",
+          "direction": 0.7853981633974483,
+          "distance": 100,
+          "range": "both",
+          "layout": null,
+          "weight": 1
+        },
+        "targetUUID": "433c5382-4eb0-46e0-84db-0ec79dbcdf8f"
+      }
+    },
+    "semanticMap": {
+      "test": {
+        "topology": "disjoint",
+        "direction": 0.7853981633974483,
+        "distance": 100,
+        "range": "both",
+        "layout": {
+          "type": "uniform",
+          "number": 10
+        },
+        "weight": 1
+      }
+    }
+  },
+  "resultMap": {
+    "5e42baa9-796f-46f6-a755-ca23d2338b90": {
+      "geoTripleList": [
+        {
+          "uuid": "ebd7a2f8-2046-4995-adc0-235e883ff30a",
+          "role": "test",
+          "originUUIDList": ["0f118056-c7ef-4ae8-a2d5-497204fa4445"],
+          "relation": {
+            "topology": "disjoint",
+            "direction": 0.7853981633974483,
+            "distance": 100,
+            "range": "both",
+            "layout": null,
+            "weight": 1
+          },
+          "targetUUID": "433c5382-4eb0-46e0-84db-0ec79dbcdf8f"
+        }
+      ],
+      "geoTripleResultList": [
+        {
+          "coord": [1, 1],
+          "region": "79ddc04d-3b8e-4e9d-9e23-782d7de0e700",
+          "pdfInput": {
+            "type": "sdf",
+            "gdf": {
+              "distance": 100,
+              "distanceDelta": 20,
+              "azimuth": 0,
+              "azimuthDelta": 0.7853981633974483
+            },
+            "sdf": {
+              "gridRegion": "79ddc04d-3b8e-4e9d-9e23-782d7de0e700",
+              "gridSum": 16384
+            },
+            "spread": {
+              "gridRegion": "79ddc04d-3b8e-4e9d-9e23-782d7de0e700",
+              "spreadPointList": "69bd9c28-dbb6-4f59-a071-9f28c52b05d8",
+              "gridSum": 16384
+            },
+            "weight": 1
+          },
+          "pdfGrid": [
+            [1, 1],
+            [0, 1]
+          ]
+        }
+      ],
+      "region": "79ddc04d-3b8e-4e9d-9e23-782d7de0e700",
+      "regionPdfGrid": [
+        [1, 1],
+        [0, 1]
+      ],
+      "result": "ced5768a-a4a4-4068-88f3-3f9b6a48b329"
+    }
+  }
+}

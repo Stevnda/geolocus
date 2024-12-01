@@ -72,7 +72,7 @@ export class RelationAction {
     context: GeolocusContext,
     mode: RelationMode,
   ): GeoTriple {
-    const role = context.getRoleMap().get(triple.role)
+    const role = context.getRoleByName(triple.role)
     if (!role) throw new Error('role is not existed')
 
     const targetUUID = this.handleTarget(triple, context)

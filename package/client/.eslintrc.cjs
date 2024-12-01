@@ -8,7 +8,6 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:import/recommended',
     'plugin:import/typescript',
-    'plugin:jsx-a11y/recommended',
     'plugin:react/recommended',
     'plugin:react/jsx-runtime',
     'plugin:react-hooks/recommended',
@@ -16,7 +15,7 @@ module.exports = {
   ],
   parser: '@typescript-eslint/parser',
   parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
-  plugins: ['@typescript-eslint', 'jsx-a11y', 'import'],
+  plugins: ['@typescript-eslint', 'import'],
   rules: {
     'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
     'import/default': 0,
