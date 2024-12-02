@@ -1,0 +1,309 @@
+{
+  "pointText": "飞机在台湾东南方 100 km, 飞机位于巴士海峡内部",
+  "pointData": [
+    {
+      "role": "default",
+      "target": "kxh",
+      "originList": [
+        {
+          "name": "台湾"
+        }
+      ],
+      "relation": {
+        "direction": "SE",
+        "topology": "disjoint",
+        "distance": 100000
+      }
+    },
+    {
+      "role": "default",
+      "target": "kxh",
+      "originList": [
+        {
+          "name": "巴士海峡"
+        }
+      ],
+      "relation": {
+        "topology": "contain"
+      }
+    }
+  ],
+  "pointText2": "飞机位于台湾内部北侧, 飞机在松山机场周围距离20km",
+  "pointData2": [
+    {
+      "role": "default",
+      "target": "kxh1727274277362",
+      "originList": [
+        {
+          "name": "台湾"
+        }
+      ],
+      "relation": {
+        "direction": "N",
+        "topology": "contain"
+      }
+    },
+    {
+      "role": "default",
+      "target": "kxh1727274277362",
+      "originList": [
+        {
+          "name": "松山机场"
+        }
+      ],
+      "relation": {
+        "distance": 20000,
+        "range": "outside"
+      }
+    }
+  ],
+  "pointText3": "飞机位于卡里马塔海峡和苏拉威西海之间",
+  "pointData3": [
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "卡里马塔海峡"
+        },
+        {
+          "name": "苏拉威西海"
+        }
+      ],
+      "relation": {
+        "topology": "contain",
+        "layout": {
+          "type": "between"
+        }
+      },
+      "target": "taiwan"
+    }
+  ],
+  "pointText4": "100架飞机均匀位于苏拉威西海",
+  "pointData4": [
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "苏拉威西海"
+        }
+      ],
+      "relation": {
+        "topology": "contain",
+        "layout": {
+          "type": "uniform",
+          "number": 100
+        }
+      },
+      "target": "taiwan"
+    }
+  ],
+  "pointText5": "10架飞机随机位于苏拉威西海",
+  "pointData5": [
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "苏拉威西海"
+        }
+      ],
+      "relation": {
+        "topology": "contain",
+        "layout": {
+          "type": "random",
+          "number": 10
+        }
+      },
+      "target": "taiwan"
+    }
+  ],
+  "lineText": "8月2日15时42分，佩洛西乘坐美军C-40专机从吉隆坡机场起飞，向东南方向沿马六甲海峡东侧飞行，后飞越卡里马塔海峡，与九段线最南端保持400公里以上的距离，后进入印度尼西亚领空，转向东飞行穿过加里曼尼岛后进入公海空域。19时20分，飞越苏拉威西海东南侧，转北沿着菲律宾东侧从菲律宾海北上，并与菲律宾领空保持100公里距离，21时30从巴士海峡以西150公里飞越巴士海峡，此时C-40专机位于里根号航母战斗群西侧约300公里，后沿台湾东部海岸进入陆地，22时44分降落松山机场，飞行时长7小时2分。",
+  "lineData": [
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "吉隆坡机场"
+        }
+      ],
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "马六甲海峡"
+        }
+      ],
+      "relation": {
+        "direction": "E",
+        "topology": "intersect"
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "卡里马塔海峡"
+        }
+      ],
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "九段线"
+        }
+      ],
+      "relation": {
+        "direction": "S",
+        "topology": "disjoint",
+        "distance": 400000
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "加里曼尼岛"
+        }
+      ],
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "苏拉威西海"
+        }
+      ],
+      "relation": {
+        "direction": "SE",
+        "topology": "contain"
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "菲律宾"
+        }
+      ],
+      "relation": {
+        "direction": "E",
+        "topology": "along",
+        "distance": 100000
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "巴士海峡"
+        }
+      ],
+      "relation": {
+        "direction": "W",
+        "topology": "disjoint",
+        "distance": 150000
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "台湾"
+        }
+      ],
+      "relation": {
+        "direction": "E",
+        "topology": "intersect"
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "松山机场"
+        }
+      ],
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "relation": {
+        "topology": "disjoint",
+        "direction": "N",
+        "distance": 800000
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "relation": {
+        "topology": "disjoint",
+        "direction": "NE",
+        "distance": 300000
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "首尔"
+        }
+      ],
+      "target": "taiwan"
+    }
+  ],
+  "ddd": "飞机从北京市出发, 经过济南市, 最后达到南京市",
+  "123": [
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "北京市"
+        }
+      ],
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "济南市"
+        }
+      ],
+      "relation": {
+        "direction": "S",
+        "topology": "intersect"
+      },
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "originList": [
+        {
+          "name": "南京市"
+        }
+      ],
+      "target": "taiwan"
+    },
+    {
+      "role": "default",
+      "target": "taiwan",
+      "originList": [
+        {
+          "name": "广州市"
+        }
+      ]
+    }
+  ]
+}

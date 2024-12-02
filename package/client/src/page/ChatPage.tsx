@@ -1,7 +1,67 @@
+import React, { useState, useRef, useCallback } from 'react'
 import { Chat } from './chat'
 import { MapView } from './map'
-import { ResizableLayout } from '@/component/layout'
 
-export const ChatPage = () => {
-  return <ResizableLayout LeftComponent={Chat} RightComponent={MapView} />
+export const ChatPage: React.FC = () => {
+  const [isResizing, setIsResizing] = useState(false)
+  const [leftWidth, setLeftWidth] = useState(30)
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    setIsResizing(true)
+    e.preventDefault()
+  }, [])
+
+  const stopResizing = useCallback(() => {
+    setIsResizing(false)
+  }, [])
+
+  const resize = useCallback(
+    (e: MouseEvent) => {
+      if (!isResizing || !containerRef.current) return
+
+      const container = containerRef.current
+      const containerRect = container.getBoundingClientRect()
+      const newWidth =
+        ((e.clientX - containerRect.left) / containerRect.width) * 100
+
+      // Limit the minimum and maximum width
+      const clampedWidth = Math.min(Math.max(newWidth, 20), 80)
+      setLeftWidth(clampedWidth)
+    },
+    [isResizing],
+  )
+
+  React.useEffect(() => {
+    window.addEventListener('mousemove', resize)
+    window.addEventListener('mouseup', stopResizing)
+    return () => {
+      window.removeEventListener('mousemove', resize)
+      window.removeEventListener('mouseup', stopResizing)
+    }
+  }, [resize, stopResizing])
+
+  return (
+    <div ref={containerRef} className="flex flex-1 overflow-hidden">
+      <div
+        className="relative overflow-auto"
+        style={{ width: `${leftWidth}%` }}
+      >
+        <Chat />
+      </div>
+      <div
+        className=" relative z-20 cursor-col-resize select-none bg-slate-400"
+        onMouseDown={startResizing}
+      >
+        <div className="absolute -left-1 h-full w-2" />
+        <div className="h-full w-[1px]" />
+      </div>
+      <div
+        className="relative overflow-auto"
+        style={{ width: `${100 - leftWidth}%` }}
+      >
+        <MapView />
+      </div>
+    </div>
+  )
 }
