@@ -6,9 +6,10 @@ const { TextArea } = Input
 
 interface InputBoxProps {
   onSubmit: (content: string) => void
+  isInput: boolean
 }
 
-export const InputBox: React.FC<InputBoxProps> = ({ onSubmit }) => {
+export const InputBox: React.FC<InputBoxProps> = ({ onSubmit, isInput }) => {
   const [input, setInput] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,7 +44,7 @@ export const InputBox: React.FC<InputBoxProps> = ({ onSubmit }) => {
             type="primary"
             icon={<SendOutlined className="text-lg" />}
             onClick={handleSubmit}
-            disabled={!input.trim()}
+            disabled={!isInput || !input.trim()}
             size="large"
           >
             发送
