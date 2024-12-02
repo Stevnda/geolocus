@@ -119,7 +119,7 @@ export const initContext = () => {
 
   geolocusContext.addRole({
     name: 'default',
-    directionDelta: Math.PI / 4,
+    directionDelta: 90,
     distanceDelta: 0.2,
     orientation: 0,
     semanticDistanceMap: {
