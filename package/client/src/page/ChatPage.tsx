@@ -4,7 +4,7 @@ import { MapView } from './map'
 
 export const ChatPage: React.FC = () => {
   const [isResizing, setIsResizing] = useState(false)
-  const [leftWidth, setLeftWidth] = useState(30)
+  const [leftWidth, setLeftWidth] = useState(40)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const startResizing = useCallback((e: React.MouseEvent) => {

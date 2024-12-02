@@ -23,6 +23,7 @@ import {
 } from '@/util/mapbox.util'
 import { GeolocusGrid, GeolocusObject, Position2 } from '@geolocus/core'
 import { toWgs84 } from '@turf/projection'
+import { RoleInfo } from './RoleInfo'
 
 const roles = [{ label: '测试用户', value: 'default' }]
 const geometryTypes = [
@@ -52,7 +53,9 @@ export const Chat: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<string>(roles[0].value)
   const [geometryType, setGeometryType] = useState<string>('point')
   const [isInput, setIsInput] = useState<boolean>(true) // inputBox 是否可以输入
-  const [showJsonText, setShowJsonText] = useState(false) // JsonText 组件是否
+  const [showContentType, setShowContentType] = useState<
+    'none' | 'prompt' | 'json' | 'computation'
+  >('none') // 显示 message 对应内容组件
   const [selectedMessageIndex, setSelectedMessageIndex] = useState<number>(-1) // 当前选中的消息的索引
 
   // Initialize with system welcome message
@@ -77,7 +80,6 @@ export const Chat: React.FC = () => {
     const geolocusContext = initContext()
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const res = computePointTest(geolocusContext, jsonText)!
-    console.log(res)
     const region = res.region as GeolocusObject
     const pdfGrid = res.regionPdfGrid as GeolocusGrid
     const result = res.result as GeolocusObject
@@ -317,19 +319,26 @@ export const Chat: React.FC = () => {
           if (!chatMessageList[index].isDone) return
           setSelectedMessageIndex(index)
           if (type === 'json') {
-            setShowJsonText(true)
+            setShowContentType('json')
           } else if (type === 'computation') {
-            //
+            setShowContentType('computation')
+          } else if (type === 'prompt') {
+            setShowContentType('prompt')
           }
         }}
       />
       <InputBox onSubmit={handleSubmit} isInput={isInput} />
-      {showJsonText && (
+      {showContentType === 'json' && (
         <div className="absolute inset-0 bg-white">
           <JsonText
             messageIndex={Math.floor(selectedMessageIndex / 3)}
-            onClose={() => setShowJsonText(false)}
+            onClose={() => setShowContentType('none')}
           />
+        </div>
+      )}
+      {showContentType === 'prompt' && (
+        <div className="absolute inset-0 bg-white">
+          <RoleInfo onClose={() => setShowContentType('none')} />
         </div>
       )}
     </div>

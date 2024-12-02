@@ -1,9 +1,9 @@
 import React from 'react'
-import { Button, Input } from 'antd'
+import { Button } from 'antd'
 import { DeleteOutlined, SaveOutlined, CheckOutlined } from '@ant-design/icons'
 import { useMessageStore } from '@/store'
-
-const { TextArea } = Input
+import CodeMirror from '@uiw/react-codemirror'
+import { json } from '@codemirror/lang-json'
 
 interface JsonTextProps {
   messageIndex: number
@@ -53,10 +53,15 @@ export const JsonText: React.FC<JsonTextProps> = ({
 
       {/* Text Area */}
       <div className="flex-1 p-4">
-        <TextArea
-          value={textValue}
-          onChange={(e) => setTextValue(e.target.value)}
-          className="h-full border"
+        <CodeMirror
+          //   height="310px"
+          //   width="380px"
+          className="h-full border *:h-full"
+          value={textValue || ''}
+          extensions={[json()]}
+          onChange={(val) => {
+            setTextValue(val)
+          }}
         />
       </div>
 

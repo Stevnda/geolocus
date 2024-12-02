@@ -18,7 +18,7 @@ export const createTestContext = () => {
   })
 
   context.addRole({
-    name: 'test',
+    name: 'default',
     directionDelta: 90,
     distanceDelta: 0.2,
     orientation: 0,
