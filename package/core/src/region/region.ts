@@ -35,7 +35,6 @@ import {
   Grid,
   MAGIC_NUMBER,
   MathUtil,
-  Vector2,
 } from '@/util'
 import { AStar, Graph } from './aStart'
 
@@ -139,26 +138,30 @@ export class GeoTripleHandler {
     const objectType = originGeometry.getType()
 
     // 取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
+    let distance = GEO_MAX_VALUE
+    if (relation.distance != null) {
+      distance = Distance.normalize(
+        relation.distance as EuclideanDistance | EuclideanDistanceRange,
+      ).mean
+    }
     const N = role.getSemanticDistanceMap().N
     const bbox = originGeometry.getBBox()
     const dx = bbox[2] - bbox[0]
     const dy = bbox[3] - bbox[1]
-    const distance = Math.max(
-      (N[0] + N[1]) / 2,
-      Math.sqrt(dx * dx + dy * dy) / 40,
-    )
+    const bufferDistance =
+      distance || Math.min((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
 
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {
       geometry = <GeolocusGeometry>(
-        Topology.bufferOfDistance(originGeometry, distance)
+        Topology.bufferOfDistance(originGeometry, bufferDistance)
       )
     } else {
       const range = relation.range
       const outside = <GeolocusGeometry>(
-        Topology.bufferOfDistance(originGeometry, distance)
+        Topology.bufferOfDistance(originGeometry, bufferDistance)
       )
-      const inside = Topology.bufferOfDistance(originGeometry, -distance)
+      const inside = Topology.bufferOfDistance(originGeometry, -bufferDistance)
       if (inside === null) {
         geometry = {
           both: outside,
@@ -202,15 +205,19 @@ export class GeoTripleHandler {
     const originGeometry = origin.getGeometry()
 
     // 取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
+    let distance = GEO_MAX_VALUE
+    if (relation.distance != null) {
+      distance = Distance.normalize(
+        relation.distance as EuclideanDistance | EuclideanDistanceRange,
+      ).mean
+    }
     const N = role.getSemanticDistanceMap().N
     const bbox = originGeometry.getBBox()
     const dx = bbox[2] - bbox[0]
     const dy = bbox[3] - bbox[1]
-    const distance = Math.max(
-      (N[0] + N[1]) / 2,
-      Math.sqrt(dx * dx + dy * dy) / 40,
-    )
-    relation.distance = distance
+    const bufferDistance =
+      distance || Math.min((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
+    relation.distance = bufferDistance
     const region = this.distanceHandler(origin, relation, role)
 
     return this.containHandler(region, relation, role)
@@ -257,7 +264,9 @@ export class GeoTripleHandler {
     )
 
     // 相离关系直接返回 origin
-    if (relation.topology === 'disjoint') return origin
+    if (!(relation.topology === 'contain' || relation.topology === 'within')) {
+      return origin
+    }
 
     let distanceRegion: GeolocusObject
     const geometry = origin.getGeometry()
@@ -412,6 +421,7 @@ export class Region {
       currentResult.geoTripleResultList = geoTripleResultList
 
       // compute the region of result, the intersection of all region
+      // NOTE intersection 为 multi 的情况
       let resultRegion = context.getRegionRange().getGeometry()
       for (const geoTripleResult of geoTripleResultList) {
         const tempRegion = Topology.intersection(
@@ -459,22 +469,19 @@ export class Region {
     result: RegionResult,
     context: GeolocusContext,
   ) {
+    const resultRegion = <GeolocusObject>result.region
     const gridSum = context.getGridSum()
-    const mask = computeGeolocusObjectMaskGrid(
-      <GeolocusObject>result?.region,
-      gridSum,
-    )
+    const mask = computeGeolocusObjectMaskGrid(resultRegion, gridSum)
     const resultGrid: GeolocusGrid = Grid.createGridWithValue(
       mask.length,
       mask[0].length,
       1,
     )
-    const region = <GeolocusObject>result.region
-    const bbox = region.getGeometry().getBBox()
+    const bbox = resultRegion.getGeometry().getBBox()
 
     for (const geoTripleResult of result.geoTripleResultList) {
       geoTripleResult.pdfGrid = this.computePdfGrid(
-        region,
+        <GeolocusObject>geoTripleResult.region,
         <PDFInput>geoTripleResult.pdfInput,
         context,
       )
@@ -531,8 +538,8 @@ export class Region {
       Math.ceil(targetDy / gridSize),
       Math.ceil(targetDx / gridSize),
       (row, col) => {
-        const x = originXStart + (col + 0.5) * gridSize
-        const y = originYStart + (row + 0.5) * gridSize
+        const x = targetXStart + (col + 0.5) * gridSize
+        const y = targetYStart + (row + 0.5) * gridSize
         const transformX = Math.floor(
           ((x - originXStart) / originDx) * (gridCol - 1),
         )
@@ -683,18 +690,18 @@ export class Region {
     const distanceOfAfterPoint =
       Distance.distance(pointOfAfterPoint, curPoint) +
       Distance.distance(pointOfAfterPoint, afterPoint)
-    let coord1 =
+    const coord1 =
       distanceOfCurPoint < distanceOfAfterPoint
         ? coordOfCurPoint
         : coordOfAfterPoint
     // 如果选择 coordOfAfterPoint, 判断是否会绕路
-    const [afterOfAfter] = Distance.nearestPoints(
-      afterRegion,
-      pointOfAfterPoint,
-    )
-    const v1 = Vector2.sub(coordOfAfterPoint, <Position2>geoTripleResult.coord)
-    const v2 = Vector2.sub(afterOfAfter, coordOfAfterPoint)
-    if (Vector2.dot(v1, v2) < 0) coord1 = coordOfCurPoint
+    // const [afterOfAfter] = Distance.nearestPoints(
+    //   afterRegion,
+    //   pointOfAfterPoint,
+    // )
+    // const v1 = Vector2.sub(coordOfAfterPoint, <Position2>geoTripleResult.coord)
+    // const v2 = Vector2.sub(afterOfAfter, coordOfAfterPoint)
+    // if (Vector2.dot(v1, v2) < 0) coord1 = coordOfCurPoint
 
     const bbox = geoTripleResult.region?.getGeometry().getBBox() as GeolocusBBox
     const xStart = bbox[0]
@@ -1036,6 +1043,13 @@ export class Region {
     const gridSize = dx / Math.sqrt(gridSum / ratio)
 
     // 记录概率值大于 0.95 的坐标, 取平均值求得中心点, 寻找最近中心点最近的坐标
+    // 记录概率值大于 0.8 且距离中心点最近的坐标
+    const center: Position2 = [
+      Math.floor((bbox[0] + bbox[2]) / 2),
+      Math.floor((bbox[1] + bbox[3]) / 2),
+    ]
+    let minCoord: Position2 = [0, 0]
+    let minDistance = GEO_MAX_VALUE
     const maxCoordList: [number, number, number, Position2[]] = [0, 0, 0, []]
     Grid.forEach(grid, (value, row, col) => {
       const x = xStart + (col + 0.5) * gridSize
@@ -1047,7 +1061,17 @@ export class Region {
         maxCoordList[2]++
         maxCoordList[3].push([x, y])
       }
+
+      const curDistance = Math.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2)
+      if (
+        Compare.LE(curDistance, minDistance) &&
+        Compare.GE(grid[row][col], 0.67)
+      ) {
+        minDistance = curDistance
+        minCoord = [x, y]
+      }
     })
+
     const maxCoordCenter: Position2 = [
       Math.floor(maxCoordList[0] / maxCoordList[2]),
       Math.floor(maxCoordList[1] / maxCoordList[2]),
@@ -1068,6 +1092,18 @@ export class Region {
       return minCoord
     })()
 
-    return { coord: maxCoord }
+    // 计算最大值坐标和最小距离坐标作为对角线构成的矩形的面积
+    // 如果构成矩形面积小于等于外接矩形面积的 1/5 (凭感觉的二八法则的魔法数字), 则取最大值坐标, 否则取最小距离坐标
+    let coord: Position2
+    if (
+      Math.abs((maxCoord[0] - minCoord[0]) * (maxCoord[1] - minCoord[1])) <=
+      (dx * dy) / 5
+    ) {
+      coord = minCoord
+    } else {
+      coord = minCoord
+    }
+
+    return { coord }
   }
 }
