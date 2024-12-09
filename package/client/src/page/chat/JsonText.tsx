@@ -47,15 +47,13 @@ export const JsonText: React.FC<JsonTextProps> = ({
   return (
     <div className="flex h-full flex-col bg-white">
       {/* Top Bar */}
-      <div className="flex items-center border-b border-slate-200">
-        <div className="p-2 px-4">结构化文本</div>
+      <div className="flex items-center border-b border-slate-300">
+        <div className="p-4">结构化文本</div>
       </div>
 
       {/* Text Area */}
-      <div className="flex-1 p-4">
+      <div className="flex-1 overflow-auto p-4">
         <CodeMirror
-          //   height="310px"
-          //   width="380px"
           className="h-full border *:h-full"
           value={textValue || ''}
           extensions={[json()]}
@@ -67,7 +65,7 @@ export const JsonText: React.FC<JsonTextProps> = ({
 
       {/* Bottom Bar */}
       <div
-        className="flex justify-end space-x-4 border-t border-slate-200 px-4
+        className="flex justify-end space-x-4 border-t border-slate-300 px-4
           py-2"
       >
         <Button

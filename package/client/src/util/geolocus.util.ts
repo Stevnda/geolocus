@@ -2,111 +2,11 @@
 import { Geolocus, geolocus, UserGeolocusTriple } from '@geolocus/core'
 import { getPlaceDataByName, nominatim } from './place.plugin'
 
-export const temp = [
-  {
-    role: 'default',
-    origin: {
-      name: '吉隆坡机场',
-    },
-    target: 'taiwan',
-  }, // 0
-  {
-    role: 'default',
-    origin: {
-      name: '马六甲海峡',
-    },
-    relation: {
-      direction: 'E',
-      topology: 'intersect',
-    },
-    target: 'taiwan',
-  }, // 1
-  {
-    role: 'default',
-    origin: {
-      name: '卡里马塔海峡',
-    },
-    target: 'taiwan',
-  }, // 2
-  {
-    role: 'default',
-    origin: {
-      name: '九段线',
-    },
-    relation: {
-      direction: 'S',
-      topology: 'disjoint',
-      distance: 400000,
-    },
-    target: 'taiwan',
-  }, // 3
-  {
-    role: 'default',
-    origin: {
-      name: '加里曼尼岛',
-    },
-    target: 'taiwan',
-  }, // 4
-  {
-    role: 'default',
-    origin: {
-      name: '苏拉威西海',
-    },
-    relation: {
-      direction: 'SE',
-      topology: 'contain',
-    },
-    target: 'taiwan',
-  }, // 5
-  {
-    role: 'default',
-    origin: {
-      name: '菲律宾',
-    },
-    relation: {
-      direction: 'E',
-      topology: 'disjoint',
-      distance: 100000,
-    },
-    target: 'taiwan',
-  }, // 6
-  {
-    role: 'default',
-    origin: {
-      name: '巴士海峡',
-    },
-    relation: {
-      direction: 'W',
-      topology: 'disjoint',
-      distance: 150000,
-    },
-    target: 'taiwan',
-  }, // 7
-  {
-    role: 'default',
-    origin: {
-      name: '台湾',
-    },
-    relation: {
-      direction: 'E',
-      topology: 'intersect',
-    },
-    target: 'taiwan',
-  }, // 8
-  {
-    role: 'default',
-    origin: {
-      name: '松山机场',
-    },
-    target: 'taiwan',
-  }, // 9
-]
-
 export const initContext = () => {
   const geolocusContext = geolocus.createContext({
     maxDistance: 1000000,
-    name: 'test',
-    gridSum: 128 * 128,
+    name: '测试上下文',
+    gridSum: 256 * 256,
     region: [
       [-99999999, -99999999],
       [99999999, -99999999],
@@ -124,7 +24,7 @@ export const initContext = () => {
     orientation: 0,
     semanticDistanceMap: {
       VN: [0, 10000],
-      N: [10000, 30000],
+      N: [100000, 300000],
       M: [30000, 100000],
       F: [100000, 300000],
       VF: [300000, 2000000],

@@ -54,8 +54,8 @@ export const RoleInfo: React.FC<RoleInfoProps> = ({ onClose }) => {
   return (
     <div className="flex h-full flex-col ">
       {/* Top Bar */}
-      <div className="flex items-center border-b border-slate-200">
-        <div className="p-2 px-4">描述角色详情</div>
+      <div className="flex items-center border-b border-slate-300">
+        <div className="p-4">描述角色详情</div>
       </div>
 
       {/* Content Form */}
@@ -63,7 +63,7 @@ export const RoleInfo: React.FC<RoleInfoProps> = ({ onClose }) => {
         <Form
           form={form}
           layout="vertical"
-          className="mx-auto max-w-[90%] rounded-lg border border-slate-200
+          className="mx-auto max-w-[90%] rounded-lg border border-slate-300
             bg-white p-6 shadow-xl shadow-slate-300"
         >
           <Form.Item
@@ -158,7 +158,7 @@ export const RoleInfo: React.FC<RoleInfoProps> = ({ onClose }) => {
 
       {/* Bottom Bar */}
       <div
-        className="flex justify-end space-x-4 border-t border-slate-200 px-4
+        className="flex justify-end space-x-4 border-t border-slate-300 px-4
           py-2"
       >
         <Button

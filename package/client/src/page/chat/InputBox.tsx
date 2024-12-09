@@ -28,7 +28,7 @@ export const InputBox: React.FC<InputBoxProps> = ({ onSubmit, isInput }) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="border-t p-4">
+    <form onSubmit={handleSubmit} className="border-t border-slate-300 p-4">
       <div className="flex items-end space-x-2">
         <TextArea
           value={input}

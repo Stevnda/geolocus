@@ -10,27 +10,27 @@ export interface ChatMessage {
   avatar: string
 }
 
-interface jsonMessage {
+interface JsonMessage {
   content: string
   userName: string
 }
 
-interface messageStore {
+interface MessageStore {
   chatMessageList: ChatMessage[]
-  jsonMessageList: jsonMessage[]
+  jsonMessageList: JsonMessage[]
   setChatMessageList: (value: ChatMessage[]) => void
   addChatMessage: (value: ChatMessage) => void
   updateChatMessageList: (index: number, value: ChatMessage) => void
   getChatMessageList: () => ChatMessage[]
   clearChatMessageList: () => void
-  setJsonMessageList: (value: jsonMessage[]) => void
-  addJsonMessage: (value: jsonMessage) => void
-  updateJsonMessageList: (index: number, value: jsonMessage) => void
-  getJsonMessageList: () => jsonMessage[]
+  setJsonMessageList: (value: JsonMessage[]) => void
+  addJsonMessage: (value: JsonMessage) => void
+  updateJsonMessageList: (index: number, value: JsonMessage) => void
+  getJsonMessageList: () => JsonMessage[]
   clearJsonMessageList: () => void
 }
 
-export const useMessageStore = create<messageStore>((set, get) => ({
+export const useMessageStore = create<MessageStore>((set, get) => ({
   chatMessageList: [],
   jsonMessageList: [],
   setChatMessageList: (value: ChatMessage[]) => {
@@ -40,14 +40,14 @@ export const useMessageStore = create<messageStore>((set, get) => ({
   },
   addChatMessage: (value: ChatMessage) => {
     set(
-      produce((draft: messageStore) => {
+      produce((draft: MessageStore) => {
         draft.chatMessageList.push(value)
       }),
     )
   },
   updateChatMessageList: (index: number, value: ChatMessage) => {
     set(
-      produce((draft: messageStore) => {
+      produce((draft: MessageStore) => {
         draft.chatMessageList[index] = value
       }),
     )
@@ -60,21 +60,21 @@ export const useMessageStore = create<messageStore>((set, get) => ({
       chatMessageList: [],
     })
   },
-  setJsonMessageList: (value: jsonMessage[]) => {
+  setJsonMessageList: (value: JsonMessage[]) => {
     set({
       jsonMessageList: value,
     })
   },
-  addJsonMessage: (value: jsonMessage) => {
+  addJsonMessage: (value: JsonMessage) => {
     set(
-      produce((draft: messageStore) => {
+      produce((draft: MessageStore) => {
         draft.jsonMessageList.push(value)
       }),
     )
   },
-  updateJsonMessageList: (index: number, value: jsonMessage) => {
+  updateJsonMessageList: (index: number, value: JsonMessage) => {
     set(
-      produce((draft: messageStore) => {
+      produce((draft: MessageStore) => {
         draft.jsonMessageList[index] = value
       }),
     )
