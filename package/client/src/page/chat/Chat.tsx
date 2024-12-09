@@ -24,6 +24,8 @@ import {
 import { GeolocusGrid, GeolocusObject, Position2 } from '@geolocus/core'
 import { toWgs84 } from '@turf/projection'
 import { RoleInfo } from './RoleInfo'
+import { RegionResult } from './RegionResult'
+import { useResultStore } from '@/store/resultStore'
 
 const roles = [{ label: '测试用户', value: 'default' }]
 const geometryTypes = [
@@ -34,7 +36,6 @@ const geometryTypes = [
 const systemStates = ['正在解析...', '解析完成', '正在计算...', '计算完成']
 
 export const Chat: React.FC = () => {
-  // userMessage
   const chatMessageList = useMessageStore((state) => state.chatMessageList)
   const getMessageList = useMessageStore((state) => state.getChatMessageList)
   const addChatMessage = useMessageStore((state) => state.addChatMessage)
@@ -44,10 +45,9 @@ export const Chat: React.FC = () => {
   const clearChatMessageList = useMessageStore(
     (state) => state.clearChatMessageList,
   )
-  // jsonMessage
   const addJsonMessage = useMessageStore((state) => state.addJsonMessage)
-  // map
   const map = useMapStore((state) => state.map)
+  const addResult = useResultStore((state) => state.addResult)
 
   // State
   const [selectedRole, setSelectedRole] = useState<string>(roles[0].value)
@@ -80,15 +80,14 @@ export const Chat: React.FC = () => {
     const geolocusContext = initContext()
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const res = computePointTest(geolocusContext, jsonText)!
+    addResult(geolocusContext, res)
     const region = res.region as GeolocusObject
     const pdfGrid = res.regionPdfGrid as GeolocusGrid
     const result = res.result as GeolocusObject
     const coord = result.getGeometry().getCenter() as Position2
 
-    const polygon = region
-    const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
-    let id = (Date.now() + Math.random()).toString()
-    addGeoJSONToMap(map, id, polygon84, 'fill', {
+    const polygon84 = toWgs84(geolocusContext.toGeoJSON(region))
+    addGeoJSONToMap(map, region.getUUID() + 'region', polygon84, 'fill', {
       'fill-outline-color': '#15803d',
       'fill-color': '#4ade80',
       'fill-opacity': 0.5,
@@ -100,12 +99,11 @@ export const Chat: React.FC = () => {
     ).concat(
       convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
     )
-    id = (Date.now() + Math.random()).toString()
-    addImageToMap(map, id, pngBlob, bbox)
+    addImageToMap(map, region.getUUID() + 'regionPdfGird', pngBlob, bbox)
 
     const coord84 = convertToWgs84(coord)
     const point = generatePointByCoord(coord84)
-    addGeoJSONToMap(map, 'kxh-point', point, 'circle', {
+    addGeoJSONToMap(map, result.getUUID() + 'result', point, 'circle', {
       'circle-color': '#dc2626',
       'circle-radius': 6,
     })
@@ -114,7 +112,8 @@ export const Chat: React.FC = () => {
   const lineTest = (jsonText: string) => {
     if (!map) return
     const geolocusContext = initContext()
-    const res = computeLineTest(geolocusContext, jsonText)
+    const res = computeLineTest(geolocusContext, jsonText)!
+    addResult(geolocusContext, res)
     const regionList = res!.geoTripleResultList.map((res) => [
       res.region,
       res.coord,
@@ -123,43 +122,42 @@ export const Chat: React.FC = () => {
       const [polygon, coord] = region as [GeolocusObject, Position2]
       const point84 = toWgs84(generatePointByCoord(coord))
       const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
-      const id = (Date.now() + Math.random()).toString()
-      addGeoJSONToMap(map, id + 'point', point84, 'circle', {
+      addGeoJSONToMap(map, polygon.getUUID() + 'coord', point84, 'circle', {
         'circle-color': '#403877',
       })
-      addGeoJSONToMap(map, id, polygon84, 'fill', {
+      addGeoJSONToMap(map, polygon.getUUID() + 'region', polygon84, 'fill', {
         'fill-outline-color': '#15803d',
         'fill-color': '#4ade80',
         'fill-opacity': 0.5,
       })
     })
 
-    const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
-    resultGridList.forEach((item, index) => {
-      const region = regionList[index][0] as GeolocusObject
-      if (!item || !region) return
-      const pngBlob = generateBlobPng(item.grid!)
-      const bbox = convertToWgs84(
-        region.getGeometry().getBBox().slice(0, 2) as Position2,
-      ).concat(
-        convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
-      )
-      const id = (Date.now() + Math.random()).toString()
-      addImageToMap(map, id, pngBlob, bbox)
-    })
+    // const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
+    // resultGridList.forEach((item, index) => {
+    //   const region = regionList[index][0] as GeolocusObject
+    //   if (!item || !region) return
+    //   const pngBlob = generateBlobPng(item.grid!)
+    //   const bbox = convertToWgs84(
+    //     region.getGeometry().getBBox().slice(0, 2) as Position2,
+    //   ).concat(
+    //     convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+    //   )
+    //   addImageToMap(map, region.getUUID() + 'pdfGird', pngBlob, bbox)
+    // })
 
-    const line = res?.result as GeolocusObject
-    const line84 = toWgs84(geolocusContext.toGeoJSON(line))
-    addGeoJSONToMap(map, line.getName() as string, line84, 'line', {
-      'line-color': '#dc2626',
-      'line-width': 2,
-    })
+    // const line = res?.result as GeolocusObject
+    // const line84 = toWgs84(geolocusContext.toGeoJSON(line))
+    // addGeoJSONToMap(map, line.getUUID() + 'result', line84, 'line', {
+    //   'line-color': '#dc2626',
+    //   'line-width': 2,
+    // })
   }
 
   const polygonTest = (jsonText: string) => {
     if (!map) return
     const geolocusContext = initContext()
-    const res = computePolygonTest(geolocusContext, jsonText)
+    const res = computePolygonTest(geolocusContext, jsonText)!
+    addResult(geolocusContext, res)
     const regionList = res!.geoTripleResultList.map((res) => [
       res.region,
       res.coord,
@@ -168,11 +166,10 @@ export const Chat: React.FC = () => {
       const [polygon, coord] = region as [GeolocusObject, Position2]
       const point84 = toWgs84(generatePointByCoord(coord))
       const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
-      const id = (Date.now() + Math.random()).toString()
-      addGeoJSONToMap(map, id + 'point', point84, 'circle', {
+      addGeoJSONToMap(map, polygon.getUUID() + 'coord', point84, 'circle', {
         'circle-color': '#403877',
       })
-      addGeoJSONToMap(map, id, polygon84, 'fill', {
+      addGeoJSONToMap(map, polygon.getUUID() + 'region', polygon84, 'fill', {
         'fill-outline-color': '#15803d',
         'fill-color': '#4ade80',
         'fill-opacity': 0.5,
@@ -189,13 +186,12 @@ export const Chat: React.FC = () => {
       ).concat(
         convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
       )
-      const id = (Date.now() + Math.random()).toString()
-      addImageToMap(map, id, pngBlob, bbox)
+      addImageToMap(map, region.getUUID() + 'pdfGird', pngBlob, bbox)
     })
 
     const polygon = res?.result as GeolocusObject
     const polygon84 = toWgs84(geolocusContext.toGeoJSON(polygon))
-    addGeoJSONToMap(map, polygon.getName() as string, polygon84, 'fill', {
+    addGeoJSONToMap(map, polygon.getUUID() + 'result', polygon84, 'fill', {
       'fill-outline-color': '#15803d',
       'fill-color': 'rgba(255, 0, 0, 0.3)',
     })
@@ -263,6 +259,7 @@ export const Chat: React.FC = () => {
       avatar: systemAvatar,
     }
     addChatMessage(systemMessage)
+    await new Promise((resolve) => setTimeout(resolve, 1000))
     if (geometryType === 'point') {
       pointTest(jsonText)
     } else if (geometryType === 'line') {
@@ -286,7 +283,7 @@ export const Chat: React.FC = () => {
 
   return (
     <div className="relative flex h-full flex-col">
-      <div className="border-b border-slate-200 p-2 px-4">
+      <div className="border-b border-slate-300 p-3 px-4">
         <div className="mb-[-8px] flex flex-wrap *:mb-2">
           <div className="mr-10 flex items-center">
             <div className="pr-2">描述角色:</div>
@@ -328,6 +325,11 @@ export const Chat: React.FC = () => {
         }}
       />
       <InputBox onSubmit={handleSubmit} isInput={isInput} />
+      {showContentType === 'prompt' && (
+        <div className="absolute inset-0 bg-white">
+          <RoleInfo onClose={() => setShowContentType('none')} />
+        </div>
+      )}
       {showContentType === 'json' && (
         <div className="absolute inset-0 bg-white">
           <JsonText
@@ -336,9 +338,12 @@ export const Chat: React.FC = () => {
           />
         </div>
       )}
-      {showContentType === 'prompt' && (
+      {showContentType === 'computation' && (
         <div className="absolute inset-0 bg-white">
-          <RoleInfo onClose={() => setShowContentType('none')} />
+          <RegionResult
+            messageIndex={Math.floor((selectedMessageIndex - 1) / 3)}
+            onClose={() => setShowContentType('none')}
+          />
         </div>
       )}
     </div>
