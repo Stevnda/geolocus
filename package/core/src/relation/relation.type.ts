@@ -1,5 +1,10 @@
 import { Role } from '@/context'
 import { GeoLayout } from './layout.type'
+import {
+  UserGeolocusTripleOrigin,
+  UserGeolocusTriple,
+  UserGeoRelation,
+} from '..'
 
 export type RelationMode = 'point' | 'line' | 'polygon'
 
@@ -58,3 +63,10 @@ export interface GeoTriple {
 }
 
 export type SemanticRelation = Omit<GeoRelation, 'weight'>
+
+export interface RelationTriple {
+  role: string
+  originList?: (UserGeolocusTripleOrigin | UserGeolocusTriple)[]
+  relation?: UserGeoRelation
+  target: string
+}

@@ -97,16 +97,20 @@ test('1-n', () => {
   scene.defineRelation(
     [
       {
-        originList: [
+        tupleList: [
           {
-            name: '运动场篮球场',
+            originList: [
+              {
+                name: '运动场篮球场',
+              },
+            ],
+            relation: {
+              direction: 0,
+              distance: 100,
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 0,
-          distance: 100,
-          topology: 'disjoint',
-        },
         role: 'test',
         target: 'a',
       },

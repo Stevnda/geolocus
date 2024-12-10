@@ -9,6 +9,7 @@ import {
   GeoRelation,
   GeoTriple,
   RelationMode,
+  RelationTriple,
   SemanticRelation,
 } from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
@@ -71,52 +72,61 @@ export class RelationAction {
     triple: UserGeolocusTriple,
     context: GeolocusContext,
     mode: RelationMode,
-  ): GeoTriple {
+  ): string {
     const role = context.getRoleByName(triple.role)
     if (!role) throw new Error('role is not existed')
 
-    const targetUUID = this.handleTarget(triple, context)
-    const originUUIDList = (() => {
-      // 处理 line 中无 origin 的情况, 将上一三元组计算区域作为 origin, 后续会处理
-      if (triple.originList == null && mode === 'line') return null
-      else return this.handleOrigin(triple, context, mode)
-    })()
+    const targetUUID = this.handleTarget(triple.target, context)
+    for (const tuple of triple.tupleList) {
+      const tempTriple: RelationTriple = {
+        role: triple.role,
+        originList: tuple.originList,
+        relation: tuple.relation,
+        target: triple.target,
+      }
 
-    // 添加至路由
-    if (originUUIDList != null) {
-      const route = context.getRoute()
-      for (const originUUID of originUUIDList) {
-        route.addEdge(originUUID, targetUUID, 'calculation')
-        const circle = RouteAction.validateRouteValidity(route)
-        if (!circle[0]) {
-          route.removeEdge(originUUID, targetUUID)
-          throw new Error('Route contains a cycle.')
+      const originUUIDList = (() => {
+        // 处理 line 中无 origin 的情况, 将上一三元组计算区域作为 origin, 后续会处理
+        if (tempTriple.originList == null && mode === 'line') return null
+        else return this.handleOrigin(tempTriple, context, mode)
+      })()
+
+      // 添加至路由
+      if (originUUIDList != null) {
+        const route = context.getRoute()
+        for (const originUUID of originUUIDList) {
+          route.addEdge(originUUID, targetUUID, 'calculation')
+          const circle = RouteAction.validateRouteValidity(route)
+          if (!circle[0]) {
+            route.removeEdge(originUUID, targetUUID)
+            throw new Error('Route contains a cycle.')
+          }
         }
+      }
+
+      // 添加至三元组映射
+      const tripleTransform: GeoTriple = {
+        uuid: generateUUID(),
+        role,
+        originUUIDList,
+        relation: this.transform(tempTriple.relation || {}, role, mode),
+        targetUUID,
+      }
+      const relation = context.getRelation()
+      const relationSet = relation.getTripleListMap().get(targetUUID)
+      if (!relationSet) {
+        const tripleListMap = relation.getTripleListMap()
+        tripleListMap.set(targetUUID, new Set([tripleTransform]))
+      } else {
+        relationSet.add(tripleTransform)
       }
     }
 
-    // 添加至三元组映射
-    const tripleTransform: GeoTriple = {
-      uuid: generateUUID(),
-      role,
-      originUUIDList,
-      relation: this.transform(triple.relation || {}, role, mode),
-      targetUUID,
-    }
-    const relation = context.getRelation()
-    const relationSet = relation.getTripleListMap().get(targetUUID)
-    if (!relationSet) {
-      const tripleListMap = relation.getTripleListMap()
-      tripleListMap.set(targetUUID, new Set([tripleTransform]))
-    } else {
-      relationSet.add(tripleTransform)
-    }
-
-    return tripleTransform
+    return targetUUID
   }
 
   private static handleOrigin(
-    triple: UserGeolocusTriple,
+    triple: RelationTriple,
     context: GeolocusContext,
     mode: RelationMode,
   ): string[] {
@@ -125,12 +135,8 @@ export class RelationAction {
     for (let origin of triple.originList!) {
       if ('role' in origin) {
         const triple = <UserGeolocusTriple>origin
-        const tripleTransform = RelationAction.defineTriple(
-          triple,
-          context,
-          mode,
-        )
-        uuidList.push(tripleTransform.targetUUID)
+        const targetUUID = RelationAction.defineTriple(triple, context, mode)
+        uuidList.push(targetUUID)
       } else {
         origin = <UserGeolocusTripleOrigin>origin
         let { name, type, coord } = origin
@@ -173,21 +179,23 @@ export class RelationAction {
   }
 
   private static handleTarget(
-    triple: UserGeolocusTriple,
+    targetName: string,
     context: GeolocusContext,
   ): string {
-    const name = triple.target as string
     const objectMap = context.getObjectMap()
     const pluginList = objectMap.getPlacePluginList()
     const defaultPlugin = pluginList[0]
 
     // NOTE SpatialRef 处理
-    const res = defaultPlugin(name, <SpatialRef>(<unknown>'test'))
+    const res = defaultPlugin(targetName, <SpatialRef>(<unknown>'test'))
     if (res?.object != null) return res.object.getUUID()
 
     const jstGeometry = JTSGeometryFactory.empty('Point')
     const geolocusGeometry = new GeolocusGeometry('Point', jstGeometry)
-    const obj = new GeolocusObject(geolocusGeometry, { name, status: 'fuzzy' })
+    const obj = new GeolocusObject(geolocusGeometry, {
+      name: targetName,
+      status: 'fuzzy',
+    })
 
     const uuid = obj.getUUID()
     ObjectMapAction.addObject(objectMap, obj)

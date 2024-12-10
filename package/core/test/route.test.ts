@@ -12,48 +12,60 @@ test('compute order', () => {
   scene.defineRelation(
     [
       {
-        originList: [
+        tupleList: [
           {
-            name: 'a',
-            type: 'Point',
-            coord: [0, 0],
+            originList: [
+              {
+                name: 'a',
+                type: 'Point',
+                coord: [0, 0],
+              },
+            ],
+            relation: {
+              direction: 0,
+              distance: 100,
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 0,
-          distance: 100,
-          topology: 'disjoint',
-        },
         role: 'test',
         target: 'b',
       },
       {
-        originList: [
+        tupleList: [
           {
-            name: 'd',
-            type: 'Point',
-            coord: [0, 0],
+            originList: [
+              {
+                name: 'd',
+                type: 'Point',
+                coord: [0, 0],
+              },
+            ],
+            relation: {
+              direction: 'E',
+              distance: 100,
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 'E',
-          distance: 100,
-          topology: 'disjoint',
-        },
         role: 'test',
         target: 'b',
       },
       {
-        originList: [
+        tupleList: [
           {
-            name: 'b',
+            originList: [
+              {
+                name: 'b',
+              },
+            ],
+            relation: {
+              direction: 90,
+              distance: 100,
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 90,
-          distance: 100,
-          topology: 'disjoint',
-        },
         role: 'test',
         target: 'c',
       },
@@ -64,6 +76,7 @@ test('compute order', () => {
   scene.computeFuzzyPointObject('c')
   const res = scene.getComputeResult('c')
   const coord = <Position2>res?.result?.getGeometry().getCenter()
+  console.log(coord)
   expect(
     coord[0] <= 169.5 &&
       coord[0] >= 169.4 &&
@@ -77,62 +90,78 @@ test('circle relation', () => {
     scene.defineRelation(
       [
         {
-          originList: [
+          tupleList: [
             {
-              name: 'a',
-              type: 'Point',
-              coord: [0, 0],
+              originList: [
+                {
+                  name: 'a',
+                  type: 'Point',
+                  coord: [0, 0],
+                },
+              ],
+              relation: {
+                direction: 0,
+                distance: 100,
+                topology: 'disjoint',
+              },
             },
           ],
-          relation: {
-            direction: 0,
-            distance: 100,
-            topology: 'disjoint',
-          },
           role: 'test',
           target: 'b',
         },
         {
-          originList: [
+          tupleList: [
             {
-              name: 'd',
-              type: 'Point',
-              coord: [0, 0],
+              originList: [
+                {
+                  name: 'd',
+                  type: 'Point',
+                  coord: [0, 0],
+                },
+              ],
+              relation: {
+                direction: 'E',
+                distance: 100,
+                topology: 'disjoint',
+              },
             },
           ],
-          relation: {
-            direction: 'E',
-            distance: 100,
-            topology: 'disjoint',
-          },
           role: 'test',
           target: 'b',
         },
         {
-          originList: [
+          tupleList: [
             {
-              name: 'c',
+              originList: [
+                {
+                  name: 'c',
+                },
+              ],
+              relation: {
+                direction: 90,
+                distance: 100,
+                topology: 'disjoint',
+              },
             },
           ],
-          relation: {
-            direction: 90,
-            distance: 100,
-            topology: 'disjoint',
-          },
           role: 'test',
           target: 'd',
         },
         {
-          originList: [
+          tupleList: [
             {
-              name: 'b',
+              originList: [
+                {
+                  name: 'b',
+                },
+              ],
+              relation: {
+                direction: 90,
+                distance: 100,
+                topology: 'disjoint',
+              },
             },
           ],
-          relation: {
-            direction: 90,
-            distance: 100,
-            topology: 'disjoint',
-          },
           role: 'test',
           target: 'c',
         },

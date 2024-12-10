@@ -31,143 +31,195 @@ test('compute line', () => {
     [
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '吉隆坡机场',
+            originList: [
+              {
+                name: '吉隆坡机场',
+              },
+            ],
           },
         ],
         target: 'taiwan',
       }, // 0
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '马六甲海峡',
+            originList: [
+              {
+                name: '马六甲海峡',
+              },
+            ],
+            relation: {
+              direction: 'E',
+              topology: 'intersect',
+            },
           },
         ],
-        relation: {
-          direction: 'E',
-          topology: 'intersect',
-        },
         target: 'taiwan',
       }, // 1
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '卡里马塔海峡',
+            originList: [
+              {
+                name: '卡里马塔海峡',
+              },
+            ],
           },
         ],
         target: 'taiwan',
       }, // 2
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '九段线',
+            originList: [
+              {
+                name: '九段线',
+              },
+            ],
+            relation: {
+              direction: 'S',
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 'S',
-          topology: 'disjoint',
-        },
         target: 'taiwan',
       }, // 3
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '加里曼尼岛',
+            originList: [
+              {
+                name: '加里曼尼岛',
+              },
+            ],
           },
         ],
         target: 'taiwan',
       }, // 4
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '苏拉威西海',
+            originList: [
+              {
+                name: '苏拉威西海',
+              },
+            ],
+            relation: {
+              direction: 'SE',
+              topology: 'contain',
+            },
           },
         ],
-        relation: {
-          direction: 'SE',
-          topology: 'contain',
-        },
         target: 'taiwan',
       }, // 5
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '菲律宾',
+            originList: [
+              {
+                name: '菲律宾',
+              },
+            ],
+            relation: {
+              direction: 'E',
+              topology: 'along',
+              distance: 100000,
+            },
           },
         ],
-        relation: {
-          direction: 'E',
-          topology: 'along',
-          distance: 100000,
-        },
         target: 'taiwan',
       }, // 6
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '巴士海峡',
+            originList: [
+              {
+                name: '巴士海峡',
+              },
+            ],
+            relation: {
+              direction: 270,
+              topology: 'disjoint',
+              distance: 150000,
+            },
           },
         ],
-        relation: {
-          direction: 270,
-          topology: 'disjoint',
-          distance: 150000,
-        },
         target: 'taiwan',
       }, // 7
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '台湾',
+            originList: [
+              {
+                name: '台湾',
+              },
+            ],
+            relation: {
+              direction: 'E',
+              topology: 'intersect',
+            },
           },
         ],
-        relation: {
-          direction: 'E',
-          topology: 'intersect',
-        },
         target: 'taiwan',
       }, // 8
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '松山机场',
+            originList: [
+              {
+                name: '松山机场',
+              },
+            ],
           },
         ],
         target: 'taiwan',
       }, // 9
       {
         role: 'default',
-        relation: {
-          topology: 'disjoint',
-          direction: 'N',
-          distance: 800000,
-        },
+        tupleList: [
+          {
+            relation: {
+              topology: 'disjoint',
+              direction: 'N',
+              distance: 800000,
+            },
+          },
+        ],
         target: 'taiwan',
       }, // 10
       {
         role: 'default',
-        relation: {
-          topology: 'disjoint',
-          direction: 'NE',
-          distance: 300000,
-        },
+        tupleList: [
+          {
+            relation: {
+              topology: 'disjoint',
+              direction: 'NE',
+              distance: 300000,
+            },
+          },
+        ],
         target: 'taiwan',
       }, // 11
       {
         role: 'default',
-        originList: [
+        tupleList: [
           {
-            name: '首尔',
+            originList: [
+              {
+                name: '首尔',
+              },
+            ],
           },
         ],
         target: 'taiwan',

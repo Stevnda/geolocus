@@ -12,18 +12,22 @@ test('simple direction and distance', () => {
   scene.defineRelation(
     [
       {
-        originList: [
+        tupleList: [
           {
-            name: 'a',
-            type: 'Point',
-            coord: [0, 0],
+            originList: [
+              {
+                name: 'a',
+                type: 'Point',
+                coord: [0, 0],
+              },
+            ],
+            relation: {
+              direction: 45,
+              distance: 100,
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 45,
-          distance: 100,
-          topology: 'disjoint',
-        },
         role: 'test',
         target: 'b',
       },
@@ -41,32 +45,41 @@ test('two direction and distance, SemanticDirection', () => {
   scene.defineRelation(
     [
       {
-        originList: [
+        tupleList: [
           {
-            name: 'a',
-            type: 'Point',
-            coord: [0, 0],
+            originList: [
+              {
+                name: 'a',
+                type: 'Point',
+                coord: [0, 0],
+              },
+            ],
+            relation: {
+              direction: 0,
+              distance: 100,
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 0,
-          distance: 100,
-          topology: 'disjoint',
-        },
         role: 'test',
         target: 'b',
       },
       {
-        originList: [
+        tupleList: [
           {
-            name: 'a',
+            originList: [
+              {
+                name: 'a',
+              },
+            ],
+            relation: {
+              direction: 'E',
+              distance: 100,
+              topology: 'disjoint',
+            },
           },
         ],
-        relation: {
-          direction: 'E',
-          distance: 100,
-          topology: 'disjoint',
-        },
+
         role: 'test',
         target: 'b',
       },
