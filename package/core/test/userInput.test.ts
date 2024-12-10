@@ -12,23 +12,7 @@ test('origin is geoTriple', () => {
   scene.defineRelation(
     [
       {
-        originList: [
-          {
-            name: 'a',
-            type: 'Point',
-            coord: [0, 0],
-          },
-        ],
-        relation: {
-          direction: 0,
-          distance: 100,
-          topology: 'disjoint',
-        },
-        role: 'test',
-        target: 'b',
-      },
-      {
-        originList: [
+        tupleList: [
           {
             originList: [
               {
@@ -38,19 +22,47 @@ test('origin is geoTriple', () => {
               },
             ],
             relation: {
-              direction: 90,
+              direction: 0,
               distance: 100,
               topology: 'disjoint',
             },
-            role: 'test',
-            target: 'c',
           },
         ],
-        relation: {
-          direction: 0,
-          distance: 100,
-          topology: 'disjoint',
-        },
+        role: 'test',
+        target: 'b',
+      },
+      {
+        tupleList: [
+          {
+            originList: [
+              {
+                tupleList: [
+                  {
+                    originList: [
+                      {
+                        name: 'a',
+                        type: 'Point',
+                        coord: [0, 0],
+                      },
+                    ],
+                    relation: {
+                      direction: 90,
+                      distance: 100,
+                      topology: 'disjoint',
+                    },
+                  },
+                ],
+                role: 'test',
+                target: 'c',
+              },
+            ],
+            relation: {
+              direction: 0,
+              distance: 100,
+              topology: 'disjoint',
+            },
+          },
+        ],
         role: 'test',
         target: 'b',
       },
@@ -60,11 +72,11 @@ test('origin is geoTriple', () => {
 
   scene.computeFuzzyPointObject('b')
   const res = scene.getComputeResult('b')
-  const coord = <Position2>res?.result?.getGeometry().getCenter() // 49.72 87.73
+  const coord = <Position2>res?.result?.getGeometry().getCenter() // 50.44 87.73
   expect(
-    coord[0] <= 49.8 &&
-      coord[0] >= 49.6 &&
+    coord[0] <= 50.5 &&
+      coord[0] >= 50.3 &&
       coord[1] <= 87.8 &&
-      coord[1] >= 87.6,
+      coord[1] >= 87.7,
   ).toBeTruthy()
 })

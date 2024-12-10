@@ -26,66 +26,69 @@
 
 ```typescript
 interface UserGeolocusTriple {
-  originList: // 参照物数组
-  // 数组元素可能是一个对象, 也可能是 UserGeolocusTriple
-  (
-    | {
-        name: string // 参照物地名
-        type?:
-          | 'Point'
-          | 'LineString'
-          | 'Polygon'
-          | 'MultiPoint'
-          | 'MultiLineString'
-          | 'MultiPolygon' // 参照物几何类型, 可以省略
-        coord?:
-          | [number, number]
-          | [number, number][]
-          | [number, number][][]
-          | [number, number][][][] // 参照物的经纬度坐标, 若文本中具有坐标, 进行提取, 否则可以省略
-      }
-    | UserGeolocusTriple
-  )[]
-  relation?: {
-    // 拓扑关系, 可忽略
-    // disjoint 代表目标物与参照物相离
-    // contain 代表目标物在参照物内部
-    // within 代表参照物在目标物内部
-    // intersect 代表目标物与参照物相交
-    // along 代表目标物与参照物相接
-    topology?: 'disjoint' | 'contain' | 'within' | 'intersect' | 'along'
-    // 方向关系, 可忽略
-    // 方向关系分为数值方向关系和语义方向关系
-    // 数值方向关系是通过方位角来描述, 0 代表北, 90 代表东, 180 代表南, 270 代表西
-    // 语义方向关系根据东西南北, 前后左右解析为对应英文字母缩写
-    direction?:
-      | 'N'
-      | 'NE'
-      | 'E'
-      | 'SE'
-      | 'S'
-      | 'SW'
-      | 'W'
-      | 'NW'
-      | 'F'
-      | 'FR'
-      | 'R'
-      | 'BR'
-      | 'B'
-      | 'BL'
-      | 'L'
-      | 'FL'
-    // 距离关系, 可忽略
-    // 精确距离使用正整数 + 正整数范围
-    // 语义距离自动转换为以下英文字母缩写, 其含义如下
-    // VN 代表距离很近, N 代表距离近, M 代表距离适中, F 代表距离远, VF 代表距离很远
-    distance?: number | [number, number] | 'VN' | 'N' | 'M' | 'F' | 'VF'
-    // 可忽略
-    // inside 代表目标物在参照物内侧
-    // outside 代表目标物与参照物外侧
-    // both 代表目标物在参照物内侧和外侧
-    // 默认为 both
-    range?: 'inside' | 'outside' | 'both'
+  // 二元组, 里面包括若干个参照物和要素关系
+  tupleList: {
+    originList: // 参照物数组
+    // 数组元素可能是一个对象, 也可能是 UserGeolocusTriple
+    (
+      | {
+          name: string // 参照物地名
+          type?:
+            | 'Point'
+            | 'LineString'
+            | 'Polygon'
+            | 'MultiPoint'
+            | 'MultiLineString'
+            | 'MultiPolygon' // 参照物几何类型, 可以省略
+          coord?:
+            | [number, number]
+            | [number, number][]
+            | [number, number][][]
+            | [number, number][][][] // 参照物的经纬度坐标, 若文本中具有坐标, 进行提取, 否则可以省略
+        }
+      | UserGeolocusTriple
+    )[]
+    relation?: {
+      // 拓扑关系, 可忽略
+      // disjoint 代表目标物与参照物相离
+      // contain 代表目标物在参照物内部
+      // within 代表参照物在目标物内部
+      // intersect 代表目标物与参照物相交
+      // along 代表目标物与参照物相接
+      topology?: 'disjoint' | 'contain' | 'within' | 'intersect' | 'along'
+      // 方向关系, 可忽略
+      // 方向关系分为数值方向关系和语义方向关系
+      // 数值方向关系是通过方位角来描述, 0 代表北, 90 代表东, 180 代表南, 270 代表西
+      // 语义方向关系根据东西南北, 前后左右解析为对应英文字母缩写
+      direction?:
+        | 'N'
+        | 'NE'
+        | 'E'
+        | 'SE'
+        | 'S'
+        | 'SW'
+        | 'W'
+        | 'NW'
+        | 'F'
+        | 'FR'
+        | 'R'
+        | 'BR'
+        | 'B'
+        | 'BL'
+        | 'L'
+        | 'FL'
+      // 距离关系, 可忽略
+      // 精确距离使用正整数 + 正整数范围
+      // 语义距离自动转换为以下英文字母缩写, 其含义如下
+      // VN 代表距离很近, N 代表距离近, M 代表距离适中, F 代表距离远, VF 代表距离很远
+      distance?: number | [number, number] | 'VN' | 'N' | 'M' | 'F' | 'VF'
+      // 可忽略
+      // inside 代表目标物在参照物内侧
+      // outside 代表目标物与参照物外侧
+      // both 代表目标物在参照物内侧和外侧
+      // 默认为 both
+      range?: 'inside' | 'outside' | 'both'
+    }[]
     // 目标物, 即目标物的名称
     target: string
   }
@@ -114,108 +117,148 @@ interface UserGeolocusTriple {
 ```json
 [
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "吉隆坡机场"
+        "originList": [
+          {
+            "name": "吉隆坡机场"
+          }
+        ]
       }
     ],
     "target": "佩洛西飞行路线"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "马六甲海峡"
-      }
-    ],
-    "relation": {
-      "direction": "E",
-      "topology": "intersect"
-    },
-    "target": "佩洛西飞行路线"
-  },
-  {
-    "originList": [
-      {
-        "name": "卡里马塔海峡"
+        "originList": [
+          {
+            "name": "马六甲海峡"
+          }
+        ],
+        "relation": {
+          "direction": "E",
+          "topology": "intersect"
+        }
       }
     ],
     "target": "佩洛西飞行路线"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "九段线"
-      }
-    ],
-    "relation": {
-      "direction": "S",
-      "topology": "disjoint",
-      "distance": 400000
-    },
-    "target": "佩洛西飞行路线"
-  },
-  {
-    "originList": [
-      {
-        "name": "加里曼尼岛"
+        "originList": [
+          {
+            "name": "卡里马塔海峡"
+          }
+        ]
       }
     ],
     "target": "佩洛西飞行路线"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "苏拉威西海"
+        "originList": [
+          {
+            "name": "九段线"
+          }
+        ],
+        "relation": {
+          "direction": "S",
+          "topology": "disjoint",
+          "distance": 400000
+        }
       }
     ],
-    "relation": {
-      "direction": "SE",
-      "topology": "contain"
-    },
     "target": "佩洛西飞行路线"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "菲律宾"
+        "originList": [
+          {
+            "name": "加里曼尼岛"
+          }
+        ]
       }
     ],
-    "relation": {
-      "direction": "E",
-      "topology": "along",
-      "distance": 100000
-    },
     "target": "佩洛西飞行路线"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "巴士海峡"
+        "originList": [
+          {
+            "name": "苏拉威西海"
+          }
+        ],
+        "relation": {
+          "direction": "SE",
+          "topology": "contain"
+        }
       }
     ],
-    "relation": {
-      "direction": "W",
-      "topology": "disjoint",
-      "distance": 150000
-    },
     "target": "佩洛西飞行路线"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "台湾"
+        "originList": [
+          {
+            "name": "菲律宾"
+          }
+        ],
+        "relation": {
+          "direction": "E",
+          "topology": "along",
+          "distance": 100000
+        }
       }
     ],
-    "relation": {
-      "direction": "E",
-      "topology": "intersect"
-    },
     "target": "佩洛西飞行路线"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "松山机场"
+        "originList": [
+          {
+            "name": "巴士海峡"
+          }
+        ],
+        "relation": {
+          "direction": "W",
+          "topology": "disjoint",
+          "distance": 150000
+        }
+      }
+    ],
+    "target": "佩洛西飞行路线"
+  },
+  {
+    "tupleList": [
+      {
+        "originList": [
+          {
+            "name": "台湾"
+          }
+        ],
+        "relation": {
+          "direction": "E",
+          "topology": "intersect"
+        }
+      }
+    ],
+    "target": "佩洛西飞行路线"
+  },
+  {
+    "tupleList": [
+      {
+        "originList": [
+          {
+            "name": "松山机场"
+          }
+        ]
       }
     ],
     "target": "佩洛西飞行路线"
@@ -234,27 +277,35 @@ interface UserGeolocusTriple {
 ```json
 [
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "台湾"
+        "originList": [
+          {
+            "name": "台湾"
+          }
+        ],
+        "relation": {
+          "direction": "SE",
+          "topology": "disjoint",
+          "distance": 100000
+        }
       }
     ],
-    "relation": {
-      "direction": "SE",
-      "topology": "disjoint",
-      "distance": 100000
-    },
     "target": "飞机"
   },
   {
-    "originList": [
+    "tupleList": [
       {
-        "name": "巴士海峡"
+        "originList": [
+          {
+            "name": "巴士海峡"
+          }
+        ],
+        "relation": {
+          "topology": "contain"
+        }
       }
     ],
-    "relation": {
-      "topology": "contain"
-    },
     "target": "飞机"
   }
 ]

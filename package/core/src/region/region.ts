@@ -491,15 +491,12 @@ export class Region {
       const pdfGrid = <PdfGrid>geoTripleResult.pdfGrid
       const tempGrid = <GeolocusGrid>pdfGrid.grid
       const weight = pdfGrid.weight
-      const transformGrid =
-        pdfGrid.type === 'gdf'
-          ? tempGrid
-          : this.extractRegionGrid(
-              tempGrid,
-              <GeolocusBBox>pdfGrid.bbox,
-              bbox,
-              gridSum,
-            )
+      const transformGrid = this.extractRegionGrid(
+        tempGrid,
+        <GeolocusBBox>pdfGrid.bbox,
+        bbox,
+        gridSum,
+      )
       Grid.forEach(resultGrid, (_, row, col) => {
         resultGrid[row][col] *= weight * transformGrid[row][col]
       })
@@ -694,14 +691,6 @@ export class Region {
       distanceOfCurPoint < distanceOfAfterPoint
         ? coordOfCurPoint
         : coordOfAfterPoint
-    // 如果选择 coordOfAfterPoint, 判断是否会绕路
-    // const [afterOfAfter] = Distance.nearestPoints(
-    //   afterRegion,
-    //   pointOfAfterPoint,
-    // )
-    // const v1 = Vector2.sub(coordOfAfterPoint, <Position2>geoTripleResult.coord)
-    // const v2 = Vector2.sub(afterOfAfter, coordOfAfterPoint)
-    // if (Vector2.dot(v1, v2) < 0) coord1 = coordOfCurPoint
 
     const bbox = geoTripleResult.region?.getGeometry().getBBox() as GeolocusBBox
     const xStart = bbox[0]
@@ -1043,13 +1032,6 @@ export class Region {
     const gridSize = dx / Math.sqrt(gridSum / ratio)
 
     // 记录概率值大于 0.95 的坐标, 取平均值求得中心点, 寻找最近中心点最近的坐标
-    // 记录概率值大于 0.8 且距离中心点最近的坐标
-    const center: Position2 = [
-      Math.floor((bbox[0] + bbox[2]) / 2),
-      Math.floor((bbox[1] + bbox[3]) / 2),
-    ]
-    let minCoord: Position2 = [0, 0]
-    let minDistance = GEO_MAX_VALUE
     const maxCoordList: [number, number, number, Position2[]] = [0, 0, 0, []]
     Grid.forEach(grid, (value, row, col) => {
       const x = xStart + (col + 0.5) * gridSize
@@ -1060,15 +1042,6 @@ export class Region {
         maxCoordList[1] += y
         maxCoordList[2]++
         maxCoordList[3].push([x, y])
-      }
-
-      const curDistance = Math.sqrt((x - center[0]) ** 2 + (y - center[1]) ** 2)
-      if (
-        Compare.LE(curDistance, minDistance) &&
-        Compare.GE(grid[row][col], 0.67)
-      ) {
-        minDistance = curDistance
-        minCoord = [x, y]
       }
     })
 
@@ -1092,18 +1065,6 @@ export class Region {
       return minCoord
     })()
 
-    // 计算最大值坐标和最小距离坐标作为对角线构成的矩形的面积
-    // 如果构成矩形面积小于等于外接矩形面积的 1/5 (凭感觉的二八法则的魔法数字), 则取最大值坐标, 否则取最小距离坐标
-    let coord: Position2
-    if (
-      Math.abs((maxCoord[0] - minCoord[0]) * (maxCoord[1] - minCoord[1])) <=
-      (dx * dy) / 5
-    ) {
-      coord = minCoord
-    } else {
-      coord = minCoord
-    }
-
-    return { coord }
+    return { coord: maxCoord }
   }
 }

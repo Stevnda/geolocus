@@ -132,25 +132,25 @@ export const Chat: React.FC = () => {
       })
     })
 
-    // const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
-    // resultGridList.forEach((item, index) => {
-    //   const region = regionList[index][0] as GeolocusObject
-    //   if (!item || !region) return
-    //   const pngBlob = generateBlobPng(item.grid!)
-    //   const bbox = convertToWgs84(
-    //     region.getGeometry().getBBox().slice(0, 2) as Position2,
-    //   ).concat(
-    //     convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
-    //   )
-    //   addImageToMap(map, region.getUUID() + 'pdfGird', pngBlob, bbox)
-    // })
+    const resultGridList = res!.geoTripleResultList.map((res) => res.pdfGrid)
+    resultGridList.forEach((item, index) => {
+      const region = regionList[index][0] as GeolocusObject
+      if (!item || !region) return
+      const pngBlob = generateBlobPng(item.grid!)
+      const bbox = convertToWgs84(
+        region.getGeometry().getBBox().slice(0, 2) as Position2,
+      ).concat(
+        convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+      )
+      addImageToMap(map, region.getUUID() + 'pdfGird', pngBlob, bbox)
+    })
 
-    // const line = res?.result as GeolocusObject
-    // const line84 = toWgs84(geolocusContext.toGeoJSON(line))
-    // addGeoJSONToMap(map, line.getUUID() + 'result', line84, 'line', {
-    //   'line-color': '#dc2626',
-    //   'line-width': 2,
-    // })
+    const line = res?.result as GeolocusObject
+    const line84 = toWgs84(geolocusContext.toGeoJSON(line))
+    addGeoJSONToMap(map, line.getUUID() + 'result', line84, 'line', {
+      'line-color': '#dc2626',
+      'line-width': 2,
+    })
   }
 
   const polygonTest = (jsonText: string) => {

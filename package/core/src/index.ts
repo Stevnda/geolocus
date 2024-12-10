@@ -41,8 +41,10 @@ export interface UserGeolocusTripleOrigin {
 
 export interface UserGeolocusTriple {
   role: string
-  originList?: (UserGeolocusTripleOrigin | UserGeolocusTriple)[]
-  relation?: UserGeoRelation
+  tupleList: {
+    originList?: (UserGeolocusTripleOrigin | UserGeolocusTriple)[]
+    relation?: UserGeoRelation
+  }[]
   target: string
 }
 
