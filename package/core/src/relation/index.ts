@@ -10,6 +10,7 @@ export {
   type ComputeRegionRange,
   type RelationMode,
   type SemanticRelation,
+  type GeoLayout,
 } from './relation.type'
 export { Distance } from './distance'
 export { Topology } from './topology'
