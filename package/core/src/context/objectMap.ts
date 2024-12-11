@@ -6,8 +6,8 @@ import {
   Position2,
 } from '@/object'
 import { GeolocusContext } from './context'
-import { PlaceOutput, PlacePlugin } from './objectMap.type'
 import { SpatialRef } from './spatialReference'
+import { PlaceOutput, PlacePlugin } from './context.type'
 
 // NOTE 命名最大概率匹配算法
 const defaultPlacePlugin = (

@@ -29,7 +29,7 @@ export class Role {
     this._uuid = generateUUID()
     this._name = name
     this._context = context
-    this._orientation = orientation // azimuth, N=0, [0, 2pi]
+    this._orientation = (orientation / 360) * Math.PI // azimuth, N=0, [0, 2pi]
     this._directionDelta = (directionDelta / 360) * Math.PI // azimuth, N=0, [0, 2pi]
     this._distanceDelta = distanceDelta
     this._semanticDistanceMap = semanticDistanceMap

@@ -7,8 +7,8 @@ import {
   EuclideanDistanceRange,
   SemanticDistance,
   ComputeRegionRange,
+  GeoLayout,
 } from './relation'
-import { GeoLayout } from './relation/layout.type'
 
 // 单目标物地理对象描述模式约束规则
 interface SingleObjectPatternRule {

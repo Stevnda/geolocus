@@ -8,6 +8,7 @@ import {
   RelationAction,
   SemanticDirection,
   RelationMode,
+  GeoLayout,
 } from './relation'
 import {
   GeolocusContext,
@@ -22,7 +23,6 @@ import { GeolocusGeometryType, GeolocusObject, Position2 } from './object'
 import { Region, RegionResult } from './region'
 import { GeoJSON } from 'geojson'
 import { IO } from './io'
-import { GeoLayout } from './relation/layout.type'
 import { generateUUID } from './util'
 
 export interface UserGeoRelation {
