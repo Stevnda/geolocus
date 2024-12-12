@@ -24,7 +24,7 @@ export const initContext = () => {
     orientation: 0,
     semanticDistanceMap: {
       VN: [0, 10000],
-      N: [100000, 300000],
+      N: [10000, 30000],
       M: [30000, 100000],
       F: [100000, 300000],
       VF: [300000, 2000000],

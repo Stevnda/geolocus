@@ -256,7 +256,7 @@ export class RelationAction {
         res.distance =
           max <= maxDistance ? distanceTransform : [min, maxDistance]
       }
-    } else if (res.topology === 'disjoint') {
+    } else if (res.topology === 'disjoint' || res.topology === 'toward') {
       // 无限距离处理
       res.distance = [0, maxDistance + Math.PI]
     } else {

@@ -16,14 +16,20 @@ export class GeolocusObject {
   private _status: 'fuzzy' | 'precise'
   private _geometry: GeolocusGeometry
   private _infinity: boolean // 用于判断该对象是否通过无线距离生成
+  private _props: Record<string, unknown>
 
-  constructor(geometry: GeolocusGeometry, init?: GeolocusObjectProps) {
+  constructor(
+    geometry: GeolocusGeometry,
+    init?: GeolocusObjectProps,
+    props?: Record<string, unknown>,
+  ) {
     this._uuid = generateUUID()
     this._geometry = geometry
     this._name = init?.name || null
     this._templateName = init?.templateName || null
     this._status = init?.status || 'precise'
     this._infinity = init?.infinity || false
+    this._props = props || {}
   }
 
   setUUID(value: string): void {
@@ -72,6 +78,14 @@ export class GeolocusObject {
 
   setInfinity(value: boolean): void {
     this._infinity = value
+  }
+
+  getProps(): Record<string, unknown> {
+    return this._props
+  }
+
+  setProps(value: Record<string, unknown>): void {
+    this._props = value
   }
 }
 

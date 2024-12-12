@@ -189,8 +189,13 @@ test('compute line', () => {
         role: 'default',
         tupleList: [
           {
+            originList: [
+              {
+                name: '东海岸线',
+              },
+            ],
             relation: {
-              topology: 'disjoint',
+              topology: 'toward',
               direction: 'N',
               distance: 800000,
             },
@@ -203,7 +208,7 @@ test('compute line', () => {
         tupleList: [
           {
             relation: {
-              topology: 'disjoint',
+              topology: 'toward',
               direction: 'NE',
               distance: 300000,
             },
