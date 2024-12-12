@@ -43,6 +43,7 @@ export type TopologyRelation =
   | 'within'
   | 'intersect'
   | 'along'
+  | 'toward'
 
 export interface ArrangementLayout {
   type: 'uniform' | 'random' | 'between'
@@ -112,6 +113,7 @@ export interface GeoRelation {
   topology: TopologyRelation
   direction?: number
   distance: EuclideanDistance | EuclideanDistanceRange
+  towardUUIDList?: string[] // 这个是 toward 运行时临时生成的
   range: ComputeRegionRange
   layout?: GeoLayout
   weight: number

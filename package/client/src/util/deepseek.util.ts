@@ -158,6 +158,50 @@ const testData = [
     ],
     target: '佩洛西飞行路线',
   },
+  {
+    role: 'default',
+    tupleList: [
+      {
+        originList: [
+          {
+            name: '东海岸线',
+          },
+        ],
+        relation: {
+          topology: 'toward',
+          direction: 'N',
+          distance: 800000,
+        },
+      },
+    ],
+    target: '佩洛西飞行路线',
+  }, // 10
+  {
+    role: 'default',
+    tupleList: [
+      {
+        relation: {
+          topology: 'toward',
+          direction: 'NE',
+          distance: 300000,
+        },
+      },
+    ],
+    target: '佩洛西飞行路线',
+  }, // 11
+  {
+    role: 'default',
+    tupleList: [
+      {
+        originList: [
+          {
+            name: '首尔',
+          },
+        ],
+      },
+    ],
+    target: '佩洛西飞行路线',
+  }, // 12
 ]
 
 // 2.新街口位于南京市中心，地铁一号线和二号线在此交汇
@@ -280,25 +324,25 @@ const lineTestData = [
 ]
 
 export const deepseek = async (text: string): Promise<string> => {
-  const completion = await openai.chat.completions.create({
-    messages: [
-      { role: 'system', content: prompt },
-      { role: 'user', content: text },
-    ],
-    model: 'deepseek-chat',
-    stream: false,
-  })
+  // const completion = await openai.chat.completions.create({
+  //   messages: [
+  //     { role: 'system', content: prompt },
+  //     { role: 'user', content: text },
+  //   ],
+  //   model: 'deepseek-chat',
+  //   stream: false,
+  // })
 
-  let content = completion.choices[0].message.content
-  if (content) {
-    content = content.replace(/```json/g, '')
-    content = content.replace(/```/g, '')
-  }
+  // let content = completion.choices[0].message.content
+  // if (content) {
+  //   content = content.replace(/```json/g, '')
+  //   content = content.replace(/```/g, '')
+  // }
 
-  console.log(content)
+  // console.log(content)
 
-  return content || '[]'
-  // await new Promise((resolve) => setTimeout(resolve, 1000))
-  // console.log(text)
-  // return JSON.stringify(lineTestData)
+  // return content || '[]'
+  await new Promise((resolve) => setTimeout(resolve, 1000))
+  console.log(text)
+  return JSON.stringify(testData)
 }

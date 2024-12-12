@@ -137,7 +137,8 @@ export class GeoTripleHandler {
     const originGeometry = origin.getGeometry()
     const objectType = originGeometry.getType()
 
-    // 取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
+    // 如果 relation.distance 不为 null, 取其平均值
+    // 然后取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
     let distance = GEO_MAX_VALUE
     if (relation.distance != null) {
       distance = Distance.normalize(
@@ -149,7 +150,7 @@ export class GeoTripleHandler {
     const dx = bbox[2] - bbox[0]
     const dy = bbox[3] - bbox[1]
     const bufferDistance =
-      distance || Math.min((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
+      distance || Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
 
     let geometry: GeolocusGeometry | null = null
     if (objectType === 'Point' || objectType === 'LineString') {
@@ -204,7 +205,8 @@ export class GeoTripleHandler {
   ): RegionHandlerResult => {
     const originGeometry = origin.getGeometry()
 
-    // 取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
+    // 如果 relation.distance 不为 null, 取其平均值
+    // 然后取外接矩形对角线的二十分之一和语义关系近的平均值两者的最大值, 作为缓冲区距离
     let distance = GEO_MAX_VALUE
     if (relation.distance != null) {
       distance = Distance.normalize(
@@ -216,11 +218,90 @@ export class GeoTripleHandler {
     const dx = bbox[2] - bbox[0]
     const dy = bbox[3] - bbox[1]
     const bufferDistance =
-      distance || Math.min((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
+      distance || Math.max((N[0] + N[1]) / 2, Math.sqrt(dx * dx + dy * dy) / 40)
     relation.distance = bufferDistance
     const region = this.distanceHandler(origin, relation, role)
 
     return this.containHandler(region, relation, role)
+  }
+
+  private static towardHandler = (
+    origin: GeolocusObject,
+    relation: GeoRelation,
+    role: Role,
+  ): RegionHandlerResult => {
+    if (relation.towardUUIDList == null) {
+      return this.disjointHandler(origin, relation, role)
+    } else {
+      const context = role.getContext()
+      const distance = Distance.normalize(
+        relation.distance as EuclideanDistance | EuclideanDistanceRange,
+      )
+      const meanDistanceDelta = role.getDistanceDelta() * distance.mean
+      const maxDistance = distance.max + meanDistanceDelta * 1.5
+      const bufferGeometry = <GeolocusGeometry>(
+        Topology.bufferOfDistance(origin.getGeometry(), maxDistance)
+      )
+
+      const objectMap = context.getObjectMap()
+      let unionOrigin: GeolocusGeometry | null = null
+      for (const originUUID of <string[]>relation.towardUUIDList) {
+        const origin = <GeolocusObject>(
+          ObjectMapAction.getObjectByUUID(objectMap, originUUID)
+        )
+        const buffer = new GeolocusObject(
+          <GeolocusGeometry>(
+            Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER)
+          ),
+        )
+        if (unionOrigin != null) {
+          unionOrigin = <GeolocusGeometry>(
+            Topology.union(unionOrigin, origin.getGeometry())
+          )
+        } else {
+          unionOrigin = buffer.getGeometry()
+        }
+      }
+      const bbox = (<GeolocusGeometry>unionOrigin).getBBox()
+      const dx = bbox[2] - bbox[0]
+      const dy = bbox[3] - bbox[1]
+      const N = role.getSemanticDistanceMap().N
+      const bufferDistance = Math.max(
+        (N[0] + N[1]) / 2,
+        Math.sqrt(dx * dx + dy * dy) / 40,
+      )
+      unionOrigin = Topology.bufferOfDistance(
+        <GeolocusGeometry>unionOrigin,
+        bufferDistance,
+      )
+
+      // 处理无限距离, 例如沿着 XXX 向东飞行
+      const infinity =
+        relation.distance instanceof Array &&
+        Compare.EQ(relation.distance[0], 0) &&
+        Compare.EQ(
+          relation.distance[1],
+          role.getContext().getMaxDistance() + Math.PI,
+        )
+      // TODO 这里可能存在 geometry 为 null 的情况, 需要保证描述性地理位置逻辑一定正确
+      const geometry = <GeolocusGeometry>(
+        Topology.intersection(bufferGeometry, <GeolocusGeometry>unionOrigin)
+      )
+      const region = new GeolocusObject(geometry, { infinity })
+      const pdf: PDFInput = {
+        type: 'sdf',
+        origin,
+        gdf: {},
+        sdf: {
+          gridRegion: region,
+          gridSum: context.getGridSum(),
+        },
+        spread: {},
+        weight: relation.weight || 1,
+      }
+
+      return { region, pdf }
+    }
   }
 
   private static directionHandler = (
@@ -263,7 +344,7 @@ export class GeoTripleHandler {
       ),
     )
 
-    // 相离关系直接返回 origin
+    // disjoint, intersect 和 toward直接返回 origin
     if (!(relation.topology === 'contain' || relation.topology === 'within')) {
       return origin
     }
@@ -316,6 +397,10 @@ export class GeoTripleHandler {
     },
     along: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
       const topology = this.alongHandler(origin, relation, role)
+      return topology
+    },
+    toward: (origin: GeolocusObject, relation: GeoRelation, role: Role) => {
+      const topology = this.towardHandler(origin, relation, role)
       return topology
     },
   }
@@ -580,10 +665,14 @@ export class Region {
       new GeolocusGeometry('Point', JTSGeometryFactory.empty('Point')),
     )
     for (const geoTriple of geoTripleList) {
-      const tag = geoTriple.originUUIDList == null
-      // handle null origin of line, the before region of geoTriple as origin
+      // 如果是 toward 关系, beforeRegion 作为 originUUIDList
+      // originUUIDList 不会空, 表示沿着 originUUIDList, 否则直接使用 disjoint 计算
+      const tag = geoTriple.relation.topology === 'toward'
       if (tag) {
         ObjectMapAction.addObject(objectMap, beforeRegion)
+        if (geoTriple.originUUIDList != null) {
+          geoTriple.relation.towardUUIDList = [...geoTriple.originUUIDList]
+        }
         geoTriple.originUUIDList = [beforeRegion.getUUID()]
       }
       const geoTripleResult = this.computePdfAndRegionOfGeoTriple(
@@ -606,6 +695,7 @@ export class Region {
       geoTripleResultList.push(geoTripleResult)
       // handle null origin of line, remove the before region of geoTriple in objectMap
       if (tag) {
+        delete geoTriple.relation.towardUUIDList
         ObjectMapAction.deleteObject(objectMap, beforeRegion)
       }
 
