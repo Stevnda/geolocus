@@ -183,7 +183,7 @@ const testData = [
         relation: {
           topology: 'toward',
           direction: 'R',
-          distance: 500000,
+          distance: 900000,
         },
       },
     ],
@@ -196,12 +196,25 @@ const testData = [
         relation: {
           topology: 'toward',
           direction: 'L',
-          distance: 800000,
+          distance: 200000,
         },
       },
     ],
     target: '佩洛西飞行路线',
   }, // 12
+  {
+    role: 'default',
+    tupleList: [
+      {
+        relation: {
+          topology: 'toward',
+          direction: '首尔',
+          distance: 300000,
+        },
+      },
+    ],
+    target: '佩洛西飞行路线',
+  }, // 13
   {
     role: 'default',
     tupleList: [
@@ -214,7 +227,7 @@ const testData = [
       },
     ],
     target: '佩洛西飞行路线',
-  }, // 13
+  }, // 14
 ]
 
 // 2.新街口位于南京市中心，地铁一号线和二号线在此交汇

@@ -27,7 +27,7 @@ import { generateUUID } from './util'
 
 export interface UserGeoRelation {
   topology?: TopologyRelation
-  direction?: SemanticDirection | number // [0,360], N=0
+  direction?: string | SemanticDirection | number // [0,360], N=0
   distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
   range?: ComputeRegionRange
   layout?: GeoLayout
