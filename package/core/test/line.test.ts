@@ -10,7 +10,7 @@ beforeEach(() => {
   scene = createTestContext()
   scene.addRole({
     name: 'default',
-    directionDelta: Math.PI / 4,
+    directionDelta: 45,
     distanceDelta: 0.2,
     orientation: 0,
     semanticDistanceMap: {
@@ -234,4 +234,96 @@ test('compute line', () => {
   )
   const res = scene.computeFuzzyLineObject('taiwan')
   expect(res?.geoTripleResultList.length).toBe(13)
+})
+
+test('compute line', () => {
+  scene.defineRelation(
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '吉隆坡机场',
+              },
+            ],
+          },
+        ],
+        target: 'taiwan',
+      }, // 0
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '马六甲海峡',
+              },
+            ],
+            relation: {
+              direction: 'E',
+              topology: 'intersect',
+            },
+          },
+        ],
+        target: 'taiwan',
+      }, // 1
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '卡里马塔海峡',
+              },
+            ],
+          },
+        ],
+        target: 'taiwan',
+      }, // 2
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 'R',
+              distance: 900000,
+            },
+          },
+        ],
+        target: 'taiwan',
+      }, // 3
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 'L',
+              distance: 200000,
+            },
+          },
+        ],
+        target: 'taiwan',
+      }, // 4
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: '菲律宾',
+              distance: 300000,
+            },
+          },
+        ],
+        target: 'taiwan',
+      }, // 5
+    ],
+    'line',
+  )
+  const res = scene.computeFuzzyLineObject('taiwan')
+  expect(res?.geoTripleResultList.length).toBe(6)
 })

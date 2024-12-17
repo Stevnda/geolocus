@@ -231,11 +231,64 @@ export class GeoTripleHandler {
     relation: GeoRelation,
     role: Role,
   ): RegionHandlerResult => {
+    // 根据距离关系计算 origin 的缓冲区
+    const distance = Distance.normalize(
+      relation.distance as EuclideanDistance | EuclideanDistanceRange,
+    )
+    const meanDistanceDelta = role.getDistanceDelta() * distance.mean
+    const minDistance =
+      distance.min - meanDistanceDelta * 1.5 >= 0
+        ? distance.min - meanDistanceDelta * 1.5
+        : 0
+    const maxDistance = distance.max + meanDistanceDelta * 1.5
+    const distanceGeometry = <GeolocusGeometry>(
+      Topology.bufferOfDistance(origin.getGeometry(), maxDistance)
+    )
+    const rangeGeometry = <GeolocusGeometry>(
+      Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance])
+    )
     if (relation.towardUUIDList == null) {
-      return this.disjointHandler(origin, relation, role)
+      const originCenter = origin.getGeometry().getCenter()
+      const directionDelta = role.getDirectionDelta()
+      const dx = GEO_MAX_VALUE * Math.sin(directionDelta)
+      const dy = GEO_MAX_VALUE * Math.cos(directionDelta)
+      const tl: Position2 = [originCenter[0] - dx, originCenter[1] + dy]
+      const tr: Position2 = [originCenter[0] + dx, originCenter[1] + dy]
+      const triangle = new GeolocusGeometry(
+        'Polygon',
+        JTSGeometryFactory.polygon([[originCenter, tl, tr, originCenter]]),
+      )
+      const triangleRotated = GeolocusGeometryAction.rotateAroundCoord(
+        triangle,
+        <number>relation.direction,
+        originCenter,
+      )
+      const geometry = <GeolocusGeometry>(
+        Topology.intersection(triangleRotated, distanceGeometry)
+      )
+      const region = new GeolocusObject(
+        <GeolocusGeometry>Topology.bufferOfDistance(geometry, MAGIC_NUMBER),
+      )
+
+      // 计算目标区域 coord
+      const intersection = <GeolocusGeometry>(
+        Topology.intersection(triangleRotated, rangeGeometry)
+      )
+      const centerCoord = intersection.getCenter()
+      region.setProps({ centerCoord })
+
+      const pdf: PDFInput = {
+        type: 'angle',
+        origin,
+        gdf: {},
+        sdf: {},
+        spread: {},
+        weight: relation.weight,
+      }
+
+      return { region, pdf }
     } else {
       // TODO 朝向关系可能存在 geometry 为 null 的情况, 需要保证描述性地理位置逻辑一定正确
-
       const context = role.getContext()
       const objectMap = context.getObjectMap()
       let unionOrigin: GeolocusGeometry | null = null
@@ -258,15 +311,6 @@ export class GeoTripleHandler {
       }
 
       // 计算沿着 xxx 的缓冲区, 如果不做缓冲区, 可能在 td 和 directionRegion 的相交操作出现错误
-      const distance = Distance.normalize(
-        relation.distance as EuclideanDistance | EuclideanDistanceRange,
-      )
-      const meanDistanceDelta = role.getDistanceDelta() * distance.mean
-      const minDistance =
-        distance.min - meanDistanceDelta * 1.5 >= 0
-          ? distance.min - meanDistanceDelta * 1.5
-          : 0
-      const maxDistance = distance.max + meanDistanceDelta * 1.5
       const bbox = (<GeolocusGeometry>unionOrigin).getBBox()
       const dx = bbox[2] - bbox[0]
       const dy = bbox[3] - bbox[1]
@@ -279,13 +323,9 @@ export class GeoTripleHandler {
         Topology.bufferOfDistance(<GeolocusGeometry>unionOrigin, bufferDistance)
       )
 
-      // 根据距离关系计算 origin 的缓冲区
-      const bufferGeometry = <GeolocusGeometry>(
-        Topology.bufferOfDistance(origin.getGeometry(), maxDistance)
-      )
       // 求 origin 和 xxx 的交集
       const geometry = <GeolocusGeometry>(
-        Topology.intersection(bufferGeometry, unionOrigin)
+        Topology.intersection(distanceGeometry, unionOrigin)
       )
 
       // 处理无限距离, 例如沿着 XXX 向东飞行
@@ -301,9 +341,6 @@ export class GeoTripleHandler {
 
       // 计算目标区域 coord
       // 这里要重复计算一次 directionRegion, 但也没办法...
-      const distanceGeometry = <GeolocusGeometry>(
-        Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance])
-      )
       const direction = <number>relation.direction
       const directionGeometry = Direction.computeRegion(
         origin.getGeometry(),
@@ -313,9 +350,7 @@ export class GeoTripleHandler {
       const intersection = <GeolocusGeometry>(
         Topology.intersection(
           <GeolocusGeometry>directionGeometry,
-          <GeolocusGeometry>(
-            Topology.intersection(distanceGeometry, unionOrigin)
-          ),
+          <GeolocusGeometry>Topology.intersection(rangeGeometry, unionOrigin),
         )
       )
       const centerCoord = intersection.getCenter()
@@ -474,7 +509,11 @@ export class GeoTripleHandler {
 
       td.region = intersection
       td.pdf.sdf.gridRegion = intersection
-      td.pdf.type = td.pdf.type === 'sdf' ? 'sdf' : 'distanceAndAngle'
+      td.pdf.type = (() => {
+        if (td.pdf.type === 'sdf') return 'sdf'
+        else if (td.pdf.type === 'angle') return 'angle'
+        else return 'distanceAndAngle'
+      })()
       td.pdf.gdf = {
         ...td.pdf.gdf,
         azimuth: direction.pdf.gdf.azimuth,
@@ -743,9 +782,9 @@ export class Region {
       const tempDirectionDelta = role.getDirectionDelta()
       const tempDistanceDelta = role.getDistanceDelta()
       if (geoTriple.relation.topology === 'toward') {
-        // 朝向关系假设距离关系和方向关系都非常准
-        role.setDirectionDelta(Math.PI * 0.1)
-        role.setDistanceDelta(0.05)
+        // 朝向关系假设距离关系和方向关系都非常准, 这里取 5% 的误差
+        role.setDirectionDelta(Math.PI * 0.05)
+        role.setDistanceDelta(0.025)
         // 如果是 toward 关系, 上一目标区域的最大 coord 作为 originUUIDList
         const beforeCoordRegion = new GeolocusObject(
           new GeolocusGeometry(
