@@ -235,7 +235,14 @@ export class RelationAction {
 
     // direction
     if (relation.direction != null) {
-      res.direction = Direction.transform(relation.direction, role)
+      // 由于线状要素描述角色的朝向变化, 方向关系放置于 region 处理
+      if (mode === 'line') {
+        // TODO 这里 direction 可能是字符串, 但修改 ts 类型会导致很多地方判断类型
+        // 所以这里强制定义其为 number, 有可能后续出现 bug, 但现在不会
+        res.direction = <number>relation.direction
+      } else {
+        res.direction = Direction.transform(relation.direction, role)
+      }
     }
 
     // distance

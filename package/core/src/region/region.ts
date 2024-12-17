@@ -35,6 +35,7 @@ import {
   Grid,
   MAGIC_NUMBER,
   MathUtil,
+  Vector2,
 } from '@/util'
 import { AStar, Graph } from './aStart'
 
@@ -233,16 +234,9 @@ export class GeoTripleHandler {
     if (relation.towardUUIDList == null) {
       return this.disjointHandler(origin, relation, role)
     } else {
-      const context = role.getContext()
-      const distance = Distance.normalize(
-        relation.distance as EuclideanDistance | EuclideanDistanceRange,
-      )
-      const meanDistanceDelta = role.getDistanceDelta() * distance.mean
-      const maxDistance = distance.max + meanDistanceDelta * 1.5
-      const bufferGeometry = <GeolocusGeometry>(
-        Topology.bufferOfDistance(origin.getGeometry(), maxDistance)
-      )
+      // TODO 朝向关系可能存在 geometry 为 null 的情况, 需要保证描述性地理位置逻辑一定正确
 
+      const context = role.getContext()
       const objectMap = context.getObjectMap()
       let unionOrigin: GeolocusGeometry | null = null
       for (const originUUID of <string[]>relation.towardUUIDList) {
@@ -262,6 +256,17 @@ export class GeoTripleHandler {
           unionOrigin = buffer.getGeometry()
         }
       }
+
+      // 计算沿着 xxx 的缓冲区, 如果不做缓冲区, 可能在 td 和 directionRegion 的相交操作出现错误
+      const distance = Distance.normalize(
+        relation.distance as EuclideanDistance | EuclideanDistanceRange,
+      )
+      const meanDistanceDelta = role.getDistanceDelta() * distance.mean
+      const minDistance =
+        distance.min - meanDistanceDelta * 1.5 >= 0
+          ? distance.min - meanDistanceDelta * 1.5
+          : 0
+      const maxDistance = distance.max + meanDistanceDelta * 1.5
       const bbox = (<GeolocusGeometry>unionOrigin).getBBox()
       const dx = bbox[2] - bbox[0]
       const dy = bbox[3] - bbox[1]
@@ -270,9 +275,17 @@ export class GeoTripleHandler {
         (N[0] + N[1]) / 2,
         Math.sqrt(dx * dx + dy * dy) / 40,
       )
-      unionOrigin = Topology.bufferOfDistance(
-        <GeolocusGeometry>unionOrigin,
-        bufferDistance,
+      unionOrigin = <GeolocusGeometry>(
+        Topology.bufferOfDistance(<GeolocusGeometry>unionOrigin, bufferDistance)
+      )
+
+      // 根据距离关系计算 origin 的缓冲区
+      const bufferGeometry = <GeolocusGeometry>(
+        Topology.bufferOfDistance(origin.getGeometry(), maxDistance)
+      )
+      // 求 origin 和 xxx 的交集
+      const geometry = <GeolocusGeometry>(
+        Topology.intersection(bufferGeometry, unionOrigin)
       )
 
       // 处理无限距离, 例如沿着 XXX 向东飞行
@@ -283,11 +296,31 @@ export class GeoTripleHandler {
           relation.distance[1],
           role.getContext().getMaxDistance() + Math.PI,
         )
-      // TODO 这里可能存在 geometry 为 null 的情况, 需要保证描述性地理位置逻辑一定正确
-      const geometry = <GeolocusGeometry>(
-        Topology.intersection(bufferGeometry, <GeolocusGeometry>unionOrigin)
-      )
+
       const region = new GeolocusObject(geometry, { infinity })
+
+      // 计算目标区域 coord
+      // 这里要重复计算一次 directionRegion, 但也没办法...
+      const distanceGeometry = <GeolocusGeometry>(
+        Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance])
+      )
+      const direction = <number>relation.direction
+      const directionGeometry = Direction.computeRegion(
+        origin.getGeometry(),
+        direction,
+        relation.range,
+      )
+      const intersection = <GeolocusGeometry>(
+        Topology.intersection(
+          <GeolocusGeometry>directionGeometry,
+          <GeolocusGeometry>(
+            Topology.intersection(distanceGeometry, unionOrigin)
+          ),
+        )
+      )
+      const centerCoord = intersection.getCenter()
+      region.setProps({ centerCoord })
+
       const pdf: PDFInput = {
         type: 'sdf',
         origin,
@@ -434,7 +467,10 @@ export class GeoTripleHandler {
     } else {
       const direction = this.directionHandler(distanceRegion, relation, role)
       const intersection = this.intersection(td.region, direction.region)
+      // 处理无限距离
       intersection.setInfinity(td.region.getInfinity())
+      // 处理朝向, centerCoord 属性
+      intersection.setProps(td.region.getProps())
 
       td.region = intersection
       td.pdf.sdf.gridRegion = intersection
@@ -661,19 +697,46 @@ export class Region {
 
     // compute pdf, region, regionPdfGrid and coord of per geoTriple together because of toward relation
     const geoTripleResultList = []
-    let beforeRegion = new GeolocusObject(
-      new GeolocusGeometry('Point', JTSGeometryFactory.empty('Point')),
-    )
-    for (const geoTriple of geoTripleList) {
-      // 如果是 toward 关系, beforeRegion 作为 originUUIDList
-      // originUUIDList 不会空, 表示沿着 originUUIDList, 否则直接使用 disjoint 计算
-      const tag = geoTriple.relation.topology === 'toward'
-      if (tag) {
-        ObjectMapAction.addObject(objectMap, beforeRegion)
+    for (let i = 0; i < geoTripleList.length; i++) {
+      const geoTriple = geoTripleList[i]
+      // 处理 role 朝向问题, 取前两个 coord 的连线的方位角作为 role 的朝向
+      // 并以此为基准处理语义方向关系
+      if (geoTripleResultList.length >= 2) {
+        const firstCoord = geoTripleResultList[i - 2].coord as Position2
+        const secondCoord = geoTripleResultList[i - 1].coord as Position2
+        const azimuth = Direction.azimuth(Vector2.sub(secondCoord, firstCoord))
+        geoTriple.role.setOrientation(azimuth)
+      }
+      if (geoTriple.relation.direction != null) {
+        geoTriple.relation.direction = Direction.transform(
+          geoTriple.relation.direction,
+          geoTriple.role,
+        )
+      }
+
+      const role = geoTriple.role
+      const tempDirectionDelta = role.getDirectionDelta()
+      const tempDistanceDelta = role.getDistanceDelta()
+      if (geoTriple.relation.topology === 'toward') {
+        // 朝向关系假设距离关系和方向关系都非常准
+        role.setDirectionDelta(Math.PI * 0.01)
+        role.setDistanceDelta(0.02)
+        // 如果是 toward 关系, 上一目标区域的最大 coord 作为 originUUIDList
+        const beforeCoordRegion = new GeolocusObject(
+          new GeolocusGeometry(
+            'Point',
+            JTSGeometryFactory.point(
+              geoTripleResultList[i - 1].coord as Position2,
+            ),
+          ),
+        )
+        // TODO 这里会向 objectMap 添加临时对象, 现在添加后没有删除
+        ObjectMapAction.addObject(objectMap, beforeCoordRegion)
+        // 若 originUUIDList 不会空, 表示沿着 originUUIDList
         if (geoTriple.originUUIDList != null) {
           geoTriple.relation.towardUUIDList = [...geoTriple.originUUIDList]
         }
-        geoTriple.originUUIDList = [beforeRegion.getUUID()]
+        geoTriple.originUUIDList = [beforeCoordRegion.getUUID()]
       }
       const geoTripleResult = this.computePdfAndRegionOfGeoTriple(
         geoTriple,
@@ -687,19 +750,23 @@ export class Region {
       geoTripleResult.pdfGrid.grid = Grid.normalize(
         <GeolocusGrid>geoTripleResult.pdfGrid.grid,
       )
-      geoTripleResult.coord = this.getCoordOfMaximumOfGeolocusGrid(
-        <GeolocusGrid>geoTripleResult.pdfGrid.grid,
-        <GeolocusObject>geoTripleResult.region,
-        context,
-      ).coord
-      geoTripleResultList.push(geoTripleResult)
-      // handle null origin of line, remove the before region of geoTriple in objectMap
-      if (tag) {
-        delete geoTriple.relation.towardUUIDList
-        ObjectMapAction.deleteObject(objectMap, beforeRegion)
-      }
 
-      beforeRegion = <GeolocusObject>geoTripleResult.region
+      // toward 关系 coord 处理
+      const centerCoord = <Position2 | undefined>(
+        geoTripleResult.region?.getProps().centerCoord
+      )
+      geoTripleResult.coord =
+        centerCoord ||
+        this.getCoordOfMaximumOfGeolocusGrid(
+          <GeolocusGrid>geoTripleResult.pdfGrid.grid,
+          <GeolocusObject>geoTripleResult.region,
+          context,
+        ).coord
+      geoTripleResultList.push(geoTripleResult)
+
+      // 恢复角色角度和距离阈值
+      role.setDirectionDelta(tempDirectionDelta)
+      role.setDistanceDelta(tempDistanceDelta)
     }
     result.geoTripleResultList = geoTripleResultList
 
@@ -1006,49 +1073,9 @@ export class Region {
     result.pdfInput = pdf
     result.region = region
 
-    if (relation.layout != null)
+    if (relation.layout != null) {
       Layout.computeLayout(relation.layout, geoTriple, result, context)
-
-    // const regionList: GeolocusObject[] = []
-    // const originList: GeolocusObject[] = []
-    // const gridRegionList: GeolocusObject[] = []
-    // for (const originUUID of <string[]>geoTriple.originUUIDList) {
-    //   const origin = <GeolocusObject>ObjectMapAction.getObjectByUUID(objectMap, originUUID)
-    //   const regionHandler = GeoTripleHandler.getRegionHandler(relation)
-    //   const { region, pdf } = regionHandler(origin, relation, geoTriple.role)
-    //   regionList.push(region)
-    //   originList.push(origin)
-    //   if (pdf.sdf.gridRegion != null) gridRegionList.push(pdf.sdf.gridRegion)
-    //   result.pdfInput = pdf
-    // }
-
-    // let resultRegion = context.getRegionRange().getGeometry()
-    // for (const region of regionList) {
-    //   const tempRegion = Topology.intersection(resultRegion, region.getGeometry())
-    //   if (!tempRegion) {
-    //     throw new Error("Can't compute the fuzzy region, the intersection is empty.")
-    //   }
-    //   resultRegion = tempRegion
-    // }
-    // result.region = new GeolocusObject(resultRegion)
-
-    // let resultOrigin = originList[0].getGeometry()
-    // for (let i = 1; i < originList.length; i++) {
-    //   const origin = originList[i]
-    //   resultOrigin = <GeolocusGeometry>Topology.union(resultOrigin, origin.getGeometry())
-    // }
-    // resultOrigin = GeolocusGeometryAction.getConcaveHull(resultOrigin)
-    // ;(<PDFInput>result.pdfInput).origin = new GeolocusObject(resultOrigin)
-
-    // let resultGridRegion = context.getRegionRange().getGeometry()
-    // for (const gridRegion of gridRegionList) {
-    //   const tempRegion = Topology.intersection(resultRegion, gridRegion.getGeometry())
-    //   if (!tempRegion) {
-    //     throw new Error("Can't compute the fuzzy region, the intersection is empty.")
-    //   }
-    //   resultGridRegion = tempRegion
-    // }
-    // ;(<PDFInput>result.pdfInput).sdf.gridRegion = new GeolocusObject(resultGridRegion)
+    }
 
     return result
   }

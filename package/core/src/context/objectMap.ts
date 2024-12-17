@@ -134,4 +134,16 @@ export class ObjectMapAction {
       nameMap.get(name)?.delete(object)
     }
   }
+
+  static deleteObjectByUUID(objectMap: ObjectMap, uuid: string): void {
+    const uuidMap = objectMap.getUUIDMap()
+    const nameMap = objectMap.getNameMap()
+
+    const object = uuidMap.get(uuid)
+    const name = object?.getName()
+    if (name) {
+      nameMap.get(name)?.delete(<GeolocusObject>object)
+    }
+    uuidMap.delete(uuid)
+  }
 }

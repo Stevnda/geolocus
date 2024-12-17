@@ -23,129 +23,129 @@ const testData = [
     ],
     target: '佩洛西飞行路线',
   },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '马六甲海峡',
-          },
-        ],
-        relation: {
-          direction: 'E',
-          topology: 'intersect',
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '卡里马塔海峡',
-          },
-        ],
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '九段线',
-          },
-        ],
-        relation: {
-          direction: 'S',
-          topology: 'disjoint',
-          distance: 400000,
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '加里曼尼岛',
-          },
-        ],
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '苏拉威西海',
-          },
-        ],
-        relation: {
-          direction: 'SE',
-          topology: 'contain',
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '菲律宾',
-          },
-        ],
-        relation: {
-          direction: 'E',
-          topology: 'along',
-          distance: 100000,
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '巴士海峡',
-          },
-        ],
-        relation: {
-          direction: 'W',
-          topology: 'disjoint',
-          distance: 150000,
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
-  {
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '台湾',
-          },
-        ],
-        relation: {
-          direction: 'E',
-          topology: 'intersect',
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '马六甲海峡',
+  //         },
+  //       ],
+  //       relation: {
+  //         direction: 'E',
+  //         topology: 'intersect',
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '卡里马塔海峡',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '九段线',
+  //         },
+  //       ],
+  //       relation: {
+  //         direction: 'S',
+  //         topology: 'disjoint',
+  //         distance: 400000,
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '加里曼尼岛',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '苏拉威西海',
+  //         },
+  //       ],
+  //       relation: {
+  //         direction: 'SE',
+  //         topology: 'contain',
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '菲律宾',
+  //         },
+  //       ],
+  //       relation: {
+  //         direction: 'E',
+  //         topology: 'along',
+  //         distance: 100000,
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '巴士海峡',
+  //         },
+  //       ],
+  //       relation: {
+  //         direction: 'W',
+  //         topology: 'disjoint',
+  //         distance: 150000,
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
+  // {
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '台湾',
+  //         },
+  //       ],
+  //       relation: {
+  //         direction: 'E',
+  //         topology: 'intersect',
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // },
   {
     tupleList: [
       {
@@ -182,13 +182,26 @@ const testData = [
       {
         relation: {
           topology: 'toward',
-          direction: 'NE',
-          distance: 300000,
+          direction: 'R',
+          distance: 500000,
         },
       },
     ],
     target: '佩洛西飞行路线',
   }, // 11
+  {
+    role: 'default',
+    tupleList: [
+      {
+        relation: {
+          topology: 'toward',
+          direction: 'L',
+          distance: 800000,
+        },
+      },
+    ],
+    target: '佩洛西飞行路线',
+  }, // 12
   {
     role: 'default',
     tupleList: [
@@ -201,7 +214,7 @@ const testData = [
       },
     ],
     target: '佩洛西飞行路线',
-  }, // 12
+  }, // 13
 ]
 
 // 2.新街口位于南京市中心，地铁一号线和二号线在此交汇

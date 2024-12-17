@@ -15,7 +15,7 @@ import { Topology } from './topology'
 import { Role } from '@/context'
 
 export class Direction {
-  // radian from [1,0] (N)
+  // radian from [0, 1] (N)
   // range: [0,2pi]
   static azimuth(vector: Position2): number {
     const angle =
