@@ -10,6 +10,7 @@ import {
   GeoTriple,
   RelationMode,
   RelationTriple,
+  SemanticDirection,
   SemanticRelation,
 } from './relation.type'
 import { JTSGeometryFactory, GeolocusGeometry, GeolocusObject } from '@/object'
@@ -237,11 +238,15 @@ export class RelationAction {
     if (relation.direction != null) {
       // 由于线状要素描述角色的朝向变化, 方向关系放置于 region 处理
       if (mode === 'line') {
-        // TODO 这里 direction 可能是字符串, 但修改 ts 类型会导致很多地方判断类型
+        // TODO 这里 direction 可能是地名或相对顺序关系, 但修改 ts 类型会导致很多地方判断类型
         // 所以这里强制定义其为 number, 有可能后续出现 bug, 但现在不会
         res.direction = <number>relation.direction
       } else {
-        res.direction = Direction.transform(relation.direction, role)
+        // 这里的 direction 不可能是地名, 否则就是解析结果错误
+        res.direction = Direction.transform(
+          <SemanticDirection | number>relation.direction,
+          role,
+        )
       }
     }
 

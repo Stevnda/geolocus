@@ -700,18 +700,43 @@ export class Region {
     for (let i = 0; i < geoTripleList.length; i++) {
       const geoTriple = geoTripleList[i]
       // 处理 role 朝向问题, 取前两个 coord 的连线的方位角作为 role 的朝向
-      // 并以此为基准处理语义方向关系
       if (geoTripleResultList.length >= 2) {
         const firstCoord = geoTripleResultList[i - 2].coord as Position2
         const secondCoord = geoTripleResultList[i - 1].coord as Position2
         const azimuth = Direction.azimuth(Vector2.sub(secondCoord, firstCoord))
         geoTriple.role.setOrientation(azimuth)
       }
+      // 处理线状要素的 direction
       if (geoTriple.relation.direction != null) {
-        geoTriple.relation.direction = Direction.transform(
-          geoTriple.relation.direction,
-          geoTriple.role,
-        )
+        if (
+          typeof geoTriple.relation.direction === 'number' ||
+          ['F', 'FR', 'R', 'BR', 'B', 'BL', 'L', 'FL'].includes(
+            geoTriple.relation.direction,
+          ) ||
+          ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'].includes(
+            geoTriple.relation.direction,
+          )
+        ) {
+          geoTriple.relation.direction = Direction.transform(
+            geoTriple.relation.direction,
+            geoTriple.role,
+          )
+        } else {
+          // 在朝 xxx 方向的情况下, i 必不可能是 0
+          const beforeCoord = geoTripleResultList[i - 1].coord as Position2
+          // TODO 这里假设地名一定可以找到, 要不就没有办法了...
+          const targetObject = <GeolocusObject>(
+            ObjectMapAction.getObjectByPlaceName(
+              objectMap,
+              geoTriple.relation.direction,
+            )
+          )
+          const targetCoord = targetObject.getGeometry().getCenter()
+          const azimuth = Direction.azimuth(
+            Vector2.sub(targetCoord, beforeCoord),
+          )
+          geoTriple.relation.direction = azimuth
+        }
       }
 
       const role = geoTriple.role
@@ -719,8 +744,8 @@ export class Region {
       const tempDistanceDelta = role.getDistanceDelta()
       if (geoTriple.relation.topology === 'toward') {
         // 朝向关系假设距离关系和方向关系都非常准
-        role.setDirectionDelta(Math.PI * 0.01)
-        role.setDistanceDelta(0.02)
+        role.setDirectionDelta(Math.PI * 0.1)
+        role.setDistanceDelta(0.05)
         // 如果是 toward 关系, 上一目标区域的最大 coord 作为 originUUIDList
         const beforeCoordRegion = new GeolocusObject(
           new GeolocusGeometry(
