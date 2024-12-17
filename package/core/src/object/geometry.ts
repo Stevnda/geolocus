@@ -87,11 +87,11 @@ export class GeolocusGeometryAction {
 
   static rotateAroundCoord(
     geometry: GeolocusGeometry,
-    theta: number,
+    azimuth: number,
     coord: Position2,
   ) {
     const affineTransformation = new jsts.geom.util.AffineTransformation()
-    affineTransformation.rotate(-theta, ...coord)
+    affineTransformation.rotate(-azimuth, ...coord)
     const geometryRotated = affineTransformation.transform(
       geometry.getGeometry(),
     )

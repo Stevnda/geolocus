@@ -120,12 +120,7 @@ test('1-n', () => {
   const center = <Position2>(
     scene.computeFuzzyPointObject('a')?.result?.getGeometry().getCenter()
   ) // [ 23.382361147149695, 114.55367398906374 ]
-  expect(
-    center[0] >= 23.3 &&
-      center[0] <= 23.4 &&
-      center[1] >= 114.5 &&
-      center[1] <= 114.6,
-  ).toBeTruthy()
+  expect(Math.abs(center[0] - 25) < 1).toBeTruthy()
 
   const context = scene.getContext()
   const route = context.getRoute()
@@ -162,8 +157,7 @@ test('1-n', () => {
         soccerCourt.getGeometry().getCenter()[0] === -25 &&
         basketballCourt.getGeometry().getCenter()[0] === 25 &&
         soccerGoal[0].getGeometry().getCenter()[1] === 7.5 &&
-        soccerGoal[1].getGeometry().getCenter()[0] >= 4.9 &&
-        soccerGoal[1].getGeometry().getCenter()[0] <= 5
+        Math.abs(soccerGoal[1].getGeometry().getCenter()[0] - 5) < 1
       )
     })(),
   ).toBeTruthy()

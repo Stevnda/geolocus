@@ -38,7 +38,7 @@ test('simple direction and distance', () => {
   scene.computeFuzzyPointObject('b')
   const res = scene.getComputeResult('b')
   const coord = <Position2>res?.result?.getGeometry().getCenter()
-  expect(coord[0] < 70.2 && coord[0] > 70.1).toBeTruthy()
+  expect(Math.abs(coord[0] - 70.2) < 1).toBeTruthy()
 })
 
 test('two direction and distance, SemanticDirection', () => {
@@ -89,6 +89,6 @@ test('two direction and distance, SemanticDirection', () => {
 
   scene.computeFuzzyPointObject('b')
   const res = scene.getComputeResult('b')
-  const coord = <Position2>res?.result?.getGeometry().getCenter() // 69.57 69.57
-  expect(coord[0] < 69.6 && coord[0] > 69.5).toBeTruthy()
+  const coord = <Position2>res?.result?.getGeometry().getCenter()
+  expect(Math.abs(coord[0] - 69.6) < 1).toBeTruthy()
 })

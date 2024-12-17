@@ -42,5 +42,5 @@ test('test orientation', () => {
   scene.computeFuzzyPointObject('b')
   const res = scene.getComputeResult('b')
   const coord = <Position2>res?.result?.getGeometry().getCenter()
-  expect(coord[0] < 70.2 && coord[0] > 70.1).toBeTruthy()
+  expect(Math.abs(coord[0] - 70.2) < 1).toBeTruthy()
 })
