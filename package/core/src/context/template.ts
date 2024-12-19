@@ -146,7 +146,7 @@ export class TemplateAction {
     return name
   }
 
-  static createObjectByTemplate(
+  static createObjectFromTemplate(
     context: GeolocusContext,
     template: Template,
     templateName: string,
@@ -192,16 +192,18 @@ export class TemplateAction {
         centerCoord[1] - templateCenter[1],
       )
     }
-    const object = new GeolocusObject(geometry, { name, templateName })
+    const object = new GeolocusObject(geometry, { name, type: templateName })
 
     // add object to objectMap
     const objectMap = context.getObjectMap()
     ObjectMapAction.addObject(objectMap, object)
 
     // add route
-    if (parentObject)
+    if (parentObject) {
       route.addEdge(parentObject.getUUID(), object.getUUID(), 'subordination')
-    else route.addEdge('root', object.getUUID(), 'subordination')
+    } else {
+      route.addEdge('root', object.getUUID(), 'subordination')
+    }
 
     // handle rule
     const ruleList = templateNode.getRuleList()
@@ -247,7 +249,7 @@ export class TemplateAction {
     rule: TemplateCustomRule,
   ) => {
     const centerCoord = rule(originObject)
-    this.createObjectByTemplate(
+    this.createObjectFromTemplate(
       context,
       template,
       childTemplateNodeName,
@@ -282,7 +284,7 @@ export class TemplateAction {
     } else {
       centerCoord = [center[0] + rule.offset[0], center[1] + rule.offset[1]]
     }
-    this.createObjectByTemplate(
+    this.createObjectFromTemplate(
       context,
       template,
       childTemplateNodeName,
@@ -332,7 +334,7 @@ export class TemplateAction {
     route.removeEdge(originObject.getUUID(), point.getUUID())
     tripleListMap.delete(point.getUUID())
 
-    this.createObjectByTemplate(
+    this.createObjectFromTemplate(
       context,
       template,
       childTemplateNodeName,
