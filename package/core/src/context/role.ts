@@ -10,6 +10,7 @@ export class Role {
   private _orientation: number
   private _directionDelta: number
   private _distanceDelta: number
+  private _timeDistanceMap: Map<string, number>
   private _semanticDistanceMap: SemanticDistanceMap
   private _weight: number
   private _spatialRef: SpatialRef
@@ -20,6 +21,7 @@ export class Role {
     orientation: number,
     directionDelta: number,
     distanceDelta: number,
+    timeDistanceMap: Map<string, number>,
     semanticDistanceMap: SemanticDistanceMap,
     weight: number,
     spatialRef: SpatialRef,
@@ -32,6 +34,7 @@ export class Role {
     this._orientation = (orientation / 180) * Math.PI // azimuth, N=0, [0, 2pi]
     this._directionDelta = (directionDelta / 180) * Math.PI // azimuth, N=0, [0, 2pi]
     this._distanceDelta = distanceDelta
+    this._timeDistanceMap = timeDistanceMap // string - rate (m/s)
     this._semanticDistanceMap = semanticDistanceMap
     this._weight = weight
     this._spatialRef = spatialRef
@@ -84,6 +87,14 @@ export class Role {
 
   getDistanceDelta(): number {
     return this._distanceDelta
+  }
+
+  setTimeDistanceMap(value: Map<string, number>): void {
+    this._timeDistanceMap = value
+  }
+
+  getTimeDistanceMap(): Map<string, number> {
+    return this._timeDistanceMap
   }
 
   setSemanticDistanceMap(value: SemanticDistanceMap): void {

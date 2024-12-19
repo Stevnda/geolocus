@@ -257,7 +257,7 @@ export class RelationAction {
     } else if (relation.distance != null) {
       const distanceTransform = Distance.transformDistance(
         relation.distance,
-        role.getSemanticDistanceMap(),
+        role,
       )
       // 最大距离处理
       if (typeof distanceTransform === 'number') {

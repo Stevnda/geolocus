@@ -22,6 +22,7 @@ export const createTestContext = () => {
     directionDelta: 90,
     distanceDelta: 0.2,
     orientation: 0,
+    timeDistanceMap: new Map([['飞机', 300]]),
     semanticDistanceMap: {
       VN: [0, 100],
       N: [100, 300],

@@ -9,6 +9,7 @@ export {
   type GeoTriple,
   type ComputeRegionRange,
   type RelationMode,
+  type TimeDistance,
   type SemanticRelation,
   type GeoLayout,
 } from './relation.type'
