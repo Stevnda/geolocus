@@ -87,7 +87,7 @@ test('1-n', () => {
       },
     },
   ])
-  TemplateAction.createObjectByTemplate(
+  TemplateAction.createObjectFromTemplate(
     scene.getContext(),
     template,
     '运动场',

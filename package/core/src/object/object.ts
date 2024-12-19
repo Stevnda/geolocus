@@ -4,14 +4,14 @@ import { GeolocusGeometry, JTSGeometryFactory } from './geometry'
 
 interface GeolocusObjectInit {
   name?: string | null // 默认值 null
-  templateName?: string | null // 默认值 null
+  type?: string | null // 默认值 null
   status?: 'fuzzy' | 'precise' // 默认值 precise
 }
 
 export class GeolocusObject {
   private _uuid: string
   private _name: string | null
-  private _templateName: string | null
+  private _type: string | null
   private _status: 'fuzzy' | 'precise'
   private _geometry: GeolocusGeometry
   private _props: Record<string, unknown>
@@ -24,7 +24,7 @@ export class GeolocusObject {
     this._uuid = generateUUID()
     this._geometry = geometry
     this._name = init?.name || null
-    this._templateName = init?.templateName || null
+    this._type = init?.type || null
     this._status = init?.status || 'precise'
     this._props = props || {}
   }
@@ -53,12 +53,12 @@ export class GeolocusObject {
     return this._name
   }
 
-  getTemplateName(): string | null {
-    return this._templateName
+  getType(): string | null {
+    return this._type
   }
 
-  setTemplateName(value: string | null) {
-    this._templateName = value
+  setType(value: string | null) {
+    this._type = value
   }
 
   setGeometry(geometry: GeolocusGeometry): void {
