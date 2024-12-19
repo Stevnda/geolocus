@@ -83,7 +83,8 @@ export class GeoTripleHandler {
     const geometry = <GeolocusGeometry>(
       Topology.bufferOfRange(origin.getGeometry(), [minDistance, maxDistance])
     )
-    const region = new GeolocusObject(geometry, { infinity })
+    const region = new GeolocusObject(geometry)
+    region.addProp('infinity', infinity)
     const pdf: PDFInput = {
       type: 'distance',
       origin,
@@ -275,7 +276,7 @@ export class GeoTripleHandler {
         Topology.intersection(triangleRotated, rangeGeometry)
       )
       const centerCoord = intersection.getCenter()
-      region.setProps({ centerCoord })
+      region.addProp('centerCoord', centerCoord)
 
       const pdf: PDFInput = {
         type: 'angle',
@@ -337,7 +338,8 @@ export class GeoTripleHandler {
           role.getContext().getMaxDistance() + Math.PI,
         )
 
-      const region = new GeolocusObject(geometry, { infinity })
+      const region = new GeolocusObject(geometry)
+      region.addProp('infinity', infinity)
 
       // 计算目标区域 coord
       // 这里要重复计算一次 directionRegion, 但也没办法...
@@ -354,7 +356,7 @@ export class GeoTripleHandler {
         )
       )
       const centerCoord = intersection.getCenter()
-      region.setProps({ centerCoord })
+      region.addProp('centerCoord', centerCoord)
 
       const pdf: PDFInput = {
         type: 'sdf',
@@ -502,9 +504,7 @@ export class GeoTripleHandler {
     } else {
       const direction = this.directionHandler(distanceRegion, relation, role)
       const intersection = this.intersection(td.region, direction.region)
-      // 处理无限距离
-      intersection.setInfinity(td.region.getInfinity())
-      // 处理朝向, centerCoord 属性
+      // 处理 infinity, centerCoord 属性
       intersection.setProps(td.region.getProps())
 
       td.region = intersection
@@ -817,7 +817,7 @@ export class Region {
 
       // toward 关系 coord 处理
       const centerCoord = <Position2 | undefined>(
-        geoTripleResult.region?.getProps().centerCoord
+        geoTripleResult.region?.getProp('centerCoord')
       )
       geoTripleResult.coord =
         centerCoord ||
@@ -1030,7 +1030,7 @@ export class Region {
     // compute the union of finite region, and then compute the intersection of union and infinity region
     let unionRegion: GeolocusGeometry | null = null
     for (const { region } of geoTripleResultList) {
-      if (region?.getInfinity()) continue
+      if (region?.getProp('infinity')) continue
       const geometry = <GeolocusGeometry>region?.getGeometry()
       if (unionRegion != null) {
         unionRegion = <GeolocusGeometry>Topology.union(unionRegion, geometry)
@@ -1039,7 +1039,7 @@ export class Region {
       }
     }
     for (const { region } of geoTripleResultList) {
-      if (!region?.getInfinity()) continue
+      if (!region?.getProp('infinity')) continue
       const tempRegion = Topology.intersection(
         <GeolocusGeometry>unionRegion,
         <GeolocusGeometry>region?.getGeometry(),
