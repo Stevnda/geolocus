@@ -10,6 +10,10 @@ export type RelationMode = 'point' | 'line' | 'polygon'
 export type EuclideanDistance = number
 export type EuclideanDistanceRange = [number, number]
 export type SemanticDistance = 'VN' | 'N' | 'M' | 'F' | 'VF'
+export type TimeDistance = {
+  time: number // 秒
+  rate: string | number // 交通工具或者速度 (m/s)
+}
 export type SemanticDistanceMap = Record<
   SemanticDistance,
   EuclideanDistanceRange

@@ -196,7 +196,10 @@ const testData = [
         relation: {
           topology: 'toward',
           direction: 'L',
-          distance: 200000,
+          distance: {
+            time: 2000,
+            rate: 300,
+          },
         },
       },
     ],
@@ -209,7 +212,10 @@ const testData = [
         relation: {
           topology: 'toward',
           direction: '首尔',
-          distance: 300000,
+          distance: {
+            time: 1000,
+            rate: '飞机',
+          },
         },
       },
     ],

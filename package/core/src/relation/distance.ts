@@ -3,9 +3,10 @@ import {
   EuclideanDistance,
   EuclideanDistanceRange,
   SemanticDistance,
-  SemanticDistanceMap,
+  TimeDistance,
 } from './relation.type'
 import { GeolocusGeometry, Position2 } from '@/object'
+import { Role } from '@/context'
 
 interface DistanceNormalization {
   max: number
@@ -16,10 +17,22 @@ interface DistanceNormalization {
 
 export class Distance {
   static transformDistance(
-    distance: EuclideanDistance | EuclideanDistanceRange | SemanticDistance,
-    map: SemanticDistanceMap,
+    distance:
+      | EuclideanDistance
+      | EuclideanDistanceRange
+      | TimeDistance
+      | SemanticDistance,
+    role: Role,
   ): EuclideanDistance | EuclideanDistanceRange {
-    if (typeof distance === 'string') {
+    if (distance instanceof Object && !(distance instanceof Array)) {
+      if (typeof distance.rate === 'number') {
+        return distance.time * distance.rate
+      } else {
+        const rate = <number>role.getTimeDistanceMap().get(distance.rate)
+        return distance.time * rate
+      }
+    } else if (typeof distance === 'string') {
+      const map = role.getSemanticDistanceMap()
       const range: EuclideanDistanceRange = map[distance]
       return range
     }

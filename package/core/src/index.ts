@@ -9,6 +9,7 @@ import {
   SemanticDirection,
   RelationMode,
   GeoLayout,
+  TimeDistance,
 } from './relation'
 import {
   GeolocusContext,
@@ -28,7 +29,11 @@ import { generateUUID } from './util'
 export interface UserGeoRelation {
   topology?: TopologyRelation
   direction?: string | SemanticDirection | number // [0,360], N=0
-  distance?: EuclideanDistance | EuclideanDistanceRange | SemanticDistance
+  distance?:
+    | EuclideanDistance
+    | EuclideanDistanceRange
+    | TimeDistance
+    | SemanticDistance
   range?: ComputeRegionRange
   layout?: GeoLayout
 }
@@ -53,6 +58,7 @@ export interface RoleInit {
   orientation: number
   directionDelta: number
   distanceDelta: number
+  timeDistanceMap: Map<string, number>
   semanticDistanceMap: SemanticDistanceMap
   weight: number
   spatialRef: SpatialRef
@@ -88,6 +94,7 @@ export class Geolocus {
       init.orientation,
       init.directionDelta,
       init.distanceDelta,
+      init.timeDistanceMap,
       init.semanticDistanceMap,
       init.weight,
       init.spatialRef,
