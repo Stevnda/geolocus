@@ -13,6 +13,7 @@ beforeEach(() => {
     directionDelta: 45,
     distanceDelta: 0.2,
     orientation: 0,
+    timeDistanceMap: new Map([['飞机', 300]]),
     semanticDistanceMap: {
       VN: [0, 10000],
       N: [10000, 30000],

@@ -6,23 +6,94 @@ import {
 } from '@/object'
 import { MAGIC_NUMBER, Vector2 } from '@/util'
 import jsts from '@geolocus/jsts'
-import { ArrangementLayout, GeoLayout, GeoTriple } from './relation.type'
+import { ArrangementLayoutInit, GeoLayout, GeoTriple } from './relation.type'
 import { GeoTripleResult, PDFInput } from '@/region/region.type'
 import { GeolocusContext, ObjectMapAction } from '@/context'
 import { Topology } from './topology'
 
 export class Layout {
-  private static isPointInPolygon(
-    coord: Position2,
-    geometry: GeolocusGeometry,
-  ): boolean {
-    const point = JTSGeometryFactory.point(coord)
-    const result =
-      jsts.operation.distance.DistanceOp.distance(
-        geometry.getGeometry(),
-        point,
-      ) === 0
-    return result
+  static computeLayout(
+    layout: GeoLayout,
+    geoTriple: GeoTriple,
+    geoTripleResult: GeoTripleResult,
+    context: GeolocusContext,
+  ) {
+    const { layout: layoutType } = layout
+    if (['uniform', 'random', 'between'].includes(layoutType)) {
+      const init = <ArrangementLayoutInit>layout.init
+      const result = this.computeArrangementLayout(
+        layout.number,
+        init,
+        geoTriple,
+        geoTripleResult,
+        context,
+      )
+      const pdfInput = <PDFInput>geoTripleResult.pdfInput
+      if (init.type === 'between') {
+        geoTripleResult.region = <GeolocusObject>result
+        pdfInput.type = 'sdf'
+        pdfInput.sdf.gridRegion = <GeolocusObject>result
+      } else {
+        pdfInput.type = 'spread'
+        pdfInput.spread.gridRegion = <GeolocusObject>geoTripleResult.region
+        pdfInput.spread.gridSum = context.getGridSum()
+        pdfInput.spread.spreadPointList = <GeolocusObject[]>result
+      }
+    }
+  }
+
+  // arrangementLayout
+  private static computeArrangementLayout(
+    number: number,
+    layoutInit: ArrangementLayoutInit,
+    geoTriple: GeoTriple,
+    geoTripleResult: GeoTripleResult,
+    context: GeolocusContext,
+  ): GeolocusObject | GeolocusObject[] {
+    const { type } = layoutInit
+    const objectMap = context.getObjectMap()
+    if (type === 'between') {
+      let resultGeometry = (<GeolocusObject>(
+        geoTripleResult.region
+      )).getGeometry()
+      for (const originUUID of <string[]>geoTriple.originUUIDList) {
+        const origin = <GeolocusObject>(
+          ObjectMapAction.getObjectByUUID(objectMap, originUUID)
+        )
+        const buffer = new GeolocusObject(
+          <GeolocusGeometry>(
+            Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER)
+          ),
+        )
+        resultGeometry = <GeolocusGeometry>(
+          Topology.difference(resultGeometry, buffer.getGeometry())
+        )
+      }
+
+      return new GeolocusObject(resultGeometry)
+    } else if (type === 'uniform') {
+      const pointList = this.generateUniformPointList(
+        <GeolocusObject>geoTripleResult.region,
+        number,
+      )
+      return new GeolocusObject(
+        new GeolocusGeometry(
+          'MultiPoint',
+          JTSGeometryFactory.multiPoint(pointList),
+        ),
+      )
+    } else {
+      const pointList = this.generateRandomPointList(
+        <GeolocusObject>geoTripleResult.region,
+        number,
+      )
+      return new GeolocusObject(
+        new GeolocusGeometry(
+          'MultiPoint',
+          JTSGeometryFactory.multiPoint(pointList),
+        ),
+      )
+    }
   }
 
   private static generateRandomPointList(
@@ -140,83 +211,16 @@ export class Layout {
     return pointList
   }
 
-  private static computeArrangementLayout(
-    layout: ArrangementLayout,
-    geoTriple: GeoTriple,
-    geoTripleResult: GeoTripleResult,
-    context: GeolocusContext,
-  ): GeolocusObject {
-    const { type, number } = layout
-    const objectMap = context.getObjectMap()
-    if (type === 'between') {
-      let resultGeometry = (<GeolocusObject>(
-        geoTripleResult.region
-      )).getGeometry()
-      for (const originUUID of <string[]>geoTriple.originUUIDList) {
-        const origin = <GeolocusObject>(
-          ObjectMapAction.getObjectByUUID(objectMap, originUUID)
-        )
-        const buffer = new GeolocusObject(
-          <GeolocusGeometry>(
-            Topology.bufferOfDistance(origin.getGeometry(), MAGIC_NUMBER)
-          ),
-        )
-        resultGeometry = <GeolocusGeometry>(
-          Topology.difference(resultGeometry, buffer.getGeometry())
-        )
-      }
-
-      return new GeolocusObject(resultGeometry)
-    } else if (type === 'uniform') {
-      const pointList = this.generateUniformPointList(
-        <GeolocusObject>geoTripleResult.region,
-        number,
-      )
-      return new GeolocusObject(
-        new GeolocusGeometry(
-          'MultiPoint',
-          JTSGeometryFactory.multiPoint(pointList),
-        ),
-      )
-    } else {
-      const pointList = this.generateRandomPointList(
-        <GeolocusObject>geoTripleResult.region,
-        number,
-      )
-      return new GeolocusObject(
-        new GeolocusGeometry(
-          'MultiPoint',
-          JTSGeometryFactory.multiPoint(pointList),
-        ),
-      )
-    }
-  }
-
-  static computeLayout(
-    layout: GeoLayout,
-    geoTriple: GeoTriple,
-    geoTripleResult: GeoTripleResult,
-    context: GeolocusContext,
-  ) {
-    const { type } = layout
-    if (['uniform', 'random', 'between'].includes(type)) {
-      const result = this.computeArrangementLayout(
-        <ArrangementLayout>layout,
-        geoTriple,
-        geoTripleResult,
-        context,
-      )
-      const pdfInput = <PDFInput>geoTripleResult.pdfInput
-      if (type === 'between') {
-        geoTripleResult.region = result
-        pdfInput.type = 'sdf'
-        pdfInput.sdf.gridRegion = result
-      } else {
-        pdfInput.type = 'spread'
-        pdfInput.spread.gridRegion = <GeolocusObject>geoTripleResult.region
-        pdfInput.spread.gridSum = context.getGridSum()
-        pdfInput.spread.spreadPointList = result
-      }
-    }
+  private static isPointInPolygon(
+    coord: Position2,
+    geometry: GeolocusGeometry,
+  ): boolean {
+    const point = JTSGeometryFactory.point(coord)
+    const result =
+      jsts.operation.distance.DistanceOp.distance(
+        geometry.getGeometry(),
+        point,
+      ) === 0
+    return result
   }
 }

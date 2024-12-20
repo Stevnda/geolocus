@@ -49,69 +49,59 @@ export type TopologyRelation =
   | 'along'
   | 'toward'
 
-export interface ArrangementLayout {
+export interface ArrangementLayoutInit {
   type: 'uniform' | 'random' | 'between'
-  number: number
 }
 
-export interface LinearLayout {
+export interface LinearLayoutInit {
   type: 'straight'
-  number: number
-  init: {
-    length: number
-  }
+  length: number
 }
 
-export interface CircularLayout {
-  type: 'solid' | 'hollow' | 'annulus'
-  number: number
-  init: {
-    radius0: number
-    radius1: number
-  }
+export interface CircularLayoutInit {
+  type: 'solid' | 'hollow'
+  radius0: number
+  radius1: number
 }
 
-export interface TriangularLayout {
+export interface TriangularLayoutInit {
   type: 'solid' | 'hollow' | 'vFormation'
-  number: number
-  init: {
-    angle: number
-    sideLength: number
-  }
+  angle: number
+  sideLength: number
 }
 
-export interface RectangularLayout {
+export interface RectangularLayoutInit {
   type: 'solid' | 'hollow'
-  number: number
-  init: {
-    width: number
-    height: number
-  }
+  width: number
+  height: number
 }
 
-export interface HexagonalLayout {
+export interface HexagonalLayoutInit {
   type: 'solid' | 'hollow'
-  number: number
-  init: {
-    sideLength: number
-  }
+  sideLength: number
 }
 
-export interface CustomLayout {
-  type: string
-  number: number
-  init: object
-}
+export type CustomLayout = Record<string, unknown>
 
-export type GeoLayout =
-  | ArrangementLayout
-  | LinearLayout
-  | CircularLayout
-  | TriangularLayout
-  | RectangularLayout
-  | HexagonalLayout
-  // | RegularPolygonLayout
-  | CustomLayout
+export type GeoLayout = {
+  layout:
+    | 'arrangement'
+    | 'line'
+    | 'circle'
+    | 'triangle'
+    | 'rectangle'
+    | 'hexagon'
+    | 'custom'
+  number: number
+  init:
+    | ArrangementLayoutInit
+    | LinearLayoutInit
+    | CircularLayoutInit
+    | TriangularLayoutInit
+    | RectangularLayoutInit
+    | HexagonalLayoutInit
+    | CustomLayout
+}
 
 export interface GeoRelation {
   topology: TopologyRelation

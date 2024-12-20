@@ -18,7 +18,7 @@ export interface PDFInput {
   }
   spread: {
     gridRegion?: GeolocusObject // spread 的计算区域
-    spreadPointList?: GeolocusObject // spread 的起始扩散点, 与三元组的目标区域相同
+    spreadPointList?: GeolocusObject[] // spread 的起始扩散点, 与三元组的目标区域相同
     gridSum?: number // 计算栅格总数
   }
   weight: number
