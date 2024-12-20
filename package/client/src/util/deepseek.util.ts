@@ -158,82 +158,82 @@ const testData = [
     ],
     target: '佩洛西飞行路线',
   },
-  {
-    role: 'default',
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '东海岸线',
-          },
-        ],
-        relation: {
-          topology: 'toward',
-          direction: 'N',
-          distance: 800000,
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  }, // 10
-  {
-    role: 'default',
-    tupleList: [
-      {
-        relation: {
-          topology: 'toward',
-          direction: 'R',
-          distance: 900000,
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  }, // 11
-  {
-    role: 'default',
-    tupleList: [
-      {
-        relation: {
-          topology: 'toward',
-          direction: 'L',
-          distance: {
-            time: 2000,
-            rate: 300,
-          },
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  }, // 12
-  {
-    role: 'default',
-    tupleList: [
-      {
-        relation: {
-          topology: 'toward',
-          direction: '首尔',
-          distance: {
-            time: 1000,
-            rate: '飞机',
-          },
-        },
-      },
-    ],
-    target: '佩洛西飞行路线',
-  }, // 13
-  {
-    role: 'default',
-    tupleList: [
-      {
-        originList: [
-          {
-            name: '首尔',
-          },
-        ],
-      },
-    ],
-    target: '佩洛西飞行路线',
-  }, // 14
+  // {
+  //   role: 'default',
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '东海岸线',
+  //         },
+  //       ],
+  //       relation: {
+  //         topology: 'toward',
+  //         direction: 'N',
+  //         distance: 800000,
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // }, // 10
+  // {
+  //   role: 'default',
+  //   tupleList: [
+  //     {
+  //       relation: {
+  //         topology: 'toward',
+  //         direction: 'R',
+  //         distance: 900000,
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // }, // 11
+  // {
+  //   role: 'default',
+  //   tupleList: [
+  //     {
+  //       relation: {
+  //         topology: 'toward',
+  //         direction: 'L',
+  //         distance: {
+  //           time: 2000,
+  //           rate: 300,
+  //         },
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // }, // 12
+  // {
+  //   role: 'default',
+  //   tupleList: [
+  //     {
+  //       relation: {
+  //         topology: 'toward',
+  //         direction: '首尔',
+  //         distance: {
+  //           time: 1000,
+  //           rate: '飞机',
+  //         },
+  //       },
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // }, // 13
+  // {
+  //   role: 'default',
+  //   tupleList: [
+  //     {
+  //       originList: [
+  //         {
+  //           name: '首尔',
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   target: '佩洛西飞行路线',
+  // }, // 14
 ]
 
 // 2.新街口位于南京市中心，地铁一号线和二号线在此交汇
@@ -355,6 +355,90 @@ const lineTestData = [
   },
 ]
 
+// 南海东北部到达台湾岛,东至菲律宾,南依印度尼西亚,西岸濒越南,西南达新加坡
+const polygonTestData = [
+  {
+    role: 'default',
+    tupleList: [
+      {
+        originList: [
+          {
+            name: '台湾',
+          },
+        ],
+        relation: {
+          direction: 'SW',
+        },
+      },
+    ],
+    target: '南海',
+  },
+  {
+    role: 'default',
+    tupleList: [
+      {
+        originList: [
+          {
+            name: '菲律宾',
+          },
+        ],
+        relation: {
+          direction: 'W',
+        },
+      },
+    ],
+    target: '南海',
+  },
+  {
+    role: 'default',
+    tupleList: [
+      {
+        originList: [
+          {
+            name: '文莱',
+          },
+        ],
+        relation: {
+          direction: 'N',
+        },
+      },
+    ],
+    target: '南海',
+  },
+  {
+    role: 'default',
+    tupleList: [
+      {
+        originList: [
+          {
+            name: '新加坡',
+          },
+        ],
+        relation: {
+          direction: 'N',
+        },
+      },
+    ],
+    target: '南海',
+  },
+  {
+    role: 'default',
+    tupleList: [
+      {
+        originList: [
+          {
+            name: '越南',
+          },
+        ],
+        relation: {
+          direction: 'E',
+        },
+      },
+    ],
+    target: '南海',
+  },
+]
+
 export const deepseek = async (text: string): Promise<string> => {
   // const completion = await openai.chat.completions.create({
   //   messages: [
@@ -376,5 +460,5 @@ export const deepseek = async (text: string): Promise<string> => {
   // return content || '[]'
   await new Promise((resolve) => setTimeout(resolve, 1000))
   console.log(text)
-  return JSON.stringify(testData)
+  return JSON.stringify(pointTestData)
 }

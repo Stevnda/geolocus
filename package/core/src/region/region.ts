@@ -572,7 +572,7 @@ export class Region {
       // compute pdf and region of per geoTriple
       const geoTripleResultList = []
       for (const geoTriple of currentResult.geoTripleList) {
-        const geoTripleResult = this.computePdfAndRegionOfGeoTriple(
+        const { result: geoTripleResult } = this.computePdfAndRegionOfGeoTriple(
           geoTriple,
           context,
         )
@@ -802,7 +802,7 @@ export class Region {
         }
         geoTriple.originUUIDList = [beforeCoordRegion.getUUID()]
       }
-      const geoTripleResult = this.computePdfAndRegionOfGeoTriple(
+      const { result: geoTripleResult } = this.computePdfAndRegionOfGeoTriple(
         geoTriple,
         context,
       )
@@ -1005,11 +1005,10 @@ export class Region {
 
     // compute pdf, region, regionPdfGrid and coord of per geoTriple together
     const geoTripleResultList = []
+    const geoTripleOriginList = []
     for (const geoTriple of geoTripleList) {
-      const geoTripleResult = this.computePdfAndRegionOfGeoTriple(
-        geoTriple,
-        context,
-      )
+      const { result: geoTripleResult, unionOrigin } =
+        this.computePdfAndRegionOfGeoTriple(geoTriple, context)
       geoTripleResult.pdfGrid = this.computePdfGrid(
         <GeolocusObject>geoTripleResult.region,
         <PDFInput>geoTripleResult.pdfInput,
@@ -1024,6 +1023,7 @@ export class Region {
         context,
       ).coord
       geoTripleResultList.push(geoTripleResult)
+      geoTripleOriginList.push(unionOrigin)
     }
     result.geoTripleResultList = geoTripleResultList
 
@@ -1049,6 +1049,13 @@ export class Region {
           "Can't compute the fuzzy region, the intersection is empty.",
         )
       }
+      unionRegion = tempRegion
+    }
+    for (const origin of geoTripleOriginList) {
+      const tempRegion = Topology.difference(
+        <GeolocusGeometry>unionRegion,
+        <GeolocusGeometry>origin,
+      )
       unionRegion = tempRegion
     }
 
@@ -1096,7 +1103,7 @@ export class Region {
   private static computePdfAndRegionOfGeoTriple(
     geoTriple: GeoTriple,
     context: GeolocusContext,
-  ): GeoTripleResult {
+  ): { result: GeoTripleResult; unionOrigin: GeolocusGeometry } {
     const result: GeoTripleResult = {
       coord: null,
       region: null,
@@ -1141,7 +1148,7 @@ export class Region {
       Layout.computeLayout(relation.layout, geoTriple, result, context)
     }
 
-    return result
+    return { result, unionOrigin: <GeolocusGeometry>unionOrigin }
   }
 
   private static computePdfGrid(

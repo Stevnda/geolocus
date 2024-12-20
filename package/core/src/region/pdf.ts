@@ -245,7 +245,9 @@ export class RegionPDF {
 
     const queue: Position2[] = []
     const startPointList = <Position2[]>(
-      pdf.spread.spreadPointList?.getGeometry().getCoordList()
+      pdf.spread.spreadPointList?.map((object) =>
+        object.getGeometry().getCenter(),
+      )
     )
     for (const [x, y] of startPointList) {
       const col = Math.floor((x - xStart) / gridSize)
