@@ -2,10 +2,11 @@ import { generateUUID, GeolocusGrid, Grid } from '@/util'
 import jsts from '@geolocus/jsts'
 import { GeolocusGeometry, JTSGeometryFactory } from './geometry'
 
-interface GeolocusObjectInit {
+export interface GeolocusObjectInit {
   name?: string | null // 默认值 null
   type?: string | null // 默认值 null
   status?: 'fuzzy' | 'precise' // 默认值 precise
+  orientation?: number | null // 默认为 0 （正北方向）, radius
 }
 
 export class GeolocusObject {
@@ -13,6 +14,7 @@ export class GeolocusObject {
   private _name: string | null
   private _type: string | null
   private _status: 'fuzzy' | 'precise'
+  private _orientation: number
   private _geometry: GeolocusGeometry
   private _props: Record<string, unknown>
 
@@ -26,6 +28,7 @@ export class GeolocusObject {
     this._name = init?.name || null
     this._type = init?.type || null
     this._status = init?.status || 'precise'
+    this._orientation = init?.orientation || 0
     this._props = props || {}
   }
 
@@ -59,6 +62,14 @@ export class GeolocusObject {
 
   setType(value: string | null) {
     this._type = value
+  }
+
+  setOrientation(value: number): void {
+    this._orientation = value
+  }
+
+  getOrientation(): number {
+    return this._orientation
   }
 
   setGeometry(geometry: GeolocusGeometry): void {

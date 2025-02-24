@@ -11,3 +11,11 @@ export {
   JTSGeometryAction as GeolocusGeometryMeta,
   GeolocusGeometryAction,
 } from './geometry'
+export {
+  Template,
+  TemplateAction,
+  TemplateCustomExpress,
+  TemplateBBoxExpress,
+  TemplateRelationExpress,
+  TemplateRule,
+} from './template'

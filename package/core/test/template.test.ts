@@ -1,8 +1,16 @@
 import { beforeEach, expect, test } from 'vitest'
 import { createTestContext } from './init'
 import { Geolocus } from '@/index'
-import { TemplateNode, Template, TemplateAction } from '@/context'
-import { GeolocusObject, Position2 } from '@/object'
+import {
+  TemplateAction,
+  GeolocusObject,
+  TemplateRule,
+  TemplateBBoxExpress,
+  TemplateRelationExpress,
+  GeolocusGeometry,
+  JTSGeometryFactory,
+} from '@/object'
+import { ObjectMapAction } from '@/context'
 
 let scene: Geolocus
 beforeEach(() => {
@@ -10,154 +18,137 @@ beforeEach(() => {
 })
 
 test('1-n', () => {
-  const soccerGoal = new TemplateNode('足球门', 'Polygon', [
-    [
-      [0, 0],
-      [0, 2],
-      [1, 2],
-      [1, 0],
-      [0, 0],
-    ],
-  ])
-  const basketballCourt = new TemplateNode('篮球场', 'Polygon', [
-    [
-      [0, 0],
-      [0, 30],
-      [30, 30],
-      [30, 0],
-      [0, 0],
-    ],
-  ])
-  const soccerCourt = new TemplateNode('足球场', 'Polygon', [
-    [
-      [0, 0],
-      [0, 30],
-      [30, 30],
-      [30, 0],
-      [0, 0],
-    ],
-  ])
-  const sportsFiled = new TemplateNode('运动场', 'Polygon', [
-    [
-      [0, 0],
-      [0, 50],
-      [100, 50],
-      [100, 0],
-      [0, 0],
-    ],
-  ])
-
-  const template = new Template(scene.getContext())
-  const nodeList = template.getNodeList()
-  nodeList.set('足球门', soccerGoal)
-  nodeList.set('篮球场', basketballCourt)
-  nodeList.set('足球场', soccerCourt)
-  nodeList.set('运动场', sportsFiled)
-
-  sportsFiled.setRuleList([
-    {
-      templateNodeName: '足球场',
-      bboxRule: {
-        type: 'relative',
-        offset: [-0.5, 0],
-      },
-    },
-    {
-      templateNodeName: '篮球场',
-      bboxRule: {
-        type: 'relative',
-        offset: [0.5, 0],
-      },
-    },
-  ])
-
-  soccerCourt.setRuleList([
-    {
-      templateNodeName: '足球门',
-      bboxRule: {
-        type: 'relative',
-        offset: [0, 0.5],
-      },
-    },
-    {
-      templateNodeName: '足球门',
-      relationRule: {
-        direction: 'E',
-        distance: 15,
-      },
-    },
-  ])
-  TemplateAction.createObjectFromTemplate(
-    scene.getContext(),
-    template,
-    '运动场',
-    [0, 0],
-  )
-
-  scene.defineRelation(
-    [
-      {
-        tupleList: [
-          {
-            originList: [
-              {
-                name: '运动场篮球场',
-              },
-            ],
-            relation: {
-              direction: 0,
-              distance: 100,
-              topology: 'disjoint',
-            },
-          },
-        ],
-        role: 'test',
-        target: 'a',
-      },
-    ],
-    'point',
-  )
-  const center = <Position2>(
-    scene.computeFuzzyPointObject('a')?.result?.getGeometry().getCenter()
-  ) // [ 23.382361147149695, 114.55367398906374 ]
-  expect(Math.abs(center[0] - 25) < 1).toBeTruthy()
-
   const context = scene.getContext()
+  const express0: TemplateBBoxExpress = {
+    name: '足球场',
+    type: 'relative',
+    offset: [-0.5, 0],
+    geometryType: 'Polygon',
+    coordList: [
+      [
+        [0, 0],
+        [0, 30],
+        [30, 30],
+        [30, 0],
+        [0, 0],
+      ],
+    ],
+  }
+
+  const express1: TemplateRelationExpress = {
+    name: '足球门',
+    relation: {
+      direction: 'W',
+      distance: 5,
+    },
+    geometryType: 'Polygon',
+    coordList: [
+      [
+        [0, 0],
+        [0, 30],
+        [30, 30],
+        [30, 0],
+        [0, 0],
+      ],
+    ],
+  }
+
+  const express2: TemplateRelationExpress = {
+    name: '足球门',
+    relation: {
+      direction: 'E',
+      distance: 5,
+    },
+    geometryType: 'Polygon',
+    coordList: [
+      [
+        [0, 0],
+        [0, 30],
+        [30, 30],
+        [30, 0],
+        [0, 0],
+      ],
+    ],
+  }
+
+  const express3: TemplateBBoxExpress = {
+    name: '篮球场',
+    type: 'relative',
+    offset: [0.5, 0],
+    geometryType: 'Polygon',
+    coordList: [
+      [
+        [0, 0],
+        [0, 30],
+        [30, 30],
+        [30, 0],
+        [0, 0],
+      ],
+    ],
+  }
+
+  const rule1: TemplateRule = {
+    name: '运动场',
+    expressList: [express0, express3],
+  }
+
+  const rule2: TemplateRule = {
+    name: '足球场',
+    expressList: [express1, express2],
+  }
+
+  const template = context.getTemplate()
+  template.addRule(rule1.name, rule1)
+  template.addRule(rule2.name, rule2)
+
+  const sportsFiled = new GeolocusObject(
+    new GeolocusGeometry(
+      'Polygon',
+      JTSGeometryFactory.create('Polygon', [
+        [
+          [0, 0],
+          [0, 50],
+          [100, 50],
+          [100, 0],
+          [0, 0],
+        ],
+      ]),
+    ),
+    {
+      name: '运动场',
+      type: '运动场',
+    },
+  )
+  ObjectMapAction.addObject(context.getObjectMap(), sportsFiled)
+  TemplateAction.createObjectTemplate(context, sportsFiled)
+
   const route = context.getRoute()
   const objectMap = context.getObjectMap()
-  const objectNameList = Array.from(objectMap.getNameMap().keys()).sort()
-  expect(objectNameList).toEqual([
-    'a',
-    '运动场',
-    '运动场篮球场',
-    '运动场足球场',
-    '运动场足球场足球门',
-  ])
-  expect(route.getNodeList().size).toEqual(7)
+  expect(route.getNodeList().size).toEqual(6)
   expect(
     (() => {
       const nameMap = objectMap.getNameMap()
       const sportsFiled = <GeolocusObject>(
         nameMap.get('运动场')?.values().next().value
-      ) // [0, 0]
+      ) // [50, 25]
       const soccerCourt = <GeolocusObject>(
         nameMap.get('运动场足球场')?.values().next().value
-      ) // [-25, 0]
+      ) // [25, 25]
       const basketballCourt = <GeolocusObject>(
         nameMap.get('运动场篮球场')?.values().next().value
-      ) // [25, 0]
+      ) // [75, 25]
       const soccerGoal = Array.from(
         <SetIterator<GeolocusObject>>(
           nameMap.get('运动场足球场足球门')?.values()
         ),
-      ) // [-25, 7.5], [4.930890921432788, -1.1475419665558064]
+      ) // [20, 25], [30, 25]
 
       return (
-        sportsFiled.getGeometry().getCenter()[0] === 0 &&
-        soccerCourt.getGeometry().getCenter()[0] === -25 &&
-        basketballCourt.getGeometry().getCenter()[0] === 25 &&
-        soccerGoal[0].getGeometry().getCenter()[1] === 7.5 &&
-        Math.abs(soccerGoal[1].getGeometry().getCenter()[0] - 5) < 1
+        sportsFiled.getGeometry().getCenter()[0] === 50 &&
+        soccerCourt.getGeometry().getCenter()[0] === 25 &&
+        basketballCourt.getGeometry().getCenter()[0] === 75 &&
+        Math.abs(soccerGoal[0].getGeometry().getCenter()[0] - 5) < 1 &&
+        Math.abs(soccerGoal[1].getGeometry().getCenter()[0] - 45) < 1
       )
     })(),
   ).toBeTruthy()

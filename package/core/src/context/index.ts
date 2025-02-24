@@ -8,4 +8,3 @@ export {
   SpatialRefAction,
   createSpatialRefFromEPSG,
 } from './spatialReference'
-export { Template, TemplateAction, TemplateNode } from './template'

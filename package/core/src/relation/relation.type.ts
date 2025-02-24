@@ -53,54 +53,49 @@ export interface ArrangementLayoutInit {
   type: 'uniform' | 'random' | 'between'
 }
 
-export interface LinearLayoutInit {
-  type: 'straight'
-  length: number
-}
-
-export interface CircularLayoutInit {
-  type: 'solid' | 'hollow'
-  radius0: number
-  radius1: number
-}
-
-export interface TriangularLayoutInit {
-  type: 'solid' | 'hollow' | 'vFormation'
-  angle: number
-  sideLength: number
-}
-
-export interface RectangularLayoutInit {
-  type: 'solid' | 'hollow'
-  width: number
-  height: number
-}
-
-export interface HexagonalLayoutInit {
-  type: 'solid' | 'hollow'
-  sideLength: number
-}
-
-export type CustomLayout = Record<string, unknown>
-
-export type GeoLayout = {
-  layout:
-    | 'arrangement'
-    | 'line'
-    | 'circle'
-    | 'triangle'
-    | 'rectangle'
-    | 'hexagon'
-    | 'custom'
-  number: number
+export interface GeometryLayoutInit {
+  type: 'line' | 'circle' | 'triangle' | 'rectangle' | 'hexagon'
   init:
-    | ArrangementLayoutInit
     | LinearLayoutInit
     | CircularLayoutInit
     | TriangularLayoutInit
     | RectangularLayoutInit
     | HexagonalLayoutInit
-    | CustomLayout
+}
+
+export interface LinearLayoutInit {
+  type: 'straight'
+  gap: number
+}
+
+export interface CircularLayoutInit {
+  type: 'solid' | 'hollow'
+  gap: number
+}
+
+export interface TriangularLayoutInit {
+  type: 'solid' | 'hollow' | 'vFormation'
+  gap: number
+  angle: number // radius
+}
+
+export interface RectangularLayoutInit {
+  type: 'solid' | 'hollow'
+  gap: number
+  ratio: [number, number] // [width, height]
+}
+
+export interface HexagonalLayoutInit {
+  type: 'solid' | 'hollow'
+  gap: number
+}
+
+export type CustomLayout = Record<string, unknown>
+
+export type GeoLayout = {
+  layout: 'arrangement' | 'geometry' | 'sequence' | 'custom'
+  number: number
+  init: ArrangementLayoutInit | GeometryLayoutInit | CustomLayout
 }
 
 export interface GeoRelation {

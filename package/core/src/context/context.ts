@@ -6,7 +6,12 @@ import { GeolocusContextInit } from './context.type'
 import { RegionResult } from '@/region'
 import { ObjectMap } from './objectMap'
 import { generateUUID } from '@/util'
-import { GeolocusGeometry, GeolocusObject, JTSGeometryFactory } from '@/object'
+import {
+  GeolocusGeometry,
+  GeolocusObject,
+  JTSGeometryFactory,
+  Template,
+} from '@/object'
 import { SpatialRef } from './spatialReference'
 
 export class GeolocusContext {
@@ -22,6 +27,7 @@ export class GeolocusContext {
   private _objectMap: ObjectMap
   private _spatialRefMap: Map<string, SpatialRef>
   private _roleMap: Map<string, Role>
+  private _template: Template
   private _route: Route
   private _relation: Relation
   private _resultMap: Map<string, RegionResult>
@@ -37,6 +43,7 @@ export class GeolocusContext {
     )
     this._objectMap = new ObjectMap(this)
     this._relation = new Relation(this)
+    this._template = new Template(this)
     this._route = new Route(this)
     this._roleMap = new Map() // the key is the name of role
     this._resultMap = new Map() // the uuid of resultMap is the same as geolocusObject
@@ -84,6 +91,14 @@ export class GeolocusContext {
 
   getRelation(): Relation {
     return this._relation
+  }
+
+  setTemplate(value: Template): void {
+    this._template = value
+  }
+
+  getTemplate(): Template {
+    return this._template
   }
 
   setRoute(value: Route): void {
