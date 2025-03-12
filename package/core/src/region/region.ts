@@ -311,15 +311,10 @@ export class GeoTripleHandler {
         }
       }
 
+      // NOTE 这个重新改一改
       // 计算沿着 xxx 的缓冲区, 如果不做缓冲区, 可能在 td 和 directionRegion 的相交操作出现错误
-      const bbox = (<GeolocusGeometry>unionOrigin).getBBox()
-      const dx = bbox[2] - bbox[0]
-      const dy = bbox[3] - bbox[1]
       const N = role.getSemanticDistanceMap().N
-      const bufferDistance = Math.max(
-        (N[0] + N[1]) / 2,
-        Math.sqrt(dx * dx + dy * dy) / 40,
-      )
+      const bufferDistance = (N[0] + N[1]) / 15
       unionOrigin = <GeolocusGeometry>(
         Topology.bufferOfDistance(<GeolocusGeometry>unionOrigin, bufferDistance)
       )
@@ -1143,7 +1138,6 @@ export class Region {
     )
     result.pdfInput = pdf
     result.region = region
-
     if (relation.layout != null) {
       Layout.computeLayout(relation.layout, geoTriple, result, context)
     }

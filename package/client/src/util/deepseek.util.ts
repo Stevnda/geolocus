@@ -249,7 +249,7 @@ const pointTestData = [
         ],
         relation: {
           topology: 'along',
-          distance: 1000,
+          distance: 2000,
         },
       },
     ],
@@ -439,6 +439,239 @@ const polygonTestData = [
   },
 ]
 
+export const examText = {
+  yangshan: [
+    // 位于羊山公园 1 km
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              distance: 1000,
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+    // 位于羊山公园东北方 1 km
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              direction: 'NE',
+              distance: 1000,
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+    // 位于羊山公园内部
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+    // 位于羊山公园内部西南方
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+              direction: 'S',
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+    // 沿着羊山公园
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              topology: 'along',
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+    // 沿着羊山公园南部
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              topology: 'along',
+              direction: 'S',
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+    // 羊山公园内部均匀分布10个点
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+              layout: {
+                layout: 'arrangement',
+                number: 10,
+                init: {
+                  type: 'uniform',
+                },
+              },
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+    // 围绕羊山公园中心 100 米
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '羊山公园',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+              layout: {
+                layout: 'geometry',
+                number: 3,
+                init: {
+                  type: 'circle',
+                  init: {
+                    type: 'hollow',
+                    gap: 200,
+                  },
+                },
+              },
+            },
+          },
+        ],
+        target: '目标对象',
+      },
+    ],
+  ],
+  yinjiekou: [
+    // 新街口位于南京市中心，地铁一号线和二号线在此交汇
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '南京地铁一号线',
+              },
+            ],
+            relation: {
+              topology: 'along',
+              distance: 2000,
+            },
+          },
+        ],
+        target: '新街口',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '南京地铁二号线',
+              },
+            ],
+            relation: {
+              topology: 'along',
+              distance: 1000,
+            },
+          },
+        ],
+        target: '新街口',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '南京市',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '新街口',
+      },
+    ],
+  ],
+}
+
 export const deepseek = async (text: string): Promise<string> => {
   // const completion = await openai.chat.completions.create({
   //   messages: [
@@ -459,6 +692,6 @@ export const deepseek = async (text: string): Promise<string> => {
 
   // return content || '[]'
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  console.log(text)
+  console.log(examText.yangshan[0])
   return JSON.stringify(pointTestData)
 }

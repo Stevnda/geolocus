@@ -176,3 +176,60 @@ export const geolocus = {
   createSpatialRefFromEPSG,
   generateUUID,
 }
+
+// export class Geolocus {
+//   private _context: GeolocusContext
+
+//   constructor(init: GeolocusContextInit) {
+//     this._context = new GeolocusContext(init)
+//   }
+
+//   getContext(): GeolocusContext {
+//     return this._context
+//   }
+
+//   use(lifeCycle: string, plugin: Plugin): string {
+//     console.log(lifeCycle, plugin)
+//     return ''
+//   }
+
+//   remove(pluginID: string): void {
+//     console.log(pluginID)
+//   }
+
+//   parse(text: string): GeoTriple[] {
+//     console.log(text)
+//     return {
+//       originUUIDList: [originObject.getUUID()],
+//       relation: transformRelation,
+//       role,
+//       targetUUID: point.getUUID(),
+//       uuid: generateUUID(),
+//     }
+//   }
+
+//   define(tripleList: GeoTriple[]): void {
+//     console.log(tripleList)
+//   }
+
+//   compute(name: string): void {
+//     console.log(name)
+//   }
+
+//   getResult(context: string, name: string): RegionResult[] {
+//     console.log(context, name)
+//     return '' as RegionResult[]
+//   }
+
+//   toJSON(result: RegionResult): JSON {
+//     console.log(result)
+//     return '' as JSON
+//   }
+
+//   toXML(result: RegionResult): XML {
+//     console.log(result)
+//     return '' as XML
+//   }
+// }
+
+// interface XML {}

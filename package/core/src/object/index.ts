@@ -14,8 +14,8 @@ export {
 export {
   Template,
   TemplateAction,
-  TemplateCustomExpress,
-  TemplateBBoxExpress,
-  TemplateRelationExpress,
-  TemplateRule,
+  type TemplateCustomExpress,
+  type TemplateBBoxExpress,
+  type TemplateRelationExpress,
+  type TemplateRule,
 } from './template'

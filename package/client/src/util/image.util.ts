@@ -29,7 +29,7 @@ const getColorFromRainbow = (value: number) => {
   return [r, g, b]
 }
 
-export const generateBlobPng = (matrix: GeolocusGrid) => {
+export const generateBlobPng = (matrix: GeolocusGrid, min = 0.05) => {
   const canvas = document.createElement('canvas')
   const ctx = canvas.getContext('2d') as CanvasRenderingContext2D
   const m = matrix.length
@@ -52,7 +52,7 @@ export const generateBlobPng = (matrix: GeolocusGrid) => {
       data[index] = r // R
       data[index + 1] = g // G
       data[index + 2] = b // B
-      data[index + 3] = value < Number.EPSILON ? 0 : 255 // A
+      data[index + 3] = value < min ? 0 : 255 // A
     }
   }
 

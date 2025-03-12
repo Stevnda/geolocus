@@ -3,7 +3,7 @@ import { Header } from '@/component/layout'
 import { useRoutes } from 'react-router-dom'
 import { routes } from '@/router'
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
   const element = useRoutes(routes)
 
   return (
@@ -13,5 +13,3 @@ const App: React.FC = () => {
     </div>
   )
 }
-
-export default App

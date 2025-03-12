@@ -1,10 +1,10 @@
 import React, { useState, useRef, useCallback } from 'react'
-import { Chat } from './chat'
-import { MapView } from './map'
+import { Chat } from '../chat'
+import { MapView } from '../map'
 
-export const ChatPage: React.FC = () => {
+export const Geolocation: React.FC = () => {
   const [isResizing, setIsResizing] = useState(false)
-  const [leftWidth, setLeftWidth] = useState(40)
+  const [leftWidth, setLeftWidth] = useState(60)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const startResizing = useCallback((e: React.MouseEvent) => {
@@ -47,7 +47,7 @@ export const ChatPage: React.FC = () => {
         className="relative overflow-auto"
         style={{ width: `${leftWidth}%` }}
       >
-        <Chat />
+        <MapView />
       </div>
       <div
         className=" relative z-20 cursor-col-resize select-none bg-slate-400"
@@ -60,7 +60,7 @@ export const ChatPage: React.FC = () => {
         className="relative overflow-auto"
         style={{ width: `${100 - leftWidth}%` }}
       >
-        <MapView />
+        <Chat />
       </div>
     </div>
   )

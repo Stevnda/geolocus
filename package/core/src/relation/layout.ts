@@ -47,7 +47,7 @@ export class Layout {
         pdfInput.type = 'spread'
         pdfInput.spread.gridRegion = <GeolocusObject>geoTripleResult.region
         pdfInput.spread.gridSum = context.getGridSum()
-        pdfInput.spread.spreadPointList = <GeolocusObject[]>result
+        pdfInput.spread.spreadPointList = <GeolocusObject>result
       }
     } else if (layoutType === 'geometry') {
       const init = <GeometryLayoutInit>layout.init
@@ -60,7 +60,7 @@ export class Layout {
       pdfInput.type = 'spread'
       pdfInput.spread.gridRegion = <GeolocusObject>geoTripleResult.region
       pdfInput.spread.gridSum = context.getGridSum()
-      pdfInput.spread.spreadPointList = <GeolocusObject[]>result
+      pdfInput.spread.spreadPointList = <GeolocusObject>result
     }
   }
 
@@ -71,7 +71,7 @@ export class Layout {
     geoTriple: GeoTriple,
     geoTripleResult: GeoTripleResult,
     context: GeolocusContext,
-  ): GeolocusObject | GeolocusObject[] {
+  ): GeolocusObject {
     const { type } = layoutInit
     const objectMap = context.getObjectMap()
     if (type === 'between') {
@@ -366,7 +366,7 @@ export class Layout {
         const y = center[1] + radius * Math.sin(angle)
         pointList.push(<Position2>[x, y])
       }
-
+      console.log(gap, pointList)
       return pointList
     }
   }
