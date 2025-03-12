@@ -24,11 +24,11 @@ export const initContext = () => {
     orientation: 0,
     timeDistanceMap: new Map([['飞机', 300]]),
     semanticDistanceMap: {
-      VN: [0, 10000],
-      N: [10000, 30000],
-      M: [30000, 100000],
-      F: [100000, 300000],
-      VF: [300000, 2000000],
+      VN: [0, 100],
+      N: [0, 200],
+      M: [300, 1000],
+      F: [1000, 3000],
+      VF: [3000, 20000],
     },
     weight: 1,
     spatialRef: geolocus.createSpatialRefFromEPSG(

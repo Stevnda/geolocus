@@ -245,9 +245,7 @@ export class RegionPDF {
 
     const queue: Position2[] = []
     const startPointList = <Position2[]>(
-      pdf.spread.spreadPointList?.map((object) =>
-        object.getGeometry().getCenter(),
-      )
+      pdf.spread.spreadPointList?.getGeometry().getCoordList()
     )
     for (const [x, y] of startPointList) {
       const col = Math.floor((x - xStart) / gridSize)
@@ -289,11 +287,12 @@ export class RegionPDF {
       if (value === -1) {
         grid[row][col] = 0
       } else {
-        grid[row][col] = value - min + 1
+        grid[row][col] =
+          (value - min + 1) * (value - min + 1) * (value - min + 1)
       }
     })
 
-    return spreadGrid
+    return Grid.normalize(spreadGrid)
   }
 
   static computePDF(pdf: PDFInput): GeolocusGrid

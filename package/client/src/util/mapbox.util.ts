@@ -49,6 +49,7 @@ export const addImageToMap = (
   dataID: string,
   blob: Blob,
   extent: number[],
+  opacity = 0.6,
 ) => {
   const url = window.URL.createObjectURL(blob)
   map.addSource(dataID, {
@@ -66,7 +67,7 @@ export const addImageToMap = (
     type: 'raster',
     source: dataID,
     paint: {
-      'raster-opacity': 0.6,
+      'raster-opacity': opacity,
     },
   })
 }

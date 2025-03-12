@@ -7,7 +7,7 @@ import systemAvatar from '../../assert/system.svg'
 import userAvatar from '../../assert/user.svg'
 import { ChatMessage, useMapStore, useMessageStore } from '@/store'
 import { JsonText } from './JsonText'
-import { deepseek } from '@/util/deepseek.util'
+import { deepseek, examText } from '@/util/deepseek.util'
 import { generatePointByCoord } from '@/util/geojson.util'
 import {
   computeLineTest,
@@ -27,11 +27,15 @@ import { RoleInfo } from './RoleInfo'
 import { RegionResult } from './RegionResult'
 import { useResultStore } from '@/store/resultStore'
 
-const roles = [{ label: '测试用户', value: 'default' }]
+const roles = [{ label: '研究生', value: 'default' }]
 const geometryTypes = [
   { label: '点', value: 'point' },
   { label: '线', value: 'line' },
   { label: '面', value: 'polygon' },
+  { label: '羊山公园', value: 'exam1' },
+  { label: '新街口', value: 'exam2' },
+  { label: '新生导引', value: 'exam3' },
+  { label: '战前部署', value: 'exam4' },
 ]
 const systemStates = ['正在解析...', '解析完成', '正在计算...', '计算完成']
 
@@ -197,7 +201,93 @@ export const Chat: React.FC = () => {
     })
   }
 
+  const yangShanTest = () => {
+    if (!map) return
+    map.setCenter([118.92, 32.11])
+    map.setZoom(13)
+
+    const jsonText = JSON.stringify(examText.yangshan.at(-1), null, 2)
+
+    const geolocusContext = initContext()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const res = computePointTest(geolocusContext, jsonText)!
+    console.log(res)
+    addResult(geolocusContext, res)
+    const region = res.region as GeolocusObject
+    const pdfGrid = res.regionPdfGrid as GeolocusGrid
+
+    // const polygon84 = toWgs84(geolocusContext.toGeoJSON(region))
+    // addGeoJSONToMap(map, region.getUUID() + 'region', polygon84, 'fill', {
+    //   'fill-outline-color': '#15803d',
+    //   'fill-color': '#4ade80',
+    //   'fill-opacity': 0.5,
+    // })
+
+    const pngBlob = generateBlobPng(pdfGrid)
+    const bbox = convertToWgs84(
+      region.getGeometry().getBBox().slice(0, 2) as Position2,
+    ).concat(
+      convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+    )
+    addImageToMap(map, region.getUUID() + 'regionPdfGird', pngBlob, bbox, 0.6)
+    // const result = res.result as GeolocusObject
+    // const coord = result.getGeometry().getCenter() as Position2
+    // const coord84 = convertToWgs84(coord)
+    // const point = generatePointByCoord(coord84)
+    // addGeoJSONToMap(map, result.getUUID() + 'result', point, 'circle', {
+    //   'circle-color': '#dc2626',
+    //   'circle-radius': 6,
+    // })
+  }
+
+  const xinjieoku = () => {
+    if (!map) return
+    map.setCenter([118.76, 32.04])
+    map.setZoom(13)
+
+    const jsonText = JSON.stringify(examText.yinjiekou[0], null, 2)
+
+    const geolocusContext = initContext()
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const res = computePointTest(geolocusContext, jsonText)!
+    console.log(res)
+    addResult(geolocusContext, res)
+    const region = res.region as GeolocusObject
+    const pdfGrid = res.regionPdfGrid as GeolocusGrid
+    const result = res.result as GeolocusObject
+    const coord = result.getGeometry().getCenter() as Position2
+
+    // const polygon84 = toWgs84(geolocusContext.toGeoJSON(region))
+    // addGeoJSONToMap(map, region.getUUID() + 'region', polygon84, 'fill', {
+    //   'fill-outline-color': '#15803d',
+    //   'fill-color': '#4ade80',
+    //   'fill-opacity': 0.5,
+    // })
+
+    const pngBlob = generateBlobPng(pdfGrid, 0.95)
+    const bbox = convertToWgs84(
+      region.getGeometry().getBBox().slice(0, 2) as Position2,
+    ).concat(
+      convertToWgs84(region.getGeometry().getBBox().slice(2, 4) as Position2),
+    )
+    addImageToMap(map, region.getUUID() + 'regionPdfGird', pngBlob, bbox, 0.6)
+    const coord84 = convertToWgs84(coord)
+    const point = generatePointByCoord(coord84)
+    addGeoJSONToMap(map, result.getUUID() + 'result', point, 'circle', {
+      'circle-color': '#dc2626',
+      'circle-radius': 6,
+    })
+  }
+
   const handleSubmit = async (content: string) => {
+    if (geometryType.includes('exam')) {
+      if (geometryType === 'exam1') {
+        yangShanTest()
+      } else if (geometryType === 'exam2') {
+        xinjieoku()
+      }
+      return
+    }
     setIsInput(false)
 
     // Add user message

@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import './mapbox-gl.css'
-import App from './page/App'
+import { App } from './page'
 import { BrowserRouter } from 'react-router-dom'
 import { StyleProvider } from '@ant-design/cssinjs'
 
