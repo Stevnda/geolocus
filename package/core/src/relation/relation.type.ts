@@ -100,7 +100,7 @@ export type GeoLayout = {
 
 export interface GeoRelation {
   topology: TopologyRelation
-  direction?: number
+  direction?: [number, number] // azimuth, range = max - min
   distance: EuclideanDistance | EuclideanDistanceRange
   towardUUIDList?: string[] // 这个是 toward 运行时临时生成的
   range: ComputeRegionRange

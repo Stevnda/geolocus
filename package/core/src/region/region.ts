@@ -261,7 +261,7 @@ export class GeoTripleHandler {
       )
       const triangleRotated = GeolocusGeometryAction.rotateAroundCoord(
         triangle,
-        <number>relation.direction,
+        (<[number, number]>relation.direction)[0],
         originCenter,
       )
       const geometry = <GeolocusGeometry>(
@@ -338,7 +338,7 @@ export class GeoTripleHandler {
 
       // 计算目标区域 coord
       // 这里要重复计算一次 directionRegion, 但也没办法...
-      const direction = <number>relation.direction
+      const direction = <[number, number]>relation.direction
       const directionGeometry = Direction.computeRegion(
         origin.getGeometry(),
         direction,
@@ -374,7 +374,7 @@ export class GeoTripleHandler {
     relation: GeoRelation,
     role: Role,
   ): RegionHandlerResult => {
-    const direction = <number>relation.direction
+    const direction = <[number, number]>relation.direction
     const directionDelta = role.getDirectionDelta()
     const geometry = Direction.computeRegion(
       origin.getGeometry(),
@@ -386,7 +386,7 @@ export class GeoTripleHandler {
       type: 'angle',
       origin,
       gdf: {
-        azimuth: direction,
+        azimuth: direction[0],
         azimuthDelta: directionDelta,
       },
       sdf: {},
@@ -745,14 +745,14 @@ export class Region {
         if (
           typeof geoTriple.relation.direction === 'number' ||
           ['F', 'FR', 'R', 'BR', 'B', 'BL', 'L', 'FL'].includes(
-            geoTriple.relation.direction,
+            <string>(<unknown>geoTriple.relation.direction),
           ) ||
           ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'].includes(
-            geoTriple.relation.direction,
+            <string>(<unknown>geoTriple.relation.direction),
           )
         ) {
           geoTriple.relation.direction = Direction.transform(
-            geoTriple.relation.direction,
+            <number>(<unknown>geoTriple.relation.direction),
             geoTriple.role,
           )
         } else {
@@ -762,14 +762,17 @@ export class Region {
           const targetObject = <GeolocusObject>(
             ObjectMapAction.getObjectByPlaceName(
               objectMap,
-              geoTriple.relation.direction,
+              <string>(<unknown>geoTriple.relation.direction),
             )
           )
           const targetCoord = targetObject.getGeometry().getCenter()
           const azimuth = Direction.azimuth(
             Vector2.sub(targetCoord, beforeCoord),
           )
-          geoTriple.relation.direction = azimuth
+          geoTriple.relation.direction = [
+            azimuth,
+            2 * geoTriple.role.getDirectionDelta(),
+          ]
         }
       }
 

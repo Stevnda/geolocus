@@ -1,5 +1,4 @@
 import {
-  GeolocusBBox,
   GeolocusGeometry,
   JTSGeometryFactory,
   GeolocusGeometryAction,
@@ -24,21 +23,26 @@ export class Direction {
     return angle
   }
 
-  static transform(direction: SemanticDirection | number, role: Role) {
-    if (typeof direction === 'number') return (direction / 360) * 2 * Math.PI
+  static transform(
+    direction: SemanticDirection | number,
+    role: Role,
+  ): [number, number] {
+    if (typeof direction === 'number')
+      return [(direction / 360) * 2 * Math.PI, 2 * role.getDirectionDelta()]
 
-    const AbsoluteDirectionMap = {
-      N: 0,
-      NE: Math.PI / 4,
-      E: Math.PI / 2,
-      SE: (3 * Math.PI) / 4,
-      S: Math.PI,
-      SW: (5 * Math.PI) / 4,
-      W: (3 * Math.PI) / 2,
-      NW: (7 * Math.PI) / 4,
+    const AbsoluteDirectionMap: Record<string, [number, number]> = {
+      N: [0, Math.PI],
+      NE: [Math.PI / 4, Math.PI / 2],
+      E: [Math.PI / 2, Math.PI],
+      SE: [(3 * Math.PI) / 4, Math.PI / 2],
+      S: [Math.PI, Math.PI],
+      SW: [(5 * Math.PI) / 4, Math.PI / 2],
+      W: [(3 * Math.PI) / 2, Math.PI],
+      NW: [(7 * Math.PI) / 4, Math.PI / 2],
     }
-    if (direction in AbsoluteDirectionMap)
+    if (direction in AbsoluteDirectionMap) {
       return AbsoluteDirectionMap[<AbsoluteDirection>direction]
+    }
 
     const transformDirection = <AbsoluteDirection>(
       direction
@@ -48,28 +52,37 @@ export class Direction {
         .replace('L', 'W')
     )
 
-    return AbsoluteDirectionMap[transformDirection] + role.getOrientation()
+    return [
+      AbsoluteDirectionMap[transformDirection][0] + role.getOrientation(),
+      AbsoluteDirectionMap[transformDirection][1],
+    ]
   }
 
   static computeRegion(
     geometry: GeolocusGeometry,
-    direction: number,
+    direction: [number, number],
     range: ComputeRegionRange,
   ) {
+    const [angle, angleRange] = direction
+    const halfAngle = angleRange / 2
     const center = geometry.getCenter()
-    const target: GeolocusBBox = [
-      -GEO_MAX_VALUE,
-      center[1],
-      GEO_MAX_VALUE,
-      GEO_MAX_VALUE,
+    const ld: Position2 = [
+      center[0] - GEO_MAX_VALUE * Math.sin(halfAngle),
+      center[1] + GEO_MAX_VALUE * Math.cos(halfAngle),
     ]
-    const bbox = new GeolocusGeometry(
+    const rd: Position2 = [
+      center[0] + GEO_MAX_VALUE * Math.sin(halfAngle),
+      center[1] + GEO_MAX_VALUE * Math.cos(halfAngle),
+    ]
+    const rt: Position2 = [GEO_MAX_VALUE, GEO_MAX_VALUE]
+    const lt: Position2 = [-GEO_MAX_VALUE, GEO_MAX_VALUE]
+    const polygon = new GeolocusGeometry(
       'Polygon',
-      JTSGeometryFactory.bbox(target),
+      JTSGeometryFactory.polygon([[center, rd, rt, lt, ld, center]]),
     )
     const bboxRotated = GeolocusGeometryAction.rotateAroundCoord(
-      bbox,
-      direction,
+      polygon,
+      angle,
       geometry.getCenter(),
     )
 
