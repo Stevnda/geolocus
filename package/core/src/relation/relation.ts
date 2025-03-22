@@ -230,8 +230,6 @@ export class RelationAction {
       res.topology = relation.topology
     } else if (mode === 'point') {
       res.topology = 'disjoint'
-    } else {
-      res.topology = 'contain'
     }
 
     // direction

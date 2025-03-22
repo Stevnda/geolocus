@@ -5,6 +5,36 @@ import { useEffect, useRef } from 'react'
 import { MapStatus } from './MapStatus'
 import { debounce } from 'es-toolkit'
 
+const tk = 'REMOVED_TIANDITU_ACCESS_TOKEN'
+const sources = {
+  'osm-tiles1': {
+    type: 'raster',
+    tiles: [
+      `http://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tk}`,
+    ],
+    tileSize: 256,
+  },
+  'osm-tiles2': {
+    type: 'raster',
+    tiles: [
+      `http://t0.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tk}`,
+    ],
+    tileSize: 256,
+  },
+}
+const layers = [
+  {
+    id: 'simple-tiles1',
+    type: 'raster',
+    source: 'osm-tiles1',
+  },
+  // {
+  //   id: 'simple-tiles2',
+  //   type: 'raster',
+  //   source: 'osm-tiles2',
+  // },
+]
+
 export const MapView = () => {
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement('div'))
   const mapRef = useRef<mapboxgl.Map | null>(null)
@@ -22,7 +52,11 @@ export const MapView = () => {
       'REMOVED_MAPBOX_ACCESS_TOKEN'
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current, // map 容器
-      style: 'mapbox://styles/mapbox/streets-v12', // map 底图
+      style: {
+        version: 8,
+        sources,
+        layers,
+      },
       center: [position[0], position[1]], // map 初始化中心位置
       zoom: position[2], // map 初始化缩放级别
     })

@@ -402,6 +402,7 @@ export class GeoTripleHandler {
     relation: GeoRelation,
     role: Role,
   ) => {
+    // NOTE 这个没必要
     // 统一转换为 polygon
     origin.setGeometry(
       <GeolocusGeometry>(
@@ -409,8 +410,14 @@ export class GeoTripleHandler {
       ),
     )
 
-    // disjoint, intersect 和 toward直接返回 origin
-    if (!(relation.topology === 'contain' || relation.topology === 'within')) {
+    // disjoint 和 toward直接返回 origin
+    if (
+      !(
+        relation.topology === 'contain' ||
+        relation.topology === 'within' ||
+        relation.topology === 'intersect'
+      )
+    ) {
       return origin
     }
 

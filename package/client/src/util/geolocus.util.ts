@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Geolocus, geolocus, UserGeolocusTriple } from '@geolocus/core'
-import { getPlaceDataByName, nominatim } from './place.plugin'
+import { getPlaceDataByName } from './place.plugin'
 
 export const initContext = () => {
   const geolocusContext = geolocus.createContext({
@@ -19,10 +19,13 @@ export const initContext = () => {
 
   geolocusContext.addRole({
     name: 'default',
-    directionDelta: 90,
+    directionDelta: 20,
     distanceDelta: 0.2,
     orientation: 0,
-    timeDistanceMap: new Map([['飞机', 300]]),
+    timeDistanceMap: new Map([
+      ['飞机', 300],
+      ['步行', 1.67],
+    ]),
     semanticDistanceMap: {
       VN: [0, 100],
       N: [0, 200],
@@ -38,7 +41,7 @@ export const initContext = () => {
   })
 
   geolocusContext.use('placePlugin', getPlaceDataByName)
-  geolocusContext.use('placePlugin', nominatim)
+  // geolocusContext.use('placePlugin', nominatim)
 
   return geolocusContext
 }

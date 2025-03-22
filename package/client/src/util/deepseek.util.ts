@@ -441,7 +441,7 @@ const polygonTestData = [
 
 export const examText = {
   yangshan: [
-    // 位于羊山公园 1 km
+    // 1 位于羊山公园 1 km
     [
       {
         role: 'default',
@@ -460,7 +460,7 @@ export const examText = {
         target: '目标对象',
       },
     ],
-    // 位于羊山公园东北方 1 km
+    // 2 位于羊山公园东北方 1 km
     [
       {
         role: 'default',
@@ -480,7 +480,7 @@ export const examText = {
         target: '目标对象',
       },
     ],
-    // 位于羊山公园内部
+    // 3 位于羊山公园内部
     [
       {
         role: 'default',
@@ -499,7 +499,7 @@ export const examText = {
         target: '目标对象',
       },
     ],
-    // 位于羊山公园内部西南方
+    // 4 位于羊山公园内部西南方
     [
       {
         role: 'default',
@@ -512,14 +512,14 @@ export const examText = {
             ],
             relation: {
               topology: 'contain',
-              direction: 'S',
+              direction: 'SW',
             },
           },
         ],
         target: '目标对象',
       },
     ],
-    // 沿着羊山公园
+    // 5 沿着羊山公园
     [
       {
         role: 'default',
@@ -538,7 +538,7 @@ export const examText = {
         target: '目标对象',
       },
     ],
-    // 沿着羊山公园南部
+    // 6 沿着羊山公园西南部
     [
       {
         role: 'default',
@@ -551,14 +551,14 @@ export const examText = {
             ],
             relation: {
               topology: 'along',
-              direction: 'S',
+              direction: 'SE',
             },
           },
         ],
         target: '目标对象',
       },
     ],
-    // 羊山公园内部均匀分布10个点
+    // 7 羊山公园内部均匀分布10个点
     [
       {
         role: 'default',
@@ -584,7 +584,7 @@ export const examText = {
         target: '目标对象',
       },
     ],
-    // 围绕羊山公园中心 100 米
+    // 8 围绕羊山公园中心 100 米
     [
       {
         role: 'default',
@@ -599,7 +599,7 @@ export const examText = {
               topology: 'contain',
               layout: {
                 layout: 'geometry',
-                number: 3,
+                number: 5,
                 init: {
                   type: 'circle',
                   init: {
@@ -617,6 +617,59 @@ export const examText = {
   ],
   yinjiekou: [
     // 新街口位于南京市中心，地铁一号线和二号线在此交汇
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '玄武区',
+              },
+            ],
+            relation: {
+              topology: 'along',
+              distance: 2001,
+            },
+          },
+        ],
+        target: '新街口',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '鼓楼区',
+              },
+            ],
+            relation: {
+              topology: 'along',
+              distance: 2001,
+            },
+          },
+        ],
+        target: '新街口',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '秦淮区',
+              },
+            ],
+            relation: {
+              topology: 'along',
+              distance: 2001,
+            },
+          },
+        ],
+        target: '新街口',
+      },
+    ],
     [
       {
         role: 'default',
@@ -658,7 +711,7 @@ export const examText = {
           {
             originList: [
               {
-                name: '南京市',
+                name: '交界处',
               },
             ],
             relation: {
@@ -667,6 +720,964 @@ export const examText = {
           },
         ],
         target: '新街口',
+      },
+    ],
+  ],
+  nanjing: [
+    // 1 志愿者服务站和学院报到点
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '金女大路交叉路口',
+              },
+            ],
+            relation: {
+              direction: 'W',
+              distance: [10, 30],
+            },
+          },
+        ],
+        target: '志愿者服务站',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院门口',
+              },
+            ],
+            relation: {
+              direction: 'W',
+              distance: [10, 20],
+            },
+          },
+        ],
+        target: '学院报到点',
+      },
+    ],
+    // 1 6号门-地理科学学院路径
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '6号门',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '6号门路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 320,
+              distance: 80,
+            },
+          },
+        ],
+        target: '6号门路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '金女大路交叉路口',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '6号门路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院广场',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '6号门路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院楼梯',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '6号门路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 10,
+              distance: 60,
+            },
+          },
+        ],
+        target: '6号门路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '6号门路径',
+      },
+    ],
+    // 3 学院报到点
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院',
+              },
+              {
+                name: '地理科学学院停车场',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+              layout: {
+                layout: 'arrangement',
+                init: {
+                  type: 'between',
+                },
+              },
+            },
+          },
+        ],
+        target: '学院报到点',
+      },
+    ],
+    // 4 仙林宾馆-地理科学学院
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '仙林宾馆',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '师院路',
+              },
+            ],
+            relation: {
+              topology: 'toward',
+              direction: 'E',
+              distance: 280,
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '师院路交叉路口',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '三江路',
+              },
+            ],
+            relation: {
+              topology: 'toward',
+              direction: 'N',
+              distance: {
+                time: 360,
+                rate: '步行',
+              },
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '三江路交叉路口',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 'E',
+              distance: 150,
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院广场',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院楼梯',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院停车场',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院停车场',
+              },
+            ],
+            relation: {
+              topology: 'toward',
+              direction: 'R',
+              distance: 30,
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '地理科学学院',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '仙林宾馆路径',
+      },
+    ],
+  ],
+  liaoshen: [
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '锦州',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+              layout: {
+                layout: 'geometry',
+                number: 5,
+                init: {
+                  type: 'circle',
+                  init: {
+                    type: 'hollow',
+                    gap: 6000,
+                  },
+                },
+              },
+            },
+          },
+        ],
+        target: '1',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '新民',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+              layout: {
+                layout: 'arrangement',
+                number: 10,
+                init: {
+                  type: 'uniform',
+                },
+              },
+            },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '开原',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '3',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '长春',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+              layout: {
+                layout: 'geometry',
+                number: 8,
+                init: {
+                  type: 'circle',
+                  init: {
+                    type: 'hollow',
+                    gap: 6000,
+                  },
+                },
+              },
+            },
+          },
+        ],
+        target: '4',
+      },
+    ],
+  ],
+  qingliangshan: [
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '居民区',
+              },
+            ],
+            relation: { topology: 'intersect', distance: 20 },
+          },
+        ],
+        target: '石头城遗址',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '秦淮河',
+              },
+            ],
+            relation: {
+              topology: 'intersect',
+              distance: 5,
+            },
+          },
+        ],
+        target: '石头城遗址',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '清凉门大街',
+              },
+            ],
+            relation: { topology: 'intersect', distance: 15 },
+          },
+        ],
+        target: '石头城遗址',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '虎踞路',
+              },
+            ],
+            relation: { topology: 'intersect', distance: 12 },
+          },
+        ],
+        target: '石头城遗址',
+      },
+    ],
+  ],
+  chishui: [
+    [
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '遵义',
+              },
+            ],
+            relation: { topology: 'contain' },
+          },
+        ],
+        target: '1',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 0,
+              distance: 30000,
+            },
+          },
+        ],
+        target: '1',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '土城',
+              },
+            ],
+            relation: { topology: 'contain' },
+          },
+        ],
+        target: '1',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 270,
+              distance: 2000,
+            },
+          },
+        ],
+        target: '1',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '古蔺',
+              },
+            ],
+            relation: {
+              topology: 'disjoint',
+              direction: 0,
+              distance: 30000,
+            },
+          },
+        ],
+        target: '1',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '扎西',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '1',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '扎西',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 90,
+              distance: 40000,
+            },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '古蔺',
+              },
+            ],
+            relation: {
+              topology: 'disjoint',
+              direction: 180,
+              distance: 10000,
+            },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '太平渡西',
+              },
+            ],
+            relation: { topology: 'contain' },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 90,
+              distance: 1000,
+            },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '娄山关',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '遵义',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '2',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '遵义',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '3',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 225,
+              distance: 5000,
+            },
+          },
+        ],
+        target: '3',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '鸭溪',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '3',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '茅台',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '3',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 270,
+              distance: 2000,
+            },
+          },
+        ],
+        target: '3',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '古蔺',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+            // relation: {
+            //   topology: 'disjoint',
+            //   direction: 115,
+            //   distance: 40000,
+            // },
+          },
+        ],
+        target: '3',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '古蔺',
+              },
+            ],
+            relation: {
+              topology: 'contain',
+            },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 90,
+              distance: 15000,
+            },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '太平渡西',
+              },
+            ],
+            relation: { topology: 'contain' },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 90,
+              distance: 1000,
+            },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: '息烽',
+              distance: 150000,
+            },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '贵阳',
+              },
+            ],
+            relation: {
+              topology: 'disjoint',
+              direction: 90,
+              distance: 30000,
+            },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 200,
+              distance: 100000,
+            },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '盘县',
+              },
+            ],
+            relation: {
+              direction: 180,
+              distance: 100000,
+            },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            originList: [
+              {
+                name: '昆明',
+              },
+            ],
+            relation: { topology: 'contain' },
+          },
+        ],
+        target: '4',
+      },
+      {
+        role: 'default',
+        tupleList: [
+          {
+            relation: {
+              topology: 'toward',
+              direction: 350,
+              distance: 300000,
+            },
+          },
+        ],
+        target: '4',
       },
     ],
   ],
@@ -692,6 +1703,6 @@ export const deepseek = async (text: string): Promise<string> => {
 
   // return content || '[]'
   await new Promise((resolve) => setTimeout(resolve, 1000))
-  console.log(examText.yangshan[0])
+  console.log(examText.yinjiekou[0])
   return JSON.stringify(pointTestData)
 }
