@@ -6,13 +6,13 @@ const { Meta } = Card
 
 const cardData = [
   {
-    title: '南京师范大学新生导引',
-    description: '南京市地理科学学院新生导引案例',
+    title: '新生入学报到指引',
+    description: '新生入学报到指引案例',
     imageUrl: nanjing,
   },
   {
-    title: '沈辽战役战前部署',
-    description: '沈辽战役战前部署案例',
+    title: '四渡赤水战役',
+    description: '四渡赤水战役',
     imageUrl: shenliao,
   },
 ]
