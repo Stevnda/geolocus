@@ -10,7 +10,7 @@
   "author": "",
   "license": "MIT",
   "scripts": {
-    "build": "node ./esbuild.config.js",
+    "build": "node ./build.js",
     "lint": "eslint src/**/* --max-warnings 0",
     "prettier": "prettier src/**/* --write",
     "format": "pnpm prettier && pnpm lint"
