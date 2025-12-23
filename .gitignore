@@ -26,3 +26,9 @@ node_modules/
 
 # Build
 dist
+
+# MCP server local config & artifacts
+package/mcp-server/temp_files/
+package/mcp-server/temp-files/
+package/mcp-server/geolocus-mcp.config.json
+package/mcp-server/geolocus-mcp.config.json5
