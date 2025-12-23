@@ -1,0 +1,14 @@
+{
+  "deepseek": {
+    "apiKey": "REPLACE_ME",
+    "baseUrl": "https://api.deepseek.com",
+    "model": "deepseek-chat",
+    "timeoutMs": 60000
+  },
+  "outputDir": "package/mcp-server/temp-files",
+  "http": {
+    "host": "127.0.0.1",
+    "port": 3000
+  }
+}
+
