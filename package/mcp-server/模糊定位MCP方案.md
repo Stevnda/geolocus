@@ -217,7 +217,6 @@ type Summary = {
 
 ---
 
-
 ## 7. 配置文件（MCP Server 运行必需）
 
 ### 7.1 配置文件位置（建议）
@@ -229,19 +228,19 @@ type Summary = {
 
 ```json5
 {
-  "deepseek": {
+  deepseek: {
     // deepseek 服务地址
-    "baseUrl": "https://api.deepseek.com",
+    baseUrl: 'https://api.deepseek.com',
     // API Key（本地维护，不建议提交到仓库）
-    "apiKey": "YOUR_KEY",
+    apiKey: 'YOUR_KEY',
     // 不作为工具参数暴露，统一由配置文件控制
-    "model": "deepseek-chat"
+    model: 'deepseek-chat',
   },
-  "output": {
+  output: {
     // 输出目录：相对于 package/mcp-server 目录解析
     // 默认建议为 "./temp-files"
-    "dir": "./temp-files"
-  }
+    dir: './temp-files',
+  },
 }
 ```
 
