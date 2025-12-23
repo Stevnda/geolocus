@@ -221,39 +221,34 @@ type Summary = {
 
 ### 7.1 配置文件位置（建议）
 
-- 推荐：`package/mcp-server/geolocus-mcp.config.json5`（JSON5 支持注释/尾逗号，便于写说明；实现用 `json5` 解析）
-- 建议做法：将 `package/mcp-server/geolocus-mcp.config.example.json5` 复制为 `package/mcp-server/geolocus-mcp.config.json5` 后填写 `apiKey`（该文件应保持在 `.gitignore` 中）
+- 使用：`package/mcp-server/config.json`
+- 建议做法：将 `package/mcp-server/config.example.json` 复制为 `package/mcp-server/config.json` 后填写 `deepseek.apiKey`（该文件应保持在 `.gitignore` 中）
 
 ### 7.2 配置内容（建议）
 
-```json5
+```json
 {
-  deepseek: {
-    // deepseek 服务地址
-    baseUrl: 'https://api.deepseek.com',
-    // API Key（本地维护，不建议提交到仓库）
-    apiKey: 'YOUR_KEY',
-    // 不作为工具参数暴露，统一由配置文件控制
-    model: 'deepseek-chat',
+  "deepseek": {
+    "apiKey": "YOUR_KEY",
+    "baseUrl": "https://api.deepseek.com",
+    "model": "deepseek-chat",
+    "timeoutMs": 60000
   },
-  output: {
-    // 输出目录：相对于 package/mcp-server 目录解析
-    // 默认建议为 "./temp-files"
-    dir: './temp-files',
-  },
+  "outputDir": "package/mcp-server/temp-files",
+  "http": {
+    "host": "127.0.0.1",
+    "port": 3000
+  }
 }
 ```
 
 说明：
 
-- `output.dir`：
-  - 默认按“package/mcp-server 目录”解析为 `./temp-files/`（即 `package/mcp-server/temp-files/`）；
-  - MCP Server 负责创建目录（如果不存在）；
-  - 工具2写入 `*.json` 文件并返回绝对路径 `filePath`。
+- `outputDir`：工具2写入 `*.json` 文件并返回 `filePath`（默认建议为 `package/mcp-server/temp-files`）。
 
 ---
 
 ## 8. 实现约定（使用官方 MCP SDK）
 
 - MCP 服务器使用官方 SDK：`@modelcontextprotocol/sdk`
-- 传输方式：stdio
+- 传输方式：stdio、StreamableHTTP

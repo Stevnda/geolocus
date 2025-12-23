@@ -1,32 +1,9 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { createMcpExpressApp } from '@modelcontextprotocol/sdk/server/express.js'
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import type { Request, Response } from 'express'
-import { z } from 'zod'
-
-const addInputShape = {
-  a: z.number(),
-  b: z.number(),
-}
-
-function createServer() {
-  const server = new McpServer({
-    name: 'geolocus-mcp-server',
-    version: '0.0.1',
-  })
-
-  server.tool(
-    'add',
-    'Return a + b.',
-    addInputShape,
-    async ({ a, b }: { a: number; b: number }) => ({
-      content: [{ type: 'text', text: String(a + b) }],
-    }),
-  )
-
-  return server
-}
+import { loadConfig } from './config.js'
+import { createServer } from './server.js'
 
 async function startStdio() {
   const server = createServer()
@@ -35,8 +12,9 @@ async function startStdio() {
 }
 
 async function startHttp() {
-  const host = process.env.MCP_HTTP_HOST || '127.0.0.1'
-  const port = Number(process.env.MCP_HTTP_PORT || '3000')
+  const cfg = await loadConfig()
+  const host = cfg.http.host
+  const port = cfg.http.port
 
   const server = createServer()
   const transport = new StreamableHTTPServerTransport({
