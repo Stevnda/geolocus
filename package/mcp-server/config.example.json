@@ -6,9 +6,9 @@
     "timeoutMs": 60000
   },
   "outputDir": "package/mcp-server/temp-files",
+  "placeCatalogFile": "package/mcp-server/place-catalog.example.json",
   "http": {
     "host": "127.0.0.1",
     "port": 3000
   }
 }
-

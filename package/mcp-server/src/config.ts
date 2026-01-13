@@ -10,6 +10,7 @@ const configSchema = z.object({
     timeoutMs: z.number().int().positive().default(60000),
   }),
   outputDir: z.string().min(1).default('package/mcp-server/temp-files'),
+  placeCatalogFile: z.string().min(1).optional(),
   http: z
     .object({
       host: z.string().min(1).default('127.0.0.1'),
