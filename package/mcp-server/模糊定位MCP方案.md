@@ -106,7 +106,10 @@ export interface RegionResult {
 {
   geometryType: 'point' | 'line' | 'polygon'
   triples: UserGeolocusTriple[]
-  contextOverrides?: object
+  contextOverrides?: {
+    // 可选：给“仅有 name 的地点”提供坐标，提升计算可信度
+    placeCatalog?: Record<string, { type: GeolocusGeometryType; coord: Position2 | Position2[] | Position2[][] | Position2[][][] }>
+  }
 }
 ```
 
@@ -117,6 +120,14 @@ export interface RegionResult {
   - `ok: false`
   - `error: 'multiple_targets'`
   - `details: { targets: string[] }`
+
+说明：
+
+- 如果 origin/target 只给了 `name`，但 `placeCatalog` 里也没有对应条目，`@geolocus/core` 会用“空的 fuzzy 点对象”占位继续算；此时结果往往不可靠，`summary.warnings` 会提示 `unresolved_origins`（agent 可以补齐坐标后重试）。
+- **MCP 工具实现约束（当前实现）**：为避免返回“明显不对的占位结果”，工具2在发现 `placeCatalog` 缺失必要 origin 坐标时会直接返回错误：
+  - `ok: false`
+  - `error: 'unresolved_origins'`
+  - `details: { unresolvedOriginNames: string[], unresolvedOriginNamesTruncated: boolean }`
 
 **输出（成功）**
 
@@ -235,6 +246,7 @@ type Summary = {
     "timeoutMs": 60000
   },
   "outputDir": "package/mcp-server/temp-files",
+  "placeCatalogFile": "package/mcp-server/place-catalog.example.json",
   "http": {
     "host": "127.0.0.1",
     "port": 3000

@@ -13,9 +13,13 @@
     "start:http": "node dist/index.js --http"
   },
   "dependencies": {
+    "@geolocus/core": "workspace:^",
     "@modelcontextprotocol/sdk": "^1.25.1",
     "@types/express": "^5.0.6",
     "express": "^5.2.1",
     "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.14"
   }
 }
