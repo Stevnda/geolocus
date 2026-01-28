@@ -2,6 +2,7 @@
 doc
 exam
 *.xml
+*.zip
 
 # IDE config
 .vscode

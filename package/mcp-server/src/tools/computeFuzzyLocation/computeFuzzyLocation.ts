@@ -4,7 +4,7 @@ import path from 'node:path'
 import { type Geolocus, type RegionResult } from '@geolocus/core'
 import type { GeoJSON } from 'geojson'
 
-import { loadConfig } from '../../config.js'
+import { loadConfig, resolveFromRepo } from '../../config.js'
 import {
   collectUnresolvedOriginNames,
   createDefaultGeolocusContext,
@@ -151,8 +151,7 @@ function getTargets(triples: ToolUserGeolocusTriple[]): string[] {
 }
 
 function resolveOutputDir(outputDir: string): string {
-  if (path.isAbsolute(outputDir)) return outputDir
-  return path.resolve(process.cwd(), outputDir)
+  return resolveFromRepo(outputDir)
 }
 
 async function writeResultFile(params: {

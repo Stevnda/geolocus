@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { z } from 'zod'
 
@@ -22,6 +23,19 @@ const configSchema = z.object({
 export type McpServerConfig = z.infer<typeof configSchema>
 
 let cachedConfig: McpServerConfig | null = null
+let cachedRepoRoot: string | null = null
+
+export function getRepoRoot(): string {
+  if (cachedRepoRoot) return cachedRepoRoot
+  const configPath = fileURLToPath(new URL('../config.json', import.meta.url))
+  cachedRepoRoot = path.resolve(path.dirname(configPath), '..', '..')
+  return cachedRepoRoot
+}
+
+export function resolveFromRepo(filePath: string): string {
+  if (path.isAbsolute(filePath)) return filePath
+  return path.resolve(getRepoRoot(), filePath)
+}
 
 export async function loadConfig(): Promise<McpServerConfig> {
   if (cachedConfig) return cachedConfig
