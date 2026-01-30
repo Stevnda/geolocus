@@ -12,6 +12,7 @@ import {
 } from './context.js'
 import { toCoreTriple } from './convert.js'
 import { loadPlaceCatalogFromConfig } from './placeCatalog.js'
+import { renderGridToPng } from './pngRenderer.js'
 import type { ToolUserGeolocusTriple } from './schemas.js'
 
 export type GeometryType = 'point' | 'line' | 'polygon'
@@ -47,30 +48,31 @@ export type ComputeFuzzyLocationResult =
   | ComputeFuzzyLocationOk
   | ComputeFuzzyLocationErr
 
-type PdfGridFile = {
-  type: 'gdf' | 'sdf' | 'spread' | null
-  grid: number[][] | null
-  bbox: [number, number, number, number] | null
-  weight: number
-}
-
 type TripleResultFile = {
   coord: [number, number] | [number, number][] | null
   regionGeoJSON: GeoJSON | null
-  pdfGrid: PdfGridFile | null
+  pdfGridPath: string | null
+  pdfGridBbox: [number, number, number, number] | null
 }
 
 type RenderFile = {
   resultGeoJSON: GeoJSON | null
   regionGeoJSON: GeoJSON | null
-  regionPdfGrid: number[][] | null
+  regionPdfGridPath: string | null
+  regionPdfGridBbox: [number, number, number, number] | null
   tripleResults: TripleResultFile[]
 }
 
-function sanitizeForFile(
-  geolocusContext: Geolocus,
-  regionResult: RegionResult,
-): RenderFile {
+function sanitizeForFile(params: {
+  geolocusContext: Geolocus
+  regionResult: RegionResult
+  gridsDirRel: string
+}): {
+  render: RenderFile
+  gridsToWrite: Array<{ relPath: string; grid: number[][] }>
+} {
+  const { geolocusContext, regionResult, gridsDirRel } = params
+
   const resultObject = regionResult.result
   const regionObject = regionResult.region
 
@@ -81,27 +83,45 @@ function sanitizeForFile(
     ? geolocusContext.toGeoJSON(regionObject)
     : null
 
-  const tripleResults = regionResult.geoTripleResultList.map((r) => ({
-    coord: (r.coord ?? null) as [number, number] | [number, number][] | null,
-    regionGeoJSON: r.region ? geolocusContext.toGeoJSON(r.region) : null,
-    pdfGrid: r.pdfGrid
-      ? {
-          type: r.pdfGrid.type,
-          grid: r.pdfGrid.grid ?? null,
-          bbox: (r.pdfGrid.bbox ?? null) as
-            | [number, number, number, number]
-            | null,
-          weight: r.pdfGrid.weight,
-        }
-      : null,
-  }))
+  const gridsToWrite: Array<{ relPath: string; grid: number[][] }> = []
+  const tripleResults = regionResult.geoTripleResultList.map((r, index) => {
+    const relPath = path.posix.join(gridsDirRel, `${index}.png`)
+    const grid = (r.pdfGrid?.grid ?? null) as number[][] | null
+    if (grid) gridsToWrite.push({ relPath, grid })
 
-  return {
+    return {
+      coord: (r.coord ?? null) as [number, number] | [number, number][] | null,
+      regionGeoJSON: r.region ? geolocusContext.toGeoJSON(r.region) : null,
+      pdfGridPath: grid ? relPath : null,
+      pdfGridBbox: (r.pdfGrid?.bbox ?? null) as
+        | [number, number, number, number]
+        | null,
+    }
+  })
+
+  const regionPdfGrid = (regionResult.regionPdfGrid ?? null) as
+    | number[][]
+    | null
+  const regionPdfGridRelPath = regionPdfGrid
+    ? path.posix.join(gridsDirRel, 'region.png')
+    : null
+  if (regionPdfGrid && regionPdfGridRelPath) {
+    gridsToWrite.push({ relPath: regionPdfGridRelPath, grid: regionPdfGrid })
+  }
+
+  const render: RenderFile = {
     resultGeoJSON,
     regionGeoJSON,
-    regionPdfGrid: regionResult.regionPdfGrid ?? null,
+    regionPdfGridPath: regionPdfGridRelPath,
+    regionPdfGridBbox: regionObject
+      ? ((regionObject.getGeometry().getBBox() ?? null) as
+          | [number, number, number, number]
+          | null)
+      : null,
     tripleResults,
   }
+
+  return { render, gridsToWrite }
 }
 
 function summarize(
@@ -160,13 +180,18 @@ async function writeResultFile(params: {
   target: string
   triples: ToolUserGeolocusTriple[]
   render: RenderFile
+  gridsToWrite: Array<{ relPath: string; grid: number[][] }>
+  bbox: [number, number, number, number] | null
+  center: [number, number] | null
 }): Promise<string> {
   const absDir = resolveOutputDir(params.outputDir)
   await mkdir(absDir, { recursive: true })
 
   const safeTarget = params.target.replace(/[^\p{L}\p{N}_-]+/gu, '_')
-  const filename = `${Date.now()}_${params.geometryType}_${safeTarget}.json`
-  const filePath = path.join(absDir, filename)
+  const dirName = `${Date.now()}_${params.geometryType}_${safeTarget}`
+  const resultDir = path.join(absDir, dirName)
+  const gridsDir = path.join(resultDir, 'grids')
+  await mkdir(gridsDir, { recursive: true })
 
   const payload = {
     version: 1,
@@ -174,11 +199,25 @@ async function writeResultFile(params: {
     geometryType: params.geometryType,
     target: params.target,
     triples: params.triples,
-    render: params.render,
+    bbox: params.bbox,
+    center: params.center,
+    resultGeoJSON: params.render.resultGeoJSON,
+    regionGeoJSON: params.render.regionGeoJSON,
+    regionPdfGridPath: params.render.regionPdfGridPath,
+    regionPdfGridBbox: params.render.regionPdfGridBbox,
+    tripleResults: params.render.tripleResults,
   }
 
-  await writeFile(filePath, JSON.stringify(payload, null, 2), 'utf8')
-  return filePath
+  for (const item of params.gridsToWrite) {
+    const fileName = path.posix.basename(item.relPath)
+    const absPngPath = path.join(gridsDir, fileName)
+    const png = await renderGridToPng(item.grid, 0.05)
+    await writeFile(absPngPath, png)
+  }
+
+  const metaPath = path.join(resultDir, 'meta.json')
+  await writeFile(metaPath, JSON.stringify(payload, null, 2), 'utf8')
+  return resultDir
 }
 
 function computeRegion(
@@ -264,23 +303,6 @@ export async function computeFuzzyLocation(params: {
     return { ok: false, error: `compute_failed: ${message}` }
   }
 
-  const render: RenderFile = regionResult
-    ? sanitizeForFile(geolocusContext, regionResult)
-    : {
-        resultGeoJSON: null,
-        regionGeoJSON: null,
-        regionPdfGrid: null,
-        tripleResults: [],
-      }
-
-  const filePath = await writeResultFile({
-    outputDir: cfg.outputDir,
-    geometryType,
-    target,
-    triples,
-    render,
-  })
-
   const summary = summarize(
     geometryType,
     target,
@@ -289,6 +311,30 @@ export async function computeFuzzyLocation(params: {
     regionResult != null,
     regionResult,
   )
+
+  const gridsDirRel = 'grids'
+  const { render, gridsToWrite } = regionResult
+    ? sanitizeForFile({ geolocusContext, regionResult, gridsDirRel })
+    : { render: null, gridsToWrite: [] }
+
+  const filePath = await writeResultFile({
+    outputDir: cfg.outputDir,
+    geometryType,
+    target,
+    triples,
+    render:
+      render ??
+      ({
+        resultGeoJSON: null,
+        regionGeoJSON: null,
+        regionPdfGridPath: null,
+        regionPdfGridBbox: null,
+        tripleResults: [],
+      } satisfies RenderFile),
+    gridsToWrite,
+    bbox: summary.bbox,
+    center: summary.center,
+  })
 
   return { ok: true, summary, filePath }
 }
