@@ -15,10 +15,8 @@ cloc --not-match-f='.*test.ts' xxx
 ## 启动流程
 
 ### 内核启动
+需要按顺序进行编译
 ```bash
-#编译jsts包
-pnpm -C package/jsts install
-pnpm -C package/jsts build
 
 #编译concave包
 pnpm -C package/concave install
@@ -27,6 +25,10 @@ pnpm -C package/concave build
 #编译core包
 pnpm -C package/core install
 pnpm -C package/core build
+```
+内核启动后，根路径下：
+```bash
+pnpm install
 ```
 
 ### MCP-server启动
