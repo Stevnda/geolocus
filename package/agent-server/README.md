@@ -48,14 +48,34 @@ pnpm -C package/agent-server dev
 说明：
 
 - 服务端不会把结果文件大 JSON 塞进模型上下文
-- 结果文件通过 `GET /api/results/:id` 获取
+- 结果通过分层 results API 按需获取（summary / geojson / triples / png）
 
-### 2) 结果文件读取
+### 2) 结果读取（分层 API）
 
-`GET /api/results/:id`
+`GET /api/results/:id/summary`
 
-- `:id` 为结果文件名（basename）
-- 服务端仅允许读取 `results.allowedDir` 下的文件，并阻止路径穿越
+- 返回 `{ version, createdAt, geometryType, target, tripleCount, bbox, center }`
+
+`GET /api/results/:id/geojson`
+
+- 返回 `{ resultGeoJSON, regionGeoJSON }`
+
+`GET /api/results/:id/triples`
+
+- 返回 `tripleResults[]`（每条包含 `coord`、`regionGeoJSON`、`pdfGridPath`、`pdfGridBbox`）
+
+`GET /api/results/:id/grids/region.png`
+
+- 仅 `geometryType=point` 时存在（regionPdfGrid 预渲染）
+
+`GET /api/results/:id/grids/:index.png`
+
+- 返回第 `index` 条 triple 的热力图 PNG
+
+安全性：
+
+- `:id` 为结果目录名（basename）
+- 服务端仅允许读取 `results.allowedDir` 下的目录/文件，并阻止路径穿越
 
 ## Smoke Test（真实连通性）
 
