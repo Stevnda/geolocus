@@ -19,6 +19,7 @@
     "bench": "vitest bench --config ./vitest.config.ts"
   },
   "dependencies": {
+    "@ai-sdk/react": "^3.0.64",
     "@ant-design/cssinjs": "^1.21.1",
     "@ant-design/icons": "^5.4.0",
     "@ant-design/pro-components": "^2.8.6",
@@ -29,6 +30,7 @@
     "@turf/projection": "^7.1.0",
     "@turf/simplify": "^7.1.0",
     "@uiw/react-codemirror": "^4.23.2",
+    "ai": "^6.0.62",
     "antd": "^5.20.6",
     "echarts": "^5.5.1",
     "es-toolkit": "^1.29.0",

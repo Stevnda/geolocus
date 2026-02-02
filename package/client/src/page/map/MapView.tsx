@@ -8,24 +8,24 @@ import { debounce } from 'es-toolkit'
 const tk = 'REMOVED_TIANDITU_ACCESS_TOKEN'
 const sources = {
   'osm-tiles1': {
-    type: 'raster',
+    type: 'raster' as const,
     tiles: [
       `http://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tk}`,
     ],
     tileSize: 256,
   },
   'osm-tiles2': {
-    type: 'raster',
+    type: 'raster' as const,
     tiles: [
       `http://t0.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tk}`,
     ],
     tileSize: 256,
   },
-}
+} satisfies mapboxgl.SourcesSpecification
 const layers = [
   {
     id: 'simple-tiles1',
-    type: 'raster',
+    type: 'raster' as const,
     source: 'osm-tiles1',
   },
   // {
@@ -33,7 +33,7 @@ const layers = [
   //   type: 'raster',
   //   source: 'osm-tiles2',
   // },
-]
+] satisfies mapboxgl.LayerSpecification[]
 
 export const MapView = () => {
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement('div'))
