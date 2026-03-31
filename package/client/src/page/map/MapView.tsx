@@ -5,19 +5,20 @@ import { useEffect, useRef } from 'react'
 import { MapStatus } from './MapStatus'
 import { debounce } from 'es-toolkit'
 
-const tk = 'REMOVED_TIANDITU_ACCESS_TOKEN'
+const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
+const tiandituAccessToken = import.meta.env.VITE_TIANDITU_ACCESS_TOKEN
 const sources = {
   'osm-tiles1': {
     type: 'raster',
     tiles: [
-      `http://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tk}`,
+      `http://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tiandituAccessToken}`,
     ],
     tileSize: 256,
   },
   'osm-tiles2': {
     type: 'raster',
     tiles: [
-      `http://t0.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tk}`,
+      `http://t0.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tiandituAccessToken}`,
     ],
     tileSize: 256,
   },
@@ -48,8 +49,13 @@ export const MapView = () => {
     // init map
     if (mapRef.current) return
 
-    mapboxgl.accessToken =
-      'REMOVED_MAPBOX_ACCESS_TOKEN'
+    if (!mapboxAccessToken || !tiandituAccessToken) {
+      throw new Error(
+        'Missing map configuration. Set VITE_MAPBOX_ACCESS_TOKEN and VITE_TIANDITU_ACCESS_TOKEN in package/client/.env.local.',
+      )
+    }
+
+    mapboxgl.accessToken = mapboxAccessToken
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current, // map 容器
       style: {
