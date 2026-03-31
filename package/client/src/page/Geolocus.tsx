@@ -1,12 +1,13 @@
 import React from 'react'
 import {
   AppstoreOutlined,
+  TagOutlined,
   MailOutlined,
   RadarChartOutlined,
   SettingOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
-import { Menu } from 'antd'
+import { Button, Menu } from 'antd'
 import { Outlet, useNavigate } from 'react-router-dom'
 
 type MenuItem = Required<MenuProps>['items'][number]
@@ -50,16 +51,30 @@ export const Geolocus: React.FC = () => {
 
   return (
     <div className="flex flex-1 overflow-hidden">
-      <div className="flex flex-col">
+      <div className="flex flex-col border-r border-slate-200 bg-white">
         <Menu
-          className="h-full"
+          className="h-full text-lg [&_.ant-menu-item]:h-14 [&_.ant-menu-item]:leading-[56px]
+            [&_.ant-menu-item-icon]:text-xl [&_.ant-menu-submenu-title]:h-14
+            [&_.ant-menu-submenu-title]:leading-[56px] [&_.ant-menu-submenu-title_.ant-menu-item-icon]:text-xl
+            [&_.ant-menu-title-content]:text-[18px]"
           onClick={onClick}
-          style={{ width: 256 }}
+          style={{ width: 300 }}
           defaultSelectedKeys={['1']}
           defaultOpenKeys={['sub1']}
           mode="inline"
           items={items}
         />
+        <div className="border-t border-slate-200 p-4">
+          <Button
+            block
+            size="large"
+            icon={<TagOutlined />}
+            className="h-14 rounded-xl border-dashed border-slate-300 text-lg text-slate-600
+              [&_.anticon]:text-xl"
+          >
+            标注平台
+          </Button>
+        </div>
       </div>
       <Outlet></Outlet>
     </div>
