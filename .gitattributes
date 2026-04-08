@@ -1,0 +1,10 @@
+* text=auto
+
+# Ensure git hooks/shell scripts run in WSL/Linux (avoid `sh\r`).
+.husky/* text eol=lf
+*.sh text eol=lf
+
+# Keep Windows-native scripts with CRLF when checked out on Windows.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf

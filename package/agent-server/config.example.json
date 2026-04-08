@@ -1,0 +1,11 @@
+{
+  "http": { "host": "127.0.0.1", "port": 8080 },
+  "deepseek": {
+    "apiKey": "YOUR_DEEPSEEK_API_KEY",
+    "baseUrl": "https://api.deepseek.com",
+    "model": "deepseek-chat",
+    "timeoutMs": 60000
+  },
+  "mcp": { "baseUrl": "http://127.0.0.1:3000/mcp" },
+  "results": { "allowedDir": "package/mcp-server/temp-files" }
+}

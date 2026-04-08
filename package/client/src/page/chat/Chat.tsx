@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { ChatBox } from './ChatBox'
 import { InputBox } from './InputBox'
 import { Select } from 'antd'
@@ -34,9 +34,17 @@ import { toWgs84 } from '@turf/projection'
 import { RoleInfo } from './RoleInfo'
 import { RegionResult } from './RegionResult'
 import { useResultStore } from '@/store/resultStore'
+import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport, type UIMessage } from 'ai'
+import { AgentChatBox } from './AgentChatBox'
+import {
+  renderResultsToMap,
+  type RenderCleanupItem,
+} from '@/util/agent-results.util'
 
 const roles = [{ label: '研究生', value: 'default' }]
 const geometryTypes = [
+  { label: 'Agent', value: 'agent' },
   { label: '点', value: 'point' },
   { label: '线', value: 'line' },
   { label: '面', value: 'polygon' },
@@ -71,14 +79,124 @@ export const Chat: React.FC = () => {
   const map = useMapStore((state) => state.map)
   const addResult = useResultStore((state) => state.addResult)
 
+  const agentTransport = useMemo(
+    () => new DefaultChatTransport({ api: '/api/chat' }),
+    [],
+  )
+  const {
+    messages: agentMessages,
+    sendMessage: sendAgentMessage,
+    status: agentStatus,
+    error: agentError,
+  } = useChat<UIMessage>({ transport: agentTransport })
+
+  const agentHandledToolCallsRef = useRef<Set<string>>(new Set())
+  const agentMapCleanupRef = useRef<RenderCleanupItem[]>([])
+
   // State
   const [selectedRole, setSelectedRole] = useState<string>(roles[0].value)
-  const [geometryType, setGeometryType] = useState<string>('point')
+  const [geometryType, setGeometryType] = useState<string>('agent')
   const [isInput, setIsInput] = useState<boolean>(true) // inputBox 是否可以输入
   const [showContentType, setShowContentType] = useState<
     'none' | 'prompt' | 'json' | 'computation'
   >('none') // 显示 message 对应内容组件
   const [selectedMessageIndex, setSelectedMessageIndex] = useState<number>(-1) // 当前选中的消息的索引
+
+  useEffect(() => {
+    if (geometryType === 'agent') setShowContentType('none')
+  }, [geometryType, setShowContentType])
+
+  useEffect(() => {
+    if (geometryType !== 'agent') return
+    if (!map) return
+
+    const handled = agentHandledToolCallsRef.current
+
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null
+
+    const findComputeOutputs = () => {
+      const outputs: Array<{ toolCallId: string; filePath: string }> = []
+      for (const m of agentMessages) {
+        for (const part of m.parts as unknown[]) {
+          const p = part
+          if (!isRecord(p)) continue
+
+          const toolInvocation = isRecord(p.toolInvocation)
+            ? p.toolInvocation
+            : null
+          const isToolPart =
+            (p.type === 'tool-compute_fuzzy_location' &&
+              p.state === 'output-available' &&
+              typeof p.toolCallId === 'string') ||
+            (p.type === 'dynamic-tool' &&
+              p.toolName === 'compute_fuzzy_location' &&
+              p.state === 'output-available' &&
+              typeof p.toolCallId === 'string') ||
+            (p.type === 'tool-invocation' &&
+              toolInvocation?.toolName === 'compute_fuzzy_location' &&
+              toolInvocation?.state === 'result' &&
+              typeof toolInvocation?.toolCallId === 'string')
+
+          if (!isToolPart) continue
+
+          const toolCallId =
+            (typeof p.toolCallId === 'string' ? p.toolCallId : undefined) ??
+            (typeof toolInvocation?.toolCallId === 'string'
+              ? toolInvocation.toolCallId
+              : undefined)
+          if (!toolCallId) continue
+          if (handled.has(toolCallId)) continue
+
+          const output =
+            ('output' in p
+              ? (p as Record<string, unknown>).output
+              : undefined) ??
+            (toolInvocation ? toolInvocation.result : undefined) ??
+            null
+
+          const structuredContent =
+            isRecord(output) && 'structuredContent' in output
+              ? (output as Record<string, unknown>).structuredContent
+              : output
+
+          if (!isRecord(structuredContent) || structuredContent.ok !== true)
+            continue
+
+          const filePath = String(structuredContent.filePath ?? '')
+          if (!filePath) continue
+          outputs.push({ toolCallId, filePath })
+        }
+      }
+      return outputs
+    }
+
+    const run = async () => {
+      for (const item of findComputeOutputs()) {
+        handled.add(item.toolCallId)
+        const resultsId = item.filePath.split(/[\\/]/).pop() ?? ''
+        if (!resultsId) continue
+
+        try {
+          const cleanup = await renderResultsToMap({
+            map,
+            resultsId,
+            previousCleanup: agentMapCleanupRef.current,
+          })
+          agentMapCleanupRef.current = cleanup
+        } catch (err) {
+          // 保持 UI 可继续对话；渲染失败只输出到控制台
+          // eslint-disable-next-line no-console
+          console.error('[agent] failed to render results', err)
+        }
+      }
+    }
+
+    run().catch((err) => {
+      // eslint-disable-next-line no-console
+      console.error('[agent] run failed', err)
+    })
+  }, [agentMessages, geometryType, map])
 
   // Initialize with system welcome message
   useEffect(() => {
@@ -944,6 +1062,11 @@ export const Chat: React.FC = () => {
   }
 
   const handleSubmit = async (content: string) => {
+    if (geometryType === 'agent') {
+      sendAgentMessage({ text: content })
+      return
+    }
+
     if (geometryType.includes('exam')) {
       if (geometryType === 'exam1') {
         yangShanTest()
@@ -995,12 +1118,14 @@ export const Chat: React.FC = () => {
     addChatMessage(systemMessage)
     const messageSize = getMessageList().length
     let jsonText = await deepseek(userMessage.content)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const arr = JSON.parse(jsonText) as any[]
+    const parsed = JSON.parse(jsonText) as unknown
+    const arr = Array.isArray(parsed) ? parsed : []
     const tripleList = arr.map((item) => {
       return {
         role: 'default',
-        ...item,
+        ...(typeof item === 'object' && item !== null
+          ? (item as Record<string, unknown>)
+          : {}),
       }
     })
     jsonText = JSON.stringify(tripleList, null, 2)
@@ -1078,30 +1203,41 @@ export const Chat: React.FC = () => {
           </div>
         </div>
       </div>
-      <ChatBox
-        messages={chatMessageList}
-        handleClick={(
-          type: 'prompt' | 'json' | 'computation',
-          index: number,
-        ) => {
-          if (!chatMessageList[index].isDone) return
-          setSelectedMessageIndex(index)
-          if (type === 'json') {
-            setShowContentType('json')
-          } else if (type === 'computation') {
-            setShowContentType('computation')
-          } else if (type === 'prompt') {
-            setShowContentType('prompt')
-          }
-        }}
+      {geometryType === 'agent' ? (
+        <AgentChatBox
+          messages={agentMessages}
+          status={agentStatus}
+          error={agentError}
+        />
+      ) : (
+        <ChatBox
+          messages={chatMessageList}
+          handleClick={(
+            type: 'prompt' | 'json' | 'computation',
+            index: number,
+          ) => {
+            if (!chatMessageList[index].isDone) return
+            setSelectedMessageIndex(index)
+            if (type === 'json') {
+              setShowContentType('json')
+            } else if (type === 'computation') {
+              setShowContentType('computation')
+            } else if (type === 'prompt') {
+              setShowContentType('prompt')
+            }
+          }}
+        />
+      )}
+      <InputBox
+        onSubmit={handleSubmit}
+        isInput={geometryType === 'agent' ? agentStatus === 'ready' : isInput}
       />
-      <InputBox onSubmit={handleSubmit} isInput={isInput} />
-      {showContentType === 'prompt' && (
+      {geometryType !== 'agent' && showContentType === 'prompt' && (
         <div className="absolute inset-0 bg-white">
           <RoleInfo onClose={() => setShowContentType('none')} />
         </div>
       )}
-      {showContentType === 'json' && (
+      {geometryType !== 'agent' && showContentType === 'json' && (
         <div className="absolute inset-0 bg-white">
           <JsonText
             messageIndex={Math.floor(selectedMessageIndex / 3)}
@@ -1109,7 +1245,7 @@ export const Chat: React.FC = () => {
           />
         </div>
       )}
-      {showContentType === 'computation' && (
+      {geometryType !== 'agent' && showContentType === 'computation' && (
         <div className="absolute inset-0 bg-white">
           <RegionResult
             messageIndex={Math.floor((selectedMessageIndex - 1) / 3)}

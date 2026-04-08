@@ -1684,6 +1684,7 @@ export const examText = {
 }
 
 export const deepseek = async (text: string): Promise<string> => {
+  // text 参数用于后续接入真实的 LLM 调用
   // const completion = await openai.chat.completions.create({
   //   messages: [
   //     { role: 'system', content: prompt },

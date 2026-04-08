@@ -5,13 +5,11 @@ import fs, { rmSync } from 'fs'
 const dirName = import.meta.dirname
 
 // ts to js
-const jsCmd = 'node ./esbuild.config.js'
-execaSync(jsCmd)
+execaSync('node', ['./esbuild.config.js'])
 console.log('ts to js finished.')
 
 // generate .d.ts
-const typeCmd = `tsc -p tsconfig.build.json`
-execaSync(typeCmd)
+execaSync('tsc', ['-p', 'tsconfig.build.json'])
 console.log('generate .d.ts finished')
 
 // merge .d.ts

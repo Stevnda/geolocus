@@ -1,14 +1,16 @@
 import React from 'react'
 import { Header } from '@/component/layout'
-import { useRoutes } from 'react-router-dom'
+import { useLocation, useRoutes } from 'react-router-dom'
 import { routes } from '@/router'
 
 export const App: React.FC = () => {
   const element = useRoutes(routes)
+  const { pathname } = useLocation()
+  const showHeader = pathname.startsWith('/geolocus')
 
   return (
     <div className="flex h-screen w-screen flex-col text-black">
-      <Header />
+      {showHeader ? <Header /> : null}
       {element}
     </div>
   )

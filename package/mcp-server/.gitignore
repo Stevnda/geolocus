@@ -1,0 +1,5 @@
+config.json
+config.local.json
+dist
+temp-files
+place-catalog.json

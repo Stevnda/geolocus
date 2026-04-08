@@ -1,0 +1,28 @@
+{
+  "name": "@geolocus/mcp-server",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "dev:http": "tsx src/index.ts --http",
+    "build": "tsc -p tsconfig.json",
+    "sync:place-catalog": "node scripts/sync-place-catalog.mjs",
+    "start": "node dist/index.js",
+    "start:http": "node dist/index.js --http",
+    "test": "vitest run --config ./vitest.config.ts"
+  },
+  "dependencies": {
+    "@geolocus/core": "workspace:^",
+    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@types/express": "^5.0.6",
+    "express": "^5.2.1",
+    "sharp": "^0.34.3",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@types/geojson": "^7946.0.14"
+  }
+}

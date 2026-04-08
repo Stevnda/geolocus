@@ -2,7 +2,7 @@ import { ImageSource } from 'mapbox-gl'
 import { GeoJSON } from 'geojson'
 import { Position2 } from '@geolocus/core/dist'
 
-type MapStyle = mapboxgl.CircleLayerSpecification['paint'] &
+export type MapStyle = mapboxgl.CircleLayerSpecification['paint'] &
   mapboxgl.LineLayerSpecification['paint'] &
   mapboxgl.FillLayerSpecification['paint']
 
@@ -51,6 +51,16 @@ export const addImageToMap = (
   extent: number[],
   opacity = 0.6,
 ) => {
+  addImageToMapWithUrl(map, dataID, blob, extent, opacity)
+}
+
+export const addImageToMapWithUrl = (
+  map: mapboxgl.Map,
+  dataID: string,
+  blob: Blob,
+  extent: number[],
+  opacity = 0.6,
+) => {
   const url = window.URL.createObjectURL(blob)
   map.addSource(dataID, {
     type: 'image',
@@ -70,6 +80,7 @@ export const addImageToMap = (
       'raster-opacity': opacity,
     },
   })
+  return url
 }
 
 export const addImageSequenceToMap = (
