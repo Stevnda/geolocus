@@ -6,35 +6,35 @@ import { MapStatus } from './MapStatus'
 import { debounce } from 'es-toolkit'
 
 const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
-const tiandituAccessToken = import.meta.env.VITE_TIANDITU_ACCESS_TOKEN
-const sources = {
-  'osm-tiles1': {
-    type: 'raster' as const,
-    tiles: [
-      `http://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tiandituAccessToken}`,
-    ],
-    tileSize: 256,
-  },
-  'osm-tiles2': {
-    type: 'raster' as const,
-    tiles: [
-      `http://t0.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tiandituAccessToken}`,
-    ],
-    tileSize: 256,
-  },
-} satisfies mapboxgl.SourcesSpecification
-const layers = [
-  {
-    id: 'simple-tiles1',
-    type: 'raster' as const,
-    source: 'osm-tiles1',
-  },
-  // {
-  //   id: 'simple-tiles2',
-  //   type: 'raster',
-  //   source: 'osm-tiles2',
-  // },
-] satisfies mapboxgl.LayerSpecification[]
+// const tk = 'c7d2aa3f1fadec823b6bf97d1fd7fc6e'
+// const sources = {
+//   'osm-tiles1': {
+//     type: 'raster',
+//     tiles: [
+//       `http://t0.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tk}`,
+//     ],
+//     tileSize: 256,
+//   },
+//   'osm-tiles2': {
+//     type: 'raster',
+//     tiles: [
+//       `http://t0.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tk}`,
+//     ],
+//     tileSize: 256,
+//   },
+// }
+// const layers = [
+//   {
+//     id: 'simple-tiles1',
+//     type: 'raster',
+//     source: 'osm-tiles1',
+//   },
+//   // {
+//   //   id: 'simple-tiles2',
+//   //   type: 'raster',
+//   //   source: 'osm-tiles2',
+//   // },
+// ]
 
 export const MapView = () => {
   const mapContainerRef = useRef<HTMLDivElement>(document.createElement('div'))
@@ -49,26 +49,22 @@ export const MapView = () => {
     // init map
     if (mapRef.current) return
 
-    if (!mapboxAccessToken || !tiandituAccessToken) {
+    if (!mapboxAccessToken) {
       throw new Error(
-        'Missing map configuration. Set VITE_MAPBOX_ACCESS_TOKEN and VITE_TIANDITU_ACCESS_TOKEN in package/client/.env.local.',
+        'Missing map configuration. Set VITE_MAPBOX_ACCESS_TOKEN in package/client/.env.local.',
       )
     }
 
     mapboxgl.accessToken = mapboxAccessToken
     mapRef.current = new mapboxgl.Map({
       container: mapContainerRef.current, // map 容器
-      style: {
-        version: 8,
-        sources,
-        layers,
-      },
+      style: 'mapbox://styles/mapbox/streets-v12', // 使用 Mapbox 官方街道底图，支持高层级缩放
       center: [position[0], position[1]], // map 初始化中心位置
       zoom: position[2], // map 初始化缩放级别
     })
     mapRef.current.addControl(
       new MapboxLanguage({
-        defaultLanguage: 'zh-Hans',
+        defaultLanguage: 'en',
       }),
     )
     setMap(mapRef.current)
