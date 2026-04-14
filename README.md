@@ -66,3 +66,9 @@ pnpm -C package/agent-server dev
 ```bash
 pnpm -C package/client dev
 ```
+
+
+### 截图平台启动（仅服务论文配图使用）
+```bash
+pnpm --dir package/json2map dev
+```
