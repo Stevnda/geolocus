@@ -1,0 +1,822 @@
+{
+  "type": "FeatureCollection",
+  "name": "expaidata_models",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t1-1",
+        "source_id": "T1",
+        "location": "118.904790,32.107950",
+        "reason": "A plausible point within Nanjing Normal University Xianlin Campus is the given campus reference location."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.90479,
+          32.10795
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t1-2",
+        "source_id": "T2",
+        "location": "-74.009000,40.706100",
+        "reason": "This is the corner of Wall Street and Broadway in Lower Manhattan."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.009,
+          40.7061
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-1",
+        "source_id": "T3",
+        "location": "2.174646,41.402753",
+        "reason": "Starting from Sagrada Familia, 150 meters southeast places the hotel just southeast of the basilica."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.174646,
+          41.402753
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-2",
+        "source_id": "T4",
+        "location": "2.348078,48.861007",
+        "reason": "This is the best-fit point reconciling 500 meters east of the Louvre and 1000 meters north of Notre-Dame."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.348078,
+          48.861007
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-3",
+        "source_id": "T5",
+        "location": "2.322470,48.862208",
+        "reason": "A likely attraction point is on the Seine just northwest of the Musee d'Orsay."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.32247,
+          48.862208
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-4",
+        "source_id": "T6",
+        "location": "-122.473821,37.811769",
+        "reason": "From the Golden Gate Bridge, 1 kilometer at a bearing of 155 degrees lands southeast of the bridge."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.473821,
+          37.811769
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-5",
+        "source_id": "T7",
+        "location": "-0.123500,51.501600",
+        "reason": "This point is north of Big Ben, west of the London Eye, and northeast of Westminster Abbey."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.1235,
+          51.5016
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-6",
+        "source_id": "T8",
+        "location": "-3.682838,40.419991",
+        "reason": "A point 500 meters inside Retiro Park from the main Puerta de Alcala entrance is approximately east of that gate."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.682838,
+          40.419991
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-7",
+        "source_id": "T9",
+        "location": "139.739900,35.658581",
+        "reason": "A plausible location inside Shiba Park facing Tokyo Tower is about 500 meters west of the tower."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.7399,
+          35.658581
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t2-8",
+        "source_id": "T10",
+        "location": "12.453051,41.902200",
+        "reason": "This point is roughly 350 meters west of St Peter's Square, within the stated 200 to 500 meter range."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.453051,
+          41.9022
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t3-1",
+        "source_id": "T11",
+        "location": "118.905849,32.108848",
+        "reason": "In front and to the right from the north-facing observer means a nearby northeast location."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.905849,
+          32.108848
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t3-2",
+        "source_id": "T12",
+        "location": "118.904790,32.109028",
+        "reason": "Nearby in front of the north-facing observer means a short distance due north."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.90479,
+          32.109028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t4-1",
+        "source_id": "T13",
+        "location": "-79.383996,43.644466",
+        "reason": "Chaining the offsets from the CN Tower puts the bookstore northeast of the station at this point."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.383996,
+          43.644466
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t4-2",
+        "source_id": "T14",
+        "location": "118.906908,32.109747",
+        "reason": "The mall is northeast of the observer, and the cafe behind it is taken as farther along the same northeast direction."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.906908,
+          32.109747
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "GPT",
+        "model": "gpt5.4",
+        "task_id": "t4-3",
+        "source_id": "T15",
+        "location": "116.389979,39.889243",
+        "reason": "This is the midpoint best satisfying the restaurant offsets implied by both the bookstore and the cafe."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.389979,
+          39.889243
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t1-1",
+        "source_id": "T1",
+        "location": "118.909000,32.110000",
+        "reason": "Placed within the general residential areas of the Nanjing Normal University Xianlin Campus."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.909,
+          32.11
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t1-2",
+        "source_id": "T2",
+        "location": "-74.011600,40.708100",
+        "reason": "Located at Trinity Church, which sits exactly at the intersection of Wall Street and Broadway."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0116,
+          40.7081
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-1",
+        "source_id": "T3",
+        "location": "2.175700,41.402600",
+        "reason": "Calculated approximately 150 meters southeast of the Sagrada Familia's center."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.1757,
+          41.4026
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-2",
+        "source_id": "T4",
+        "location": "2.344400,48.861900",
+        "reason": "Computed 500 meters east of the Louvre's longitude and 1000 meters north of Notre-Dame's latitude."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.3444,
+          48.8619
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-3",
+        "source_id": "T5",
+        "location": "2.320000,48.863000",
+        "reason": "Positioned on the banks of the Seine River slightly northwest of the Musee d'Orsay."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.32,
+          48.863
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-4",
+        "source_id": "T6",
+        "location": "-122.473400,37.811700",
+        "reason": "Calculated 1 km from the Golden Gate Bridge center using a bearing of 155 degrees."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.4734,
+          37.8117
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-5",
+        "source_id": "T7",
+        "location": "-0.124000,51.501500",
+        "reason": "Positioned geometrically north of Big Ben, west of the London Eye, and northeast of Westminster Abbey."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.124,
+          51.5015
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-6",
+        "source_id": "T8",
+        "location": "-3.684600,40.416600",
+        "reason": "Placed approximately 500 meters inside Retiro Park heading southeast from its main northwest entrance."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.6846,
+          40.4166
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-7",
+        "source_id": "T9",
+        "location": "139.750900,35.658600",
+        "reason": "Located within Shiba Park, estimated 500 meters directly east of Tokyo Tower."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.7509,
+          35.6586
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t2-8",
+        "source_id": "T10",
+        "location": "12.452600,41.902200",
+        "reason": "Placed roughly 350 meters directly west of St Peter's Square."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.4526,
+          41.9022
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t3-1",
+        "source_id": "T11",
+        "location": "118.906300,32.109200",
+        "reason": "Calculated 200 meters northeast relative to the observer at NNU Xianlin Campus facing north."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.9063,
+          32.1092
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t3-2",
+        "source_id": "T12",
+        "location": "118.904800,32.108900",
+        "reason": "Placed approximately 100 meters directly north of the observer's location."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.9048,
+          32.1089
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t4-1",
+        "source_id": "T13",
+        "location": "-79.388300,43.644500",
+        "reason": "Derived by chaining offsets from the CN Tower: 200m west, 100m north, and 150m northeast."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.3883,
+          43.6445
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t4-2",
+        "source_id": "T14",
+        "location": "118.907800,32.110500",
+        "reason": "Positioned further northeast along the line of sight, placing it behind a hypothetical mall located to the front-right."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.9078,
+          32.1105
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Gemini",
+        "model": "gemini-3.1-pro",
+        "task_id": "t4-3",
+        "source_id": "T15",
+        "location": "116.396000,39.896100",
+        "reason": "Averaged the coordinates derived from the partially conflicting distance constraints of the bookstore and cafe."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.396,
+          39.8961
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t1-1",
+        "source_id": "T1",
+        "location": "118.913500,32.105000",
+        "reason": "Residential area within NNU Xianlin Campus, likely the on-campus dormitory/housing zone in the eastern part of campus."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.9135,
+          32.105
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t1-2",
+        "source_id": "T2",
+        "location": "-74.009100,40.707400",
+        "reason": "Trinity Church sits at the intersection of Wall Street and Broadway in Lower Manhattan."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0091,
+          40.7074
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-1",
+        "source_id": "T3",
+        "location": "2.175600,41.402800",
+        "reason": "150m southeast of Sagrada Familia (2.1744, 41.4036), shifting ~106m east and ~106m south."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.1756,
+          41.4028
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-2",
+        "source_id": "T4",
+        "location": "2.344300,39.861400",
+        "reason": "500m east of the Louvre (~2.3376+0.0067) and 1000m north of Notre-Dame (~48.8530+0.0090), averaging to approximate intersection."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.3443,
+          39.8614
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-3",
+        "source_id": "T5",
+        "location": "2.319600,48.862500",
+        "reason": "Along the Seine northwest of Musée d'Orsay points toward the Pont Royal / Tuileries Garden area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.3196,
+          48.8625
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-4",
+        "source_id": "T6",
+        "location": "-122.468000,37.810000",
+        "reason": "1 km from the Golden Gate Bridge center at bearing 155° (SSE), landing in the Presidio/Crissy Field area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.468,
+          37.81
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-5",
+        "source_id": "T7",
+        "location": "-0.123000,40.750600",
+        "reason": "North of Big Ben, west of the London Eye, and NE of Westminster Abbey places it near the western end of Westminster Bridge Road area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.123,
+          40.7506
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-6",
+        "source_id": "T8",
+        "location": "-3.683000,40.415500",
+        "reason": "500m inside Retiro Park from the main entrance (Puerta de Alcalá side), near the Estanque Grande area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.683,
+          40.4155
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-7",
+        "source_id": "T9",
+        "location": "139.748000,35.656500",
+        "reason": "Inside Shiba Park facing Tokyo Tower at ~500m distance, on the northwest side of the park."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.748,
+          35.6565
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t2-8",
+        "source_id": "T10",
+        "location": "12.453000,41.902000",
+        "reason": "200-500m west of St Peter's Square center, in the Prati neighborhood near Via della Conciliazione."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.453,
+          41.902
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t3-1",
+        "source_id": "T11",
+        "location": "118.907000,32.110000",
+        "reason": "In front (north) and to the right (east) of observer at NNU Xianlin, placing it to the northeast."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.907,
+          32.11
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t3-2",
+        "source_id": "T12",
+        "location": "118.904800,32.109500",
+        "reason": "Nearby in front means a short distance north of the observer at NNU Xianlin Campus."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.9048,
+          32.1095
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t4-1",
+        "source_id": "T13",
+        "location": "-79.385000,43.644000",
+        "reason": "CN Tower is at (-79.3871,43.6426); restaurant 200m west (-79.3897,43.6426); station 100m north (43.6435); bookstore 150m NE of station."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.385,
+          43.644
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t4-2",
+        "source_id": "T14",
+        "location": "118.907000,32.106500",
+        "reason": "Shopping mall is NE (front-right); cafe is behind (south of) the mall, placing it between observer and the mall."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.907,
+          32.1065
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Claude",
+        "model": "claude-opus-4.6",
+        "task_id": "t4-3",
+        "source_id": "T15",
+        "location": "116.375000,39.910000",
+        "reason": "Bookstore ~1200m SW of Forbidden City; cafe ~300m NW of Temple of Heaven; restaurant ~2000m SE of bookstore and ~1900m NW of cafe, converging near central Beijing."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.375,
+          39.91
+        ]
+      }
+    }
+  ]
+}

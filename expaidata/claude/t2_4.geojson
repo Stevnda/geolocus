@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "1 km from the Golden Gate Bridge center at bearing 155° (SSE), landing in the Presidio/Crissy Field area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.468,
+          37.81
+        ]
+      }
+    }
+  ]
+}

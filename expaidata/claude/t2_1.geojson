@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "150m southeast of Sagrada Familia (2.1744, 41.4036), shifting ~106m east and ~106m south."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.1756,
+          41.4028
+        ]
+      }
+    }
+  ]
+}

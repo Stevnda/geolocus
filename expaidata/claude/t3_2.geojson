@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "Nearby in front means a short distance north of the observer at NNU Xianlin Campus."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.9048,
+          32.1095
+        ]
+      }
+    }
+  ]
+}

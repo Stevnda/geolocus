@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "200-500m west of St Peter's Square center, in the Prati neighborhood near Via della Conciliazione."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          12.453,
+          41.902
+        ]
+      }
+    }
+  ]
+}

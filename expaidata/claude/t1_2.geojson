@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "Trinity Church sits at the intersection of Wall Street and Broadway in Lower Manhattan."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.0091,
+          40.7074
+        ]
+      }
+    }
+  ]
+}

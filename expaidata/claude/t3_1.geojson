@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "In front (north) and to the right (east) of observer at NNU Xianlin, placing it to the northeast."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.907,
+          32.11
+        ]
+      }
+    }
+  ]
+}

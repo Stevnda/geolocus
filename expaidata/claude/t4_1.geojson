@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "CN Tower is at (-79.3871,43.6426); restaurant 200m west (-79.3897,43.6426); station 100m north (43.6435); bookstore 150m NE of station."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -79.385,
+          43.644
+        ]
+      }
+    }
+  ]
+}

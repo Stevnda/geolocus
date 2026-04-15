@@ -1,0 +1,92 @@
+[
+  {
+    "id": "T1",
+    "lng": 118.909,
+    "lat": 32.11,
+    "reason": "Placed within the general residential areas of the Nanjing Normal University Xianlin Campus."
+  },
+  {
+    "id": "T2",
+    "lng": -74.0116,
+    "lat": 40.7081,
+    "reason": "Located at Trinity Church, which sits exactly at the intersection of Wall Street and Broadway."
+  },
+  {
+    "id": "T3",
+    "lng": 2.1757,
+    "lat": 41.4026,
+    "reason": "Calculated approximately 150 meters southeast of the Sagrada Familia's center."
+  },
+  {
+    "id": "T4",
+    "lng": 2.3444,
+    "lat": 48.8619,
+    "reason": "Computed 500 meters east of the Louvre's longitude and 1000 meters north of Notre-Dame's latitude."
+  },
+  {
+    "id": "T5",
+    "lng": 2.32,
+    "lat": 48.863,
+    "reason": "Positioned on the banks of the Seine River slightly northwest of the Musee d'Orsay."
+  },
+  {
+    "id": "T6",
+    "lng": -122.4734,
+    "lat": 37.8117,
+    "reason": "Calculated 1 km from the Golden Gate Bridge center using a bearing of 155 degrees."
+  },
+  {
+    "id": "T7",
+    "lng": -0.124,
+    "lat": 51.5015,
+    "reason": "Positioned geometrically north of Big Ben, west of the London Eye, and northeast of Westminster Abbey."
+  },
+  {
+    "id": "T8",
+    "lng": -3.6846,
+    "lat": 40.4166,
+    "reason": "Placed approximately 500 meters inside Retiro Park heading southeast from its main northwest entrance."
+  },
+  {
+    "id": "T9",
+    "lng": 139.7509,
+    "lat": 35.6586,
+    "reason": "Located within Shiba Park, estimated 500 meters directly east of Tokyo Tower."
+  },
+  {
+    "id": "T10",
+    "lng": 12.4526,
+    "lat": 41.9022,
+    "reason": "Placed roughly 350 meters directly west of St Peter's Square."
+  },
+  {
+    "id": "T11",
+    "lng": 118.9063,
+    "lat": 32.1092,
+    "reason": "Calculated 200 meters northeast relative to the observer at NNU Xianlin Campus facing north."
+  },
+  {
+    "id": "T12",
+    "lng": 118.9048,
+    "lat": 32.1089,
+    "reason": "Placed approximately 100 meters directly north of the observer's location."
+  },
+  {
+    "id": "T13",
+    "lng": -79.3883,
+    "lat": 43.6445,
+    "reason": "Derived by chaining offsets from the CN Tower: 200m west, 100m north, and 150m northeast."
+  },
+  {
+    "id": "T14",
+    "lng": 118.9078,
+    "lat": 32.1105,
+    "reason": "Positioned further northeast along the line of sight, placing it behind a hypothetical mall located to the front-right."
+  },
+  {
+    "id": "T15",
+    "lng": 116.396,
+    "lat": 39.8961,
+    "reason": "Averaged the coordinates derived from the partially conflicting distance constraints of the bookstore and cafe."
+  }
+]

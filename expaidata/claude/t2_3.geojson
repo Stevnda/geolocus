@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "Along the Seine northwest of Musée d'Orsay points toward the Pont Royal / Tuileries Garden area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.3196,
+          48.8625
+        ]
+      }
+    }
+  ]
+}

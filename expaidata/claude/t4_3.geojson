@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "Bookstore ~1200m SW of Forbidden City; cafe ~300m NW of Temple of Heaven; restaurant ~2000m SE of bookstore and ~1900m NW of cafe, converging near central Beijing."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.375,
+          39.91
+        ]
+      }
+    }
+  ]
+}

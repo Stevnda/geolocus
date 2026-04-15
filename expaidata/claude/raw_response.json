@@ -1,0 +1,17 @@
+[
+  {"id": "T1",  "lng": 118.9135, "lat": 32.1050, "reason": "Residential area within NNU Xianlin Campus, likely the on-campus dormitory/housing zone in the eastern part of campus."},
+  {"id": "T2",  "lng": -74.0091, "lat": 40.7074, "reason": "Trinity Church sits at the intersection of Wall Street and Broadway in Lower Manhattan."},
+  {"id": "T3",  "lng": 2.1756, "lat": 41.4028, "reason": "150m southeast of Sagrada Familia (2.1744, 41.4036), shifting ~106m east and ~106m south."},
+  {"id": "T4",  "lng": 2.3443, "lat": 39.8614, "reason": "500m east of the Louvre (~2.3376+0.0067) and 1000m north of Notre-Dame (~48.8530+0.0090), averaging to approximate intersection."},
+  {"id": "T5",  "lng": 2.3196, "lat": 48.8625, "reason": "Along the Seine northwest of Musée d'Orsay points toward the Pont Royal / Tuileries Garden area."},
+  {"id": "T6",  "lng": -122.4680, "lat": 37.8100, "reason": "1 km from the Golden Gate Bridge center at bearing 155° (SSE), landing in the Presidio/Crissy Field area."},
+  {"id": "T7",  "lng": -0.1230, "lat": 40.7506, "reason": "North of Big Ben, west of the London Eye, and NE of Westminster Abbey places it near the western end of Westminster Bridge Road area."},
+  {"id": "T8",  "lng": -3.6830, "lat": 40.4155, "reason": "500m inside Retiro Park from the main entrance (Puerta de Alcalá side), near the Estanque Grande area."},
+  {"id": "T9",  "lng": 139.7480, "lat": 35.6565, "reason": "Inside Shiba Park facing Tokyo Tower at ~500m distance, on the northwest side of the park."},
+  {"id": "T10", "lng": 12.4530, "lat": 41.9020, "reason": "200-500m west of St Peter's Square center, in the Prati neighborhood near Via della Conciliazione."},
+  {"id": "T11", "lng": 118.9070, "lat": 32.1100, "reason": "In front (north) and to the right (east) of observer at NNU Xianlin, placing it to the northeast."},
+  {"id": "T12", "lng": 118.9048, "lat": 32.1095, "reason": "Nearby in front means a short distance north of the observer at NNU Xianlin Campus."},
+  {"id": "T13", "lng": -79.3850, "lat": 43.6440, "reason": "CN Tower is at (-79.3871,43.6426); restaurant 200m west (-79.3897,43.6426); station 100m north (43.6435); bookstore 150m NE of station."},
+  {"id": "T14", "lng": 118.9070, "lat": 32.1065, "reason": "Shopping mall is NE (front-right); cafe is behind (south of) the mall, placing it between observer and the mall."},
+  {"id": "T15", "lng": 116.3750, "lat": 39.9100, "reason": "Bookstore ~1200m SW of Forbidden City; cafe ~300m NW of Temple of Heaven; restaurant ~2000m SE of bookstore and ~1900m NW of cafe, converging near central Beijing."}
+]

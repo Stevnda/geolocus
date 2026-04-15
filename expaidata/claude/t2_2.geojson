@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "500m east of the Louvre (~2.3376+0.0067) and 1000m north of Notre-Dame (~48.8530+0.0090), averaging to approximate intersection."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          2.3443,
+          39.8614
+        ]
+      }
+    }
+  ]
+}

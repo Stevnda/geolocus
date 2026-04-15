@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "North of Big Ben, west of the London Eye, and NE of Westminster Abbey places it near the western end of Westminster Bridge Road area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -0.123,
+          40.7506
+        ]
+      }
+    }
+  ]
+}

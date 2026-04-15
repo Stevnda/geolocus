@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "Shopping mall is NE (front-right); cafe is behind (south of) the mall, placing it between observer and the mall."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.907,
+          32.1065
+        ]
+      }
+    }
+  ]
+}

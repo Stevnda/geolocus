@@ -1,0 +1,92 @@
+[
+  {
+    "id": "T1",
+    "lng": 118.90479,
+    "lat": 32.10795,
+    "reason": "A plausible point within Nanjing Normal University Xianlin Campus is the given campus reference location."
+  },
+  {
+    "id": "T2",
+    "lng": -74.009,
+    "lat": 40.7061,
+    "reason": "This is the corner of Wall Street and Broadway in Lower Manhattan."
+  },
+  {
+    "id": "T3",
+    "lng": 2.174646,
+    "lat": 41.402753,
+    "reason": "Starting from Sagrada Familia, 150 meters southeast places the hotel just southeast of the basilica."
+  },
+  {
+    "id": "T4",
+    "lng": 2.348078,
+    "lat": 48.861007,
+    "reason": "This is the best-fit point reconciling 500 meters east of the Louvre and 1000 meters north of Notre-Dame."
+  },
+  {
+    "id": "T5",
+    "lng": 2.32247,
+    "lat": 48.862208,
+    "reason": "A likely attraction point is on the Seine just northwest of the Musee d'Orsay."
+  },
+  {
+    "id": "T6",
+    "lng": -122.473821,
+    "lat": 37.811769,
+    "reason": "From the Golden Gate Bridge, 1 kilometer at a bearing of 155 degrees lands southeast of the bridge."
+  },
+  {
+    "id": "T7",
+    "lng": -0.1235,
+    "lat": 51.5016,
+    "reason": "This point is north of Big Ben, west of the London Eye, and northeast of Westminster Abbey."
+  },
+  {
+    "id": "T8",
+    "lng": -3.682838,
+    "lat": 40.419991,
+    "reason": "A point 500 meters inside Retiro Park from the main Puerta de Alcala entrance is approximately east of that gate."
+  },
+  {
+    "id": "T9",
+    "lng": 139.7399,
+    "lat": 35.658581,
+    "reason": "A plausible location inside Shiba Park facing Tokyo Tower is about 500 meters west of the tower."
+  },
+  {
+    "id": "T10",
+    "lng": 12.453051,
+    "lat": 41.9022,
+    "reason": "This point is roughly 350 meters west of St Peter's Square, within the stated 200 to 500 meter range."
+  },
+  {
+    "id": "T11",
+    "lng": 118.905849,
+    "lat": 32.108848,
+    "reason": "In front and to the right from the north-facing observer means a nearby northeast location."
+  },
+  {
+    "id": "T12",
+    "lng": 118.90479,
+    "lat": 32.109028,
+    "reason": "Nearby in front of the north-facing observer means a short distance due north."
+  },
+  {
+    "id": "T13",
+    "lng": -79.383996,
+    "lat": 43.644466,
+    "reason": "Chaining the offsets from the CN Tower puts the bookstore northeast of the station at this point."
+  },
+  {
+    "id": "T14",
+    "lng": 118.906908,
+    "lat": 32.109747,
+    "reason": "The mall is northeast of the observer, and the cafe behind it is taken as farther along the same northeast direction."
+  },
+  {
+    "id": "T15",
+    "lng": 116.389979,
+    "lat": 39.889243,
+    "reason": "This is the midpoint best satisfying the restaurant offsets implied by both the bookstore and the cafe."
+  }
+]

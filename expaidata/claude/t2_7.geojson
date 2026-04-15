@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "Inside Shiba Park facing Tokyo Tower at ~500m distance, on the northwest side of the park."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          139.748,
+          35.6565
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "500m inside Retiro Park from the main entrance (Puerta de Alcalá side), near the Estanque Grande area."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -3.683,
+          40.4155
+        ]
+      }
+    }
+  ]
+}

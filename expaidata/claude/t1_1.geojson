@@ -1,0 +1,19 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "source": "Claude Opus 4.6",
+        "rationale": "Residential area within NNU Xianlin Campus, likely the on-campus dormitory/housing zone in the eastern part of campus."
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          118.9135,
+          32.105
+        ]
+      }
+    }
+  ]
+}
