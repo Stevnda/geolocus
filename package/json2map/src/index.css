@@ -126,6 +126,39 @@ input {
   box-shadow: 0 16px 32px rgba(15, 118, 110, 0.22);
 }
 
+.filter-group {
+  margin-top: 14px;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: #486581;
+}
+
+.field-input {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border: 1px solid rgba(16, 42, 67, 0.12);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #102a43;
+  outline: none;
+}
+
+.field-input:focus {
+  border-color: #155e75;
+  box-shadow: 0 0 0 3px rgba(21, 94, 117, 0.12);
+}
+
+.field-input:disabled {
+  cursor: not-allowed;
+  color: #829ab1;
+  background: rgba(241, 245, 249, 0.9);
+}
+
 .upload-button:hover,
 .secondary-button:hover,
 .panel-toggle:hover {
