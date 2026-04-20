@@ -13,17 +13,6 @@ const FILL_LAYER_ID = "uploaded-geojson-fill";
 const LINE_LAYER_ID = "uploaded-geojson-line";
 const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
-type UploadState = {
-  fileName: string;
-  featureCount: number;
-  geometrySummary: string;
-};
-
-type TaskOption = {
-  value: string;
-  count: number;
-};
-
 const baseCollection: FeatureCollection = {
   type: "FeatureCollection",
   features: [],
@@ -118,19 +107,6 @@ const getBounds = (collection: FeatureCollection) => {
   return bounds;
 };
 
-const getGeometrySummary = (collection: FeatureCollection) => {
-  const counts = new Map<string, number>();
-
-  for (const feature of collection.features) {
-    const geometryType = feature.geometry?.type ?? "Null";
-    counts.set(geometryType, (counts.get(geometryType) ?? 0) + 1);
-  }
-
-  return Array.from(counts.entries())
-    .map(([geometryType, count]) => `${geometryType} × ${count}`)
-    .join(" / ");
-};
-
 const getTaskId = (feature: Feature<Geometry, GeoJsonProperties>) => {
   const taskId = feature.properties?.task_id;
   return typeof taskId === "string" && taskId.trim() ? taskId : null;
@@ -214,20 +190,36 @@ const ensureLayers = (map: mapboxgl.Map) => {
   }
 };
 
+type MapLayer = {
+  id: string;
+  name: string;
+  collection: FeatureCollection<Geometry, GeoJsonProperties>;
+  visible: boolean;
+};
+
 export const App = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
-  const [uploadState, setUploadState] = useState<UploadState | null>(null);
-  const [uploadedFileName, setUploadedFileName] = useState("");
+  const [layers, setLayers] = useState<MapLayer[]>([]);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
-  const [rawCollection, setRawCollection] = useState<FeatureCollection<
-    Geometry,
-    GeoJsonProperties
-  > | null>(null);
-  const [taskOptions, setTaskOptions] = useState<TaskOption[]>([]);
   const [selectedTaskId, setSelectedTaskId] = useState("");
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const prevDepsRef = useRef<{ task: string; layers: string }>({
+    task: "",
+    layers: "",
+  });
+
+  const taskOptions = useMemo(() => {
+    const combinedFeatures = layers.flatMap((l) => l.collection.features);
+    const combinedCollection: FeatureCollection<Geometry, GeoJsonProperties> = {
+      type: "FeatureCollection",
+      features: combinedFeatures,
+    };
+    return getTaskOptions(combinedCollection);
+  }, [layers]);
+
   const [showRoleText, setShowRoleText] = useState(false);
   const [centerInput, setCenterInput] = useState("116.391300, 39.907500");
   const [zoomInput, setZoomInput] = useState("3.0");
@@ -259,6 +251,7 @@ export const App = () => {
 
     map.on("load", () => {
       ensureLayers(map);
+      setMapLoaded(true);
     });
 
     const syncMapState = () => {
@@ -313,21 +306,12 @@ export const App = () => {
     }
   };
 
-  const helperText = useMemo(() => {
-    if (uploadState) {
-      const taskText = selectedTaskId
-        ? ` · 当前 task_id: ${selectedTaskId}`
-        : taskOptions.length > 0
-          ? ` · 可按 ${taskOptions.length} 个 task_id 筛选`
-          : "";
-      return `${uploadState.fileName} · ${uploadState.featureCount} 个要素 · ${uploadState.geometrySummary}${taskText}`;
-    }
-    return "支持 .geojson 和 .json，上传后会自动缩放到全图。";
-  }, [selectedTaskId, taskOptions.length, uploadState]);
-
-  const updateMapData = (collection: FeatureCollection, fileName: string) => {
+  const syncDataToMap = (
+    collection: FeatureCollection,
+    shouldFitBounds = false,
+  ) => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !map.isStyleLoaded()) return;
 
     ensureLayers(map);
 
@@ -344,7 +328,15 @@ export const App = () => {
       properties: GeoJsonProperties,
     ) => {
       const createMarker = (lng: number, lat: number) => {
-        const marker = new mapboxgl.Marker({ color: "#ef4444" });
+        const customIcon = document.createElement("div");
+        customIcon.style.width = "40px";
+        customIcon.style.height = "40px";
+        customIcon.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="25" fill="#D32F2F" fill-opacity="0.4" stroke="#000000" stroke-width="1.5" />
+  <circle cx="50" cy="50" r="8" fill="#000000" />
+</svg>`;
+
+        const marker = new mapboxgl.Marker(customIcon);
         const roleId = properties?.role_id;
         if (roleId !== undefined && roleId !== null) {
           const textEl = document.createElement("div");
@@ -386,38 +378,50 @@ export const App = () => {
       }
     }
 
-    const bounds = getBounds(collection);
-    if (bounds) {
-      map.fitBounds(bounds, {
-        padding: 48,
-        duration: 800,
-        maxZoom: 15,
-      });
+    if (shouldFitBounds && collection.features.length > 0) {
+      const bounds = getBounds(collection);
+      if (bounds) {
+        map.fitBounds(bounds, {
+          padding: 48,
+          duration: 800,
+          maxZoom: 15,
+        });
+      }
     }
-
-    setUploadState({
-      fileName,
-      featureCount: collection.features.length,
-      geometrySummary: getGeometrySummary(collection) || "无几何对象",
-    });
-    setErrorMessage("");
   };
 
   useEffect(() => {
-    if (!rawCollection) return;
+    const visibleFeatures = layers
+      .filter((l) => l.visible)
+      .flatMap((l) => l.collection.features);
+    const combinedCollection: FeatureCollection<Geometry, GeoJsonProperties> = {
+      type: "FeatureCollection",
+      features: visibleFeatures,
+    };
 
     const filteredCollection = filterCollectionByTaskId(
-      rawCollection,
+      combinedCollection,
       selectedTaskId,
     );
 
-    if (selectedTaskId && filteredCollection.features.length === 0) {
+    if (
+      selectedTaskId &&
+      filteredCollection.features.length === 0 &&
+      layers.some((l) => l.visible)
+    ) {
       setErrorMessage(`没有找到 task_id = ${selectedTaskId} 的要素。`);
-      return;
+    } else {
+      setErrorMessage("");
     }
 
-    updateMapData(filteredCollection, uploadedFileName || "已上传数据");
-  }, [rawCollection, selectedTaskId, uploadedFileName]);
+    const currentLayersKey = layers.map((l) => l.id).join(",");
+    const shouldFitBounds =
+      prevDepsRef.current.task !== selectedTaskId ||
+      prevDepsRef.current.layers !== currentLayersKey;
+    prevDepsRef.current = { task: selectedTaskId, layers: currentLayersKey };
+
+    syncDataToMap(filteredCollection, shouldFitBounds);
+  }, [layers, selectedTaskId, showRoleText, mapLoaded]);
 
   const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -433,11 +437,14 @@ export const App = () => {
         throw new Error("GeoJSON 中没有可显示的要素。");
       }
 
-      setUploadedFileName(file.name);
-      setRawCollection(collection);
-      setTaskOptions(getTaskOptions(collection));
-      setSelectedTaskId("");
-      updateMapData(collection, file.name);
+      const newLayer: MapLayer = {
+        id: Math.random().toString(36).substring(2, 9),
+        name: file.name,
+        collection,
+        visible: true,
+      };
+
+      setLayers((prev) => [...prev, newLayer]);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "GeoJSON 读取失败。";
@@ -446,20 +453,8 @@ export const App = () => {
   };
 
   const clearMap = () => {
-    const map = mapRef.current;
-    const source = map?.getSource(MAP_SOURCE_ID) as
-      | mapboxgl.GeoJSONSource
-      | undefined;
-    source?.setData(baseCollection);
-
-    markersRef.current.forEach((marker) => marker.remove());
-    markersRef.current = [];
-
-    setUploadedFileName("");
-    setRawCollection(null);
-    setTaskOptions([]);
+    setLayers([]);
     setSelectedTaskId("");
-    setUploadState(null);
     setErrorMessage("");
   };
 
@@ -524,9 +519,15 @@ export const App = () => {
               const svgString = new XMLSerializer().serializeToString(svg);
               const img = new Image();
               img.onload = () => {
-                const width = 27 * pixelRatio;
-                const height = 41 * pixelRatio;
-                ctx.drawImage(img, px - width / 2, py - height, width, height);
+                const width = 40 * pixelRatio;
+                const height = 40 * pixelRatio;
+                ctx.drawImage(
+                  img,
+                  px - width / 2,
+                  py - height / 2,
+                  width,
+                  height,
+                );
 
                 if (showRoleText) {
                   const textEl = el.querySelector(
@@ -541,7 +542,7 @@ export const App = () => {
                     const textHeight = 14 * pixelRatio;
 
                     const tx = px;
-                    const ty = py - height - 16 * pixelRatio;
+                    const ty = py - height / 2 - 16 * pixelRatio;
 
                     ctx.shadowColor = "rgba(0,0,0,0.3)";
                     ctx.shadowBlur = 3 * pixelRatio;
@@ -735,7 +736,91 @@ export const App = () => {
             </p>
           </div>
 
-          <p className="helper-text">{helperText}</p>
+          {layers.length > 0 && (
+            <div
+              className="filter-group layers-list"
+              style={{
+                marginTop: "16px",
+                background: "#f8fafc",
+                padding: "8px",
+                borderRadius: "8px",
+              }}
+            >
+              <label className="field-label" style={{ marginBottom: "8px" }}>
+                已上传的图层 ({layers.length})
+              </label>
+              <div
+                style={{ display: "flex", flexDirection: "column", gap: "6px" }}
+              >
+                {layers.map((layer) => (
+                  <div
+                    key={layer.id}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      background: "white",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      border: "1px solid #e2e8f0",
+                    }}
+                  >
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        cursor: "pointer",
+                        fontSize: "14px",
+                        flex: 1,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={layer.visible}
+                        onChange={(e) => {
+                          setLayers((prev) =>
+                            prev.map((l) =>
+                              l.id === layer.id
+                                ? { ...l, visible: e.target.checked }
+                                : l,
+                            ),
+                          );
+                        }}
+                      />
+                      {layer.name} ({layer.collection.features.length})
+                    </label>
+                    <button
+                      onClick={() =>
+                        setLayers((prev) =>
+                          prev.filter((l) => l.id !== layer.id),
+                        )
+                      }
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#ef4444",
+                        cursor: "pointer",
+                        padding: "2px 6px",
+                        fontSize: "12px",
+                        flexShrink: 0,
+                      }}
+                      title="删除图层"
+                    >
+                      删除
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <p className="helper-text" style={{ marginTop: "12px" }}>
+            支持 .geojson 和
+            .json，多次上传可自动叠加并缩放。可同时勾选多个层进行对比。
+          </p>
           {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
         </div>
       </section>
