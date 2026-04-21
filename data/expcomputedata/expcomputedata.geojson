@@ -1,0 +1,192 @@
+﻿{
+  "type": "FeatureCollection",
+  "name": "expcomputedata",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t1-1",
+        "location": "118.904685,32.108996"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [118.90468464267543, 32.108996165261949]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t1-2",
+        "location": "-74.010678,40.707126"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.010677712596248, 40.7071263934348]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-1",
+        "location": "2.175717,41.402494"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.175716819846508, 41.402493509400422]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-2",
+        "location": "2.352369,48.861665"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.35236945627415, 48.861665005192442]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-3",
+        "location": "2.324416,48.861370"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [2.3244162552813266, 48.861369870519184]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-4",
+        "location": "-122.469055,37.804126"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-122.46905519958922, 37.8041258004581]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-5",
+        "location": "-0.123800,51.502413"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.12379959397862554, 51.502412719474989]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-6",
+        "location": "-3.684191,40.415380"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-3.6841906142530094, 40.415380045466037]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-7",
+        "location": "139.749549,35.660408"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [139.74954904658978, 35.660407953666528]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t2-8",
+        "location": "12.677082,41.807761"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [12.677081798087114, 41.807760662800433]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t3-1",
+        "location": "118.913627,32.115173"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [118.91362706745352, 32.115172735160186]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t3-2",
+        "location": "118.904108,32.119572"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [118.90410831482484, 32.119572006846958]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t4-1",
+        "location": "-79.388292,43.643915"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.388291956538978, 43.643915456277405]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t4-2",
+        "location": "118.923208,32.118365"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [118.92320807638004, 32.118364863148543]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "role_id": "Ours",
+        "task_id": "t4-3",
+        "location": "116.386689,39.897016"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [116.38668943764364, 39.897016300551961]
+      }
+    }
+  ]
+}
