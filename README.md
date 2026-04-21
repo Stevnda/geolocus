@@ -1,74 +1,84 @@
 # Geolocus
 
-## 统计
+## Statistics
 
-### 代码行数
+### Lines of Code
 
 ```bash
-# 所有代码
+# All code
 cloc xxx
-# 移除测试代码
+# Exclude test code
 cloc --not-match-f='.*test.ts' xxx
 ```
 
+## Startup Guide
 
-## 启动流程
+### Core Startup
 
-### 内核启动
-需要按顺序进行编译
+The packages need to be built in order.
+
 ```bash
-
-#编译concave包
+# Build the concave package
 pnpm -C package/concave install
 pnpm -C package/concave build
 
-#编译core包
+# Build the core package
 pnpm -C package/core install
 pnpm -C package/core build
 ```
-内核启动后，根路径下：
+
+After the core is ready, run this in the repository root:
+
 ```bash
 pnpm install
 ```
 
-### MCP-server启动
-复制并填写配置文件：
+### MCP Server Startup
+
+Copy and fill in the config file:
 
 ```powershell
 cd package/mcp-server
 Copy-Item config.example.json config.json
 ```
-启动命令：
+
+Start command:
+
 ```bash
 pnpm -C package/mcp-server dev:http
 ```
 
-### agent-server启动
-复制并填写配置文件：
+### Agent Server Startup
+
+Copy and fill in the config file:
 
 ```powershell
 cd package/agent-server
 Copy-Item config.example.json config.json
 ```
 
-关键字段：
+Key fields:
 
-- `deepseek.apiKey`：必须填写真实 key
-- `mcp.baseUrl`：默认 `http://127.0.0.1:3000/mcp`
-- `results.allowedDir`：默认 `package/mcp-server/temp-files`（结果文件读取 allowlist）
+- `deepseek.apiKey`: must be set to a real API key
+- `mcp.baseUrl`: defaults to `http://127.0.0.1:3000/mcp`
+- `results.allowedDir`: defaults to `package/mcp-server/temp-files` (allowlist for reading result files)
 
-启动命令：
+Start command:
+
 ```bash
 pnpm -C package/agent-server dev
 ```
 
-### client启动
+### Client Startup
+
 ```bash
 pnpm -C package/client dev
 ```
 
+### Screenshot Platform Startup
 
-### 截图平台启动（仅服务论文配图使用）
+For paper figures only:
+
 ```bash
 pnpm --dir package/json2map dev
 ```
