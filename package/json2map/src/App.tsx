@@ -329,8 +329,8 @@ export const App = () => {
     ) => {
       const createMarker = (lng: number, lat: number) => {
         const customIcon = document.createElement("div");
-        customIcon.style.width = "40px";
-        customIcon.style.height = "40px";
+        customIcon.style.width = "60px";
+        customIcon.style.height = "60px";
         customIcon.innerHTML = `<svg width="100%" height="100%" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <circle cx="50" cy="50" r="25" fill="#D32F2F" fill-opacity="0.4" stroke="#000000" stroke-width="1.5" />
   <circle cx="50" cy="50" r="8" fill="#000000" />
@@ -349,7 +349,7 @@ export const App = () => {
           textEl.style.background = "white";
           textEl.style.padding = "2px 6px";
           textEl.style.borderRadius = "4px";
-          textEl.style.fontSize = "12px";
+          textEl.style.fontSize = "21px";
           textEl.style.fontWeight = "bold";
           textEl.style.color = "#333";
           textEl.style.boxShadow = "0 1px 3px rgba(0,0,0,0.3)";
@@ -519,8 +519,8 @@ export const App = () => {
               const svgString = new XMLSerializer().serializeToString(svg);
               const img = new Image();
               img.onload = () => {
-                const width = 40 * pixelRatio;
-                const height = 40 * pixelRatio;
+                const width = 60 * pixelRatio;
+                const height = 60 * pixelRatio;
                 ctx.drawImage(
                   img,
                   px - width / 2,
@@ -535,7 +535,7 @@ export const App = () => {
                   ) as HTMLElement;
                   if (textEl) {
                     const text = textEl.innerText;
-                    ctx.font = `bold ${12 * pixelRatio}px sans-serif`;
+                    ctx.font = `bold ${21 * pixelRatio}px sans-serif`;
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
                     const textWidth = ctx.measureText(text).width;
